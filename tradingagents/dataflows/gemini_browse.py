@@ -6,34 +6,98 @@
 
 import os
 from datetime import datetime
-from typing import Annotated
+from typing import Annotated, Any, Callable, Dict, List
 
-from langchain_google_genai import ChatGoogleGenerativeAI
+try:
+    from google import genai
+    from google.genai import types
+except ImportError:  # pragma: no cover - handled gracefully at runtime
+    genai = None
+    types = None
 
-from .google import get_google_news
+
+def _response_as_dict(response: Any) -> Dict[str, Any]:
+    """Best-effort conversion of Gemini response objects into dict form."""
+    for attr in ("to_dict", "model_dump"):
+        if hasattr(response, attr):
+            method: Callable[[], Dict[str, Any]] = getattr(response, attr)
+            try:
+                return method()
+            except Exception:
+                continue
+    return {}
 
 
-def _summarize_with_gemini(model_name: str, content: str) -> str:
-    """Summarize provided content using Gemini if GOOGLE_API_KEY is configured.
+def _extract_citations(response: Any) -> List[str]:
+    """Pull citation information from Gemini grounding metadata when available."""
+    payload = _response_as_dict(response)
+    candidates = payload.get("candidates") or []
+    citations: List[str] = []
 
-    Falls back to the original content if the key is missing or invocation fails.
-    """
+    for candidate in candidates:
+        metadata = candidate.get("grounding_metadata") or {}
+        supports = metadata.get("grounding_supports") or []
+        for support in supports:
+            chunk = support.get("grounding_chunk") or {}
+            web_source = chunk.get("web") or {}
+            uri = web_source.get("uri")
+            title = web_source.get("title") or ""
+            if uri:
+                display = title or uri
+                citations.append(f"{display} - {uri}")
+    return citations
+
+
+def _format_grounded_output(response: Any) -> str:
+    """Compose the final text response including optional citations."""
+    text = getattr(response, "text", "") or ""
+    text = text.strip()
+
+    if not text:
+        payload = _response_as_dict(response)
+        candidates = payload.get("candidates") or []
+        for candidate in candidates:
+            content = candidate.get("content") or {}
+            parts = content.get("parts") or []
+            for part in parts:
+                candidate_text = part.get("text")
+                if candidate_text:
+                    text += candidate_text.strip() + "\n"
+        text = text.strip()
+
+    citations = _extract_citations(response)
+    if citations:
+        sources_section = "\n".join(f"- {item}" for item in citations)
+        if text:
+            text = f"{text}\n\nSources:\n{sources_section}"
+        else:
+            text = f"Sources:\n{sources_section}"
+
+    return text
+
+
+def _generate_with_grounding(prompt: str, model_name: str) -> str:
+    """Invoke Gemini with Google Search grounding."""
+    api_key = os.getenv("GOOGLE_API_KEY")
+    if not api_key or genai is None or types is None:
+        return ""
+
     try:
-        if not os.getenv("GOOGLE_API_KEY"):
-            return content
-        chat = ChatGoogleGenerativeAI(model=model_name)
-        prompt = (
-            "You are a financial news analyst. Summarize the following news snippets into"
-            " a concise, source-aware report with bullet points, keeping dates and titles when available."
-            " Avoid speculation and do not fabricate sources."
+        client = genai.Client(api_key=api_key)
+        grounding_tool = types.Tool(google_search=types.GoogleSearch())
+        config = types.GenerateContentConfig(
+            tools=[grounding_tool],
         )
-        response = chat.invoke(
-            f"{prompt}\n\n=== NEWS SNIPPETS START ===\n{content}\n=== NEWS SNIPPETS END ==="
+        response = client.models.generate_content(
+            model=model_name,
+            contents=prompt,
+            config=config,
         )
-        # LangChain message objects expose .content
-        return getattr(response, "content", str(response))
     except Exception:
-        return content
+        return ""
+
+    formatted = _format_grounded_output(response)
+    return formatted.strip()
 
 
 def get_news_gemini_web(
@@ -41,11 +105,7 @@ def get_news_gemini_web(
     start_date: Annotated[str, "Start date in yyyy-mm-dd format"],
     end_date: Annotated[str, "End date in yyyy-mm-dd format"],
 ) -> str:
-    """Retrieve company news using Google News, then summarize with Gemini.
-
-    This avoids OpenAI web_search tools and leverages Gemini for summarization only.
-    """
-    # Compute look-back window in days
+    """Retrieve company news using Gemini Google Search grounding."""
     try:
         start_dt = datetime.strptime(start_date, "%Y-%m-%d")
         end_dt = datetime.strptime(end_date, "%Y-%m-%d")
@@ -53,15 +113,16 @@ def get_news_gemini_web(
         # Invalid date format; return empty result
         return ""
 
-    look_back_days = max((end_dt - start_dt).days, 1)
-
-    news_raw = get_google_news(ticker, end_date, look_back_days)
-    if not news_raw:
+    if start_dt > end_dt:
         return ""
 
-    model = os.getenv("GEMINI_WEB_MODEL", "gemini-2.0-flash")
-    summarized = _summarize_with_gemini(model, news_raw)
-    return summarized
+    prompt = (
+        f"You are a financial research assistant. Retrieve and summarize key financial news for {ticker} "
+        f"between {start_date} and {end_date}. Include precise dates and cite each source."
+    )
+    model = os.getenv("GEMINI_WEB_MODEL", "gemini-2.5-flash")
+    grounded = _generate_with_grounding(prompt, model)
+    return grounded
 
 
 def get_global_news_gemini_web(
@@ -69,17 +130,17 @@ def get_global_news_gemini_web(
     look_back_days: Annotated[int, "Number of days to look back"] = 7,
     limit: Annotated[int, "Maximum number of articles to return"] = 5,
 ) -> str:
-    """Retrieve global/macroeconomic news via Google News, then summarize with Gemini.
+    """Retrieve global news using Gemini Google Search grounding.
 
-    The `limit` parameter is advisory; Google News utility may not honor it strictly.
+    The `limit` parameter is retained for backward compatibility with existing call sites.
     """
-    query = "global OR macroeconomics OR markets OR stocks"
-    news_raw = get_google_news(query, curr_date, look_back_days)
-    if not news_raw:
-        return ""
+    prompt = (
+        "You are a macroeconomic analyst. Provide a concise, source-linked digest of major global market, "
+        f"economy, and policy developments from the past {look_back_days} days leading up to {curr_date}. "
+        "Group related items together and cite each source."
+    )
+    _ = limit  # Retained parameter for API compatibility
 
-    model = os.getenv("GEMINI_WEB_MODEL", "gemini-2.0-flash")
-    summarized = _summarize_with_gemini(model, news_raw)
-    return summarized
-
-
+    model = os.getenv("GEMINI_WEB_MODEL", "gemini-2.5-flash")
+    grounded = _generate_with_grounding(prompt, model)
+    return grounded
