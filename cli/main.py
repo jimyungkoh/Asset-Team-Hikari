@@ -7,6 +7,7 @@
 """
 from typing import Optional
 import datetime
+import json
 import typer
 from pathlib import Path
 from functools import wraps
@@ -39,8 +40,8 @@ from cli.utils import *
 console = Console()
 
 app = typer.Typer(
-    name="TradingAgents",
-    help="TradingAgents CLI: Multi-Agents LLM Financial Trading Framework",
+    name="Asset-Team-Hikari",
+    help="Asset-Team-Hikari: Multi-Agents LLM Financial Trading & Portfolio Management Framework",
     add_completion=True,  # Enable shell completion
 )
 
@@ -97,7 +98,8 @@ class MessageBuffer:
 
     def update_report_section(self, section_name, content):
         if section_name in self.report_sections:
-            self.report_sections[section_name] = content
+            normalized = _stringify_content(content).strip()
+            self.report_sections[section_name] = normalized if normalized else None
             self._update_current_report()
 
     def _update_current_report(self):
@@ -181,6 +183,35 @@ class MessageBuffer:
 message_buffer = MessageBuffer()
 
 
+def _stringify_content(content, *, separator="\n\n") -> str:
+    """Convert mixed structured message content into a printable string."""
+    if content is None:
+        return ""
+
+    if isinstance(content, str):
+        return content
+
+    if isinstance(content, (int, float, bool)):
+        return str(content)
+
+    if isinstance(content, dict):
+        if "text" in content:
+            return _stringify_content(content["text"], separator=separator)
+        if "content" in content:
+            return _stringify_content(content["content"], separator=separator)
+        return json.dumps(content, ensure_ascii=False)
+
+    if isinstance(content, (list, tuple, set)):
+        parts = []
+        for item in content:
+            normalized = _stringify_content(item, separator=separator)
+            if normalized:
+                parts.append(normalized)
+        return separator.join(parts)
+
+    return str(content)
+
+
 def create_layout():
     layout = Layout()
     layout.split_column(
@@ -201,10 +232,10 @@ def update_display(layout, spinner_text=None):
     # Header with welcome message
     layout["header"].update(
         Panel(
-            "[bold green]Welcome to TradingAgents CLI[/bold green]\n"
-            "[dim]© [Tauric Research](https://github.com/TauricResearch)[/dim]",
-            title="Welcome to TradingAgents",
-            border_style="green",
+            "[bold cyan]✨ Asset-Team-Hikari - AI Trading Intelligence Platform[/bold cyan]\n"
+            "[dim]Powered by Multi-Agent LLM Framework | © [cyan]jimyungkoh[/cyan][/dim]",
+            title="🚀 Welcome to Asset-Team-Hikari",
+            border_style="cyan",
             padding=(1, 2),
             expand=True,
         )
@@ -213,16 +244,16 @@ def update_display(layout, spinner_text=None):
     # Progress panel showing agent status
     progress_table = Table(
         show_header=True,
-        header_style="bold magenta",
+        header_style="bold bright_blue",
         show_footer=False,
-        box=box.SIMPLE_HEAD,  # Use simple header with horizontal lines
+        box=box.ROUNDED,  # Use rounded box for modern look
         title=None,  # Remove the redundant Progress title
         padding=(0, 2),  # Add horizontal padding
         expand=True,  # Make table expand to fill available space
     )
-    progress_table.add_column("Team", style="cyan", justify="center", width=20)
-    progress_table.add_column("Agent", style="green", justify="center", width=20)
-    progress_table.add_column("Status", style="yellow", justify="center", width=20)
+    progress_table.add_column("Team", style="bright_cyan", justify="center", width=20)
+    progress_table.add_column("Agent", style="bright_magenta", justify="center", width=20)
+    progress_table.add_column("Status", style="bright_yellow", justify="center", width=20)
 
     # Group agents by team
     teams = {
@@ -283,15 +314,15 @@ def update_display(layout, spinner_text=None):
     # Messages panel showing recent messages and tool calls
     messages_table = Table(
         show_header=True,
-        header_style="bold magenta",
+        header_style="bold bright_blue",
         show_footer=False,
         expand=True,  # Make table expand to fill available space
-        box=box.MINIMAL,  # Use minimal box style for a lighter look
+        box=box.ROUNDED,  # Use rounded box for modern look
         show_lines=True,  # Keep horizontal lines
         padding=(0, 1),  # Add some padding between columns
     )
-    messages_table.add_column("Time", style="cyan", width=8, justify="center")
-    messages_table.add_column("Type", style="green", width=10, justify="center")
+    messages_table.add_column("Time", style="bright_cyan", width=8, justify="center")
+    messages_table.add_column("Type", style="bright_magenta", width=10, justify="center")
     messages_table.add_column(
         "Content", style="white", no_wrap=False, ratio=1
     )  # Make content column expand
@@ -359,7 +390,7 @@ def update_display(layout, spinner_text=None):
         Panel(
             messages_table,
             title="Messages & Tools",
-            border_style="blue",
+            border_style="bright_cyan",
             padding=(1, 2),
         )
     )
@@ -369,17 +400,17 @@ def update_display(layout, spinner_text=None):
         layout["analysis"].update(
             Panel(
                 Markdown(message_buffer.current_report),
-                title="Current Report",
-                border_style="green",
+                title="📊 Analysis Report",
+                border_style="bright_magenta",
                 padding=(1, 2),
             )
         )
     else:
         layout["analysis"].update(
             Panel(
-                "[italic]Waiting for analysis report...[/italic]",
-                title="Current Report",
-                border_style="green",
+                "[italic]⏳ Waiting for analysis report...[/italic]",
+                title="📊 Analysis Report",
+                border_style="bright_magenta",
                 padding=(1, 2),
             )
         )
@@ -394,12 +425,12 @@ def update_display(layout, spinner_text=None):
     )
 
     stats_table = Table(show_header=False, box=None, padding=(0, 2), expand=True)
-    stats_table.add_column("Stats", justify="center")
+    stats_table.add_column("Stats", justify="center", style="bright_white")
     stats_table.add_row(
-        f"Tool Calls: {tool_calls_count} | LLM Calls: {llm_calls_count} | Generated Reports: {reports_count}"
+        f"🔧 Tool Calls: {tool_calls_count} | 🧠 LLM Calls: {llm_calls_count} | 📄 Generated Reports: {reports_count}"
     )
 
-    layout["footer"].update(Panel(stats_table, border_style="grey50"))
+    layout["footer"].update(Panel(stats_table, border_style="bright_cyan"))
 
 
 def get_user_selections():
@@ -410,20 +441,23 @@ def get_user_selections():
 
     # Create welcome box content
     welcome_content = f"{welcome_ascii}\n"
-    welcome_content += "[bold green]TradingAgents: Multi-Agents LLM Financial Trading Framework - CLI[/bold green]\n\n"
+    welcome_content += "[bold cyan]✨ Asset-Team-Hikari: Multi-Agents LLM Financial Trading Framework - CLI[/bold cyan]\n\n"
+    # Add HIKARI meaning lines
+    welcome_content += "[bright_yellow]HIKARI (光): Light, Clarity, Insight[/bright_yellow]\n"
+    welcome_content += "[dim]Illuminate the market • Filter the noise • Act with discipline[/dim]\n\n"
     welcome_content += "[bold]Workflow Steps:[/bold]\n"
     welcome_content += "I. Analyst Team → II. Research Team → III. Trader → IV. Risk Management → V. Portfolio Management\n\n"
     welcome_content += (
-        "[dim]Built by [Tauric Research](https://github.com/TauricResearch)[/dim]"
+        "[dim]Powered by AI-driven trading intelligence | © [bright_cyan]jimyungkoh[/bright_cyan][/dim]"
     )
 
     # Create and center the welcome box
     welcome_box = Panel(
         welcome_content,
-        border_style="green",
+        border_style="bright_cyan",
         padding=(1, 2),
-        title="Welcome to TradingAgents",
-        subtitle="Multi-Agents LLM Financial Trading Framework",
+        title="🚀 Welcome to Asset-Team-Hikari",
+        subtitle="Multi-Agents LLM Financial Trading & Portfolio Management",
     )
     console.print(Align.center(welcome_box))
     console.print()  # Add a blank line after the welcome box
@@ -434,7 +468,7 @@ def get_user_selections():
         box_content += f"[dim]{prompt}[/dim]"
         if default:
             box_content += f"\n[dim]Default: {default}[/dim]"
-        return Panel(box_content, border_style="blue", padding=(1, 2))
+        return Panel(box_content, border_style="bright_magenta", padding=(1, 2))
 
     # Step 1: Ticker symbol
     console.print(
@@ -480,10 +514,13 @@ def get_user_selections():
             "Step 5: OpenAI backend", "Select which service to talk to"
         )
     )
-    selected_llm_provider, backend_url = select_llm_provider()
+    provider_selection = select_llm_provider()
+    selected_llm_provider = provider_selection["identifier"]
+    backend_url = provider_selection["url"]
+    provider_settings = provider_selection.get("settings", {})
 
     # Warn for OpenRouter env when selected
-    if selected_llm_provider.lower() == "openrouter":
+    if selected_llm_provider == "openrouter":
         import os
         if not os.getenv("OPENROUTER_API_KEY"):
             console.print("[yellow]Warning:[/yellow] OPENROUTER_API_KEY is not set. Requests may fail.")
@@ -500,7 +537,7 @@ def get_user_selections():
     selected_deep_thinker = select_deep_thinking_agent(selected_llm_provider)
 
     # Warn if Gemini will be used for news without GOOGLE_API_KEY
-    if selected_llm_provider.lower() == "openrouter":
+    if selected_llm_provider == "openrouter":
         import os
         if not os.getenv("GOOGLE_API_KEY"):
             console.print("[yellow]Warning:[/yellow] GOOGLE_API_KEY is not set. News vendor will fallback from Gemini to Google/Local.")
@@ -510,10 +547,12 @@ def get_user_selections():
         "analysis_date": analysis_date,
         "analysts": selected_analysts,
         "research_depth": selected_research_depth,
-        "llm_provider": selected_llm_provider.lower(),
+        "llm_provider": selected_llm_provider,
+        "llm_provider_display": provider_selection["display"],
         "backend_url": backend_url,
         "shallow_thinker": selected_shallow_thinker,
         "deep_thinker": selected_deep_thinker,
+        "provider_settings": provider_settings,
     }
 
 
@@ -543,7 +582,7 @@ def get_analysis_date():
 
 def display_complete_report(final_state):
     """Display the complete analysis report with team-based panels."""
-    console.print("\n[bold green]Complete Analysis Report[/bold green]\n")
+    console.print("\n[bold bright_cyan]✨ Complete Analysis Report[/bold bright_cyan]\n")
 
     # I. Analyst Team Reports
     analyst_reports = []
@@ -553,8 +592,8 @@ def display_complete_report(final_state):
         analyst_reports.append(
             Panel(
                 Markdown(final_state["market_report"]),
-                title="Market Analyst",
-                border_style="blue",
+                title="📈 Market Analyst",
+                border_style="bright_magenta",
                 padding=(1, 2),
             )
         )
@@ -564,8 +603,8 @@ def display_complete_report(final_state):
         analyst_reports.append(
             Panel(
                 Markdown(final_state["sentiment_report"]),
-                title="Social Analyst",
-                border_style="blue",
+                title="💬 Social Analyst",
+                border_style="bright_magenta",
                 padding=(1, 2),
             )
         )
@@ -575,8 +614,8 @@ def display_complete_report(final_state):
         analyst_reports.append(
             Panel(
                 Markdown(final_state["news_report"]),
-                title="News Analyst",
-                border_style="blue",
+                title="📰 News Analyst",
+                border_style="bright_magenta",
                 padding=(1, 2),
             )
         )
@@ -586,8 +625,8 @@ def display_complete_report(final_state):
         analyst_reports.append(
             Panel(
                 Markdown(final_state["fundamentals_report"]),
-                title="Fundamentals Analyst",
-                border_style="blue",
+                title="💰 Fundamentals Analyst",
+                border_style="bright_magenta",
                 padding=(1, 2),
             )
         )
@@ -596,8 +635,8 @@ def display_complete_report(final_state):
         console.print(
             Panel(
                 Columns(analyst_reports, equal=True, expand=True),
-                title="I. Analyst Team Reports",
-                border_style="cyan",
+                title="I. 👥 Analyst Team Reports",
+                border_style="bright_cyan",
                 padding=(1, 2),
             )
         )
@@ -612,8 +651,8 @@ def display_complete_report(final_state):
             research_reports.append(
                 Panel(
                     Markdown(debate_state["bull_history"]),
-                    title="Bull Researcher",
-                    border_style="blue",
+                    title="🐂 Bull Researcher",
+                    border_style="bright_magenta",
                     padding=(1, 2),
                 )
             )
@@ -623,8 +662,8 @@ def display_complete_report(final_state):
             research_reports.append(
                 Panel(
                     Markdown(debate_state["bear_history"]),
-                    title="Bear Researcher",
-                    border_style="blue",
+                    title="🐻 Bear Researcher",
+                    border_style="bright_magenta",
                     padding=(1, 2),
                 )
             )
@@ -634,8 +673,8 @@ def display_complete_report(final_state):
             research_reports.append(
                 Panel(
                     Markdown(debate_state["judge_decision"]),
-                    title="Research Manager",
-                    border_style="blue",
+                    title="🎯 Research Manager",
+                    border_style="bright_magenta",
                     padding=(1, 2),
                 )
             )
@@ -644,8 +683,8 @@ def display_complete_report(final_state):
             console.print(
                 Panel(
                     Columns(research_reports, equal=True, expand=True),
-                    title="II. Research Team Decision",
-                    border_style="magenta",
+                    title="II. 🔍 Research Team Decision",
+                    border_style="bright_yellow",
                     padding=(1, 2),
                 )
             )
@@ -656,12 +695,12 @@ def display_complete_report(final_state):
             Panel(
                 Panel(
                     Markdown(final_state["trader_investment_plan"]),
-                    title="Trader",
-                    border_style="blue",
+                    title="💼 Trader",
+                    border_style="bright_magenta",
                     padding=(1, 2),
                 ),
-                title="III. Trading Team Plan",
-                border_style="yellow",
+                title="III. 📊 Trading Team Plan",
+                border_style="bright_green",
                 padding=(1, 2),
             )
         )
@@ -676,8 +715,8 @@ def display_complete_report(final_state):
             risk_reports.append(
                 Panel(
                     Markdown(risk_state["risky_history"]),
-                    title="Aggressive Analyst",
-                    border_style="blue",
+                    title="⚡ Aggressive Analyst",
+                    border_style="bright_magenta",
                     padding=(1, 2),
                 )
             )
@@ -687,8 +726,8 @@ def display_complete_report(final_state):
             risk_reports.append(
                 Panel(
                     Markdown(risk_state["safe_history"]),
-                    title="Conservative Analyst",
-                    border_style="blue",
+                    title="🛡️ Conservative Analyst",
+                    border_style="bright_magenta",
                     padding=(1, 2),
                 )
             )
@@ -698,8 +737,8 @@ def display_complete_report(final_state):
             risk_reports.append(
                 Panel(
                     Markdown(risk_state["neutral_history"]),
-                    title="Neutral Analyst",
-                    border_style="blue",
+                    title="⚖️ Neutral Analyst",
+                    border_style="bright_magenta",
                     padding=(1, 2),
                 )
             )
@@ -708,8 +747,8 @@ def display_complete_report(final_state):
             console.print(
                 Panel(
                     Columns(risk_reports, equal=True, expand=True),
-                    title="IV. Risk Management Team Decision",
-                    border_style="red",
+                    title="IV. ⚠️ Risk Management Team Decision",
+                    border_style="bright_red",
                     padding=(1, 2),
                 )
             )
@@ -720,12 +759,12 @@ def display_complete_report(final_state):
                 Panel(
                     Panel(
                         Markdown(risk_state["judge_decision"]),
-                        title="Portfolio Manager",
-                        border_style="blue",
+                        title="👨‍💼 Portfolio Manager",
+                        border_style="bright_magenta",
                         padding=(1, 2),
                     ),
-                    title="V. Portfolio Manager Decision",
-                    border_style="green",
+                    title="V. 🎖️ Portfolio Manager Decision",
+                    border_style="bright_magenta",
                     padding=(1, 2),
                 )
             )
@@ -767,7 +806,18 @@ def run_analysis():
     config["quick_think_llm"] = selections["shallow_thinker"]
     config["deep_think_llm"] = selections["deep_thinker"]
     config["backend_url"] = selections["backend_url"]
-    config["llm_provider"] = selections["llm_provider"].lower()
+    config["llm_provider"] = selections["llm_provider"]
+
+    if selections["llm_provider"] == "openrouter":
+        provider_settings = selections.get("provider_settings") or {}
+        if "enable_thinking_mode" in provider_settings:
+            config["enable_thinking_mode"] = provider_settings["enable_thinking_mode"]
+        if "default_thinking_effort" in provider_settings:
+            config["thinking_effort"] = provider_settings["default_thinking_effort"]
+        if "thinking_effort_deep" in provider_settings:
+            config["thinking_effort_deep"] = provider_settings["thinking_effort_deep"]
+        if "thinking_effort_quick" in provider_settings:
+            config["thinking_effort_quick"] = provider_settings["thinking_effort_quick"]
 
     # Initialize the graph
     graph = TradingAgentsGraph(
@@ -788,7 +838,7 @@ def run_analysis():
         def wrapper(*args, **kwargs):
             func(*args, **kwargs)
             timestamp, message_type, content = obj.messages[-1]
-            content = content.replace("\n", " ")  # Replace newlines with spaces
+            content = _stringify_content(content).replace("\n", " ")
             with open(log_file, "a") as f:
                 f.write(f"{timestamp} [{message_type}] {content}\n")
         return wrapper
@@ -810,7 +860,7 @@ def run_analysis():
         def wrapper(section_name, content):
             func(section_name, content)
             if section_name in obj.report_sections and obj.report_sections[section_name] is not None:
-                content = obj.report_sections[section_name]
+                content = _stringify_content(obj.report_sections[section_name]).strip()
                 if content:
                     file_name = f"{section_name}.md"
                     with open(report_dir / file_name, "w") as f:
