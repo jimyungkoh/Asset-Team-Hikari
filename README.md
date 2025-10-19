@@ -37,6 +37,20 @@ Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 >
 > So we decided to fully open-source the framework. Looking forward to building impactful projects with you!
 
+## 📌 Attribution
+
+This project is a **derived work** based on [TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents), which is licensed under the **Apache License 2.0**.
+
+**Original Project:**
+- Repository: [github.com/TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents)
+- Authors: Yijia Xiao, Edward Sun, Di Luo, Wei Wang
+- Paper: [arxiv.org/abs/2412.20138](https://arxiv.org/abs/2412.20138)
+- License: Apache License 2.0
+
+**Modifications:** This project extends the original framework with enhanced features and improvements while maintaining Apache License 2.0 compliance. See [CHANGELOG.md](CHANGELOG.md) for detailed modification history.
+
+---
+
 <div align="center">
 <a href="https://www.star-history.com/#TauricResearch/TradingAgents&Date">
  <picture>

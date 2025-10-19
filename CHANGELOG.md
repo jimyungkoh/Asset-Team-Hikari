@@ -15,6 +15,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### README.md
+
+**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
+**Last Updated**: 2025-10-19
+
+#### [1.3] - 2025-10-19
+
+- **Added**: Attribution section acknowledging original TauricResearch/TradingAgents project
+- **Added**: Original project repository, authors, and paper references
+- **Note**: Maintains Apache License 2.0 compliance as per derivative work requirements
+
+**Impact**: 🟢 Low
+
+---
+
+### NOTICE
+
+**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
+**Last Updated**: 2025-10-19
+
+#### [1.0] - 2025-10-19
+
+- **Added**: New NOTICE file for Apache License 2.0 compliance
+- **Note**: Documents original project information and derivative work status per Apache 2.0 Section 4
+
+**Impact**: 🟢 Low
+
+---
+
 ### tradingagents/dataflows/gemini_browse.py
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
