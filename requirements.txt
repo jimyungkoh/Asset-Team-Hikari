@@ -31,3 +31,4 @@ questionary
 langchain_anthropic
 langchain-google-genai
 pre-commit
+google-generativeai
