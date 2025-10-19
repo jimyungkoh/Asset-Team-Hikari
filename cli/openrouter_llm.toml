@@ -1,0 +1,24 @@
+# ============================================================
+# Modified: See CHANGELOG.md for complete modification history
+# Last Updated: 2025-10-19
+# Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
+# ============================================================
+
+[provider]
+display_name = "Openrouter"
+identifier = "openrouter"
+backend_url = "https://openrouter.ai/api/v1"
+enable_thinking_mode = true
+default_thinking_effort = "high"
+
+# Quick Thinking Models
+[[quick_thinking]]
+label = "xAI: Grok-4 Fast"
+value = "x-ai/grok-4-fast"
+default = true
+
+# Deep Thinking Models
+[[deep_thinking]]
+label = "DeepSeek: DeepSeek-V3.1-Terminus"
+value = "deepseek/deepseek-v3.1-terminus"
+default = true
