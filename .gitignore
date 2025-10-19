@@ -9,3 +9,11 @@ eval_results/
 eval_data/
 *.egg-info/
 .env
+
+# Agents
+AGENTS.md
+CRUSH.md
+
+# IDE
+.cursor/
+.idea/

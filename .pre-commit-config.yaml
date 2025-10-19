@@ -1,0 +1,14 @@
+# ============================================================
+# Modified: See CHANGELOG.md for complete modification history
+# Last Updated: 2025-10-19
+# Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
+# ============================================================
+repos:
+  - repo: local
+    hooks:
+      - id: validate-headers-and-changelog
+        name: validate headers and changelog
+        entry: python3 scripts/validate_commit_headers.py
+        language: system
+        pass_filenames: true
+        stages: [commit]
