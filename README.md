@@ -1,3 +1,9 @@
+<!-- ============================================================
+Modified: See CHANGELOG.md for complete modification history
+Last Updated: 2025-10-19
+Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
+============================================================ -->
+
 <p align="center">
   <img src="assets/TauricResearch.png" style="width: 60%; height: auto;">
 </p>
@@ -13,19 +19,19 @@
 
 <div align="center">
   <!-- Keep these links. Translations will automatically update with the README. -->
-  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=de">Deutsch</a> | 
-  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=es">Español</a> | 
-  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=fr">français</a> | 
-  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=ja">日本語</a> | 
-  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=ko">한국어</a> | 
-  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=pt">Português</a> | 
-  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=ru">Русский</a> | 
+  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=de">Deutsch</a> |
+  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=es">Español</a> |
+  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=fr">français</a> |
+  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=ja">日本語</a> |
+  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=ko">한국어</a> |
+  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=pt">Português</a> |
+  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=ru">Русский</a> |
   <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=zh">中文</a>
 </div>
 
 ---
 
-# TradingAgents: Multi-Agents LLM Financial Trading Framework 
+# TradingAgents: Multi-Agents LLM Financial Trading Framework
 
 > 🎉 **TradingAgents** officially released! We have received numerous inquiries about the work, and we would like to express our thanks for the enthusiasm in our community.
 >
@@ -60,6 +66,7 @@ TradingAgents is a multi-agent trading framework that mirrors the dynamics of re
 Our framework decomposes complex trading tasks into specialized roles. This ensures the system achieves a robust, scalable approach to market analysis and decision-making.
 
 ### Analyst Team
+
 - Fundamentals Analyst: Evaluates company financials and performance metrics, identifying intrinsic values and potential red flags.
 - Sentiment Analyst: Analyzes social media and public sentiment using sentiment scoring algorithms to gauge short-term market mood.
 - News Analyst: Monitors global news and macroeconomic indicators, interpreting the impact of events on market conditions.
@@ -70,6 +77,7 @@ Our framework decomposes complex trading tasks into specialized roles. This ensu
 </p>
 
 ### Researcher Team
+
 - Comprises both bullish and bearish researchers who critically assess the insights provided by the Analyst Team. Through structured debates, they balance potential gains against inherent risks.
 
 <p align="center">
@@ -77,6 +85,7 @@ Our framework decomposes complex trading tasks into specialized roles. This ensu
 </p>
 
 ### Trader Agent
+
 - Composes reports from the analysts and researchers to make informed trading decisions. It determines the timing and magnitude of trades based on comprehensive market insights.
 
 <p align="center">
@@ -84,6 +93,7 @@ Our framework decomposes complex trading tasks into specialized roles. This ensu
 </p>
 
 ### Risk Management and Portfolio Manager
+
 - Continuously evaluates portfolio risk by assessing market volatility, liquidity, and other risk factors. The risk management team evaluates and adjusts trading strategies, providing assessment reports to the Portfolio Manager for final decision.
 - The Portfolio Manager approves/rejects the transaction proposal. If approved, the order will be sent to the simulated exchange and executed.
 
@@ -96,18 +106,21 @@ Our framework decomposes complex trading tasks into specialized roles. This ensu
 ### Installation
 
 Clone TradingAgents:
+
 ```bash
 git clone https://github.com/TauricResearch/TradingAgents.git
 cd TradingAgents
 ```
 
 Create a virtual environment in any of your favorite environment managers:
+
 ```bash
 conda create -n tradingagents python=3.13
 conda activate tradingagents
 ```
 
 Install dependencies:
+
 ```bash
 pip install -r requirements.txt
 ```
@@ -122,6 +135,7 @@ export ALPHA_VANTAGE_API_KEY=$YOUR_ALPHA_VANTAGE_API_KEY
 ```
 
 Alternatively, you can create a `.env` file in the project root with your API keys (see `.env.example` for reference):
+
 ```bash
 cp .env.example .env
 # Edit .env with your actual API keys
@@ -129,12 +143,32 @@ cp .env.example .env
 
 **Note:** We are happy to partner with Alpha Vantage to provide robust API support for TradingAgents. You can get a free AlphaVantage API [here](https://www.alphavantage.co/support/#api-key), TradingAgents-sourced requests also have increased rate limits to 60 requests per minute with no daily limits. Typically the quota is sufficient for performing complex tasks with TradingAgents thanks to Alpha Vantage’s open-source support program. If you prefer to use OpenAI for these data sources instead, you can modify the data vendor settings in `tradingagents/default_config.py`.
 
+### OpenRouter (Embeddings Excluded) + Gemini News Browsing
+
+When selecting OpenRouter as the LLM provider in the CLI, TradingAgents will automatically route news/global-news collection to Gemini web browsing tools (via Google Generative AI) instead of using OpenAI Responses web_search tools, which are not supported by OpenRouter. The agents will still think and reason using your selected OpenRouter models.
+
+Required environment variables:
+
+```bash
+# OpenRouter (used only when you select OpenRouter provider)
+export OPENROUTER_API_KEY=$YOUR_OPENROUTER_API_KEY
+export OPENROUTER_SITE_URL="https://your.site"      # used for policy compliance
+export OPENROUTER_APP_TITLE="TradingAgents"
+
+# Gemini browsing for news collection under OpenRouter
+export GOOGLE_API_KEY=$YOUR_GOOGLE_API_KEY
+```
+
+If `GOOGLE_API_KEY` is not set, the news vendor will fall back to Google/Local sources without Gemini summarization.
+
 ### CLI Usage
 
 You can also try out the CLI directly by running:
+
 ```bash
 python -m cli.main
 ```
+
 You will see a screen where you can select your desired tickers, date, LLMs, research depth, etc.
 
 <p align="center">
@@ -210,16 +244,16 @@ We welcome contributions from the community! Whether it's fixing a bug, improvin
 
 ## Citation
 
-Please reference our work if you find *TradingAgents* provides you with some help :)
+Please reference our work if you find _TradingAgents_ provides you with some help :)
 
 ```
 @misc{xiao2025tradingagentsmultiagentsllmfinancial,
-      title={TradingAgents: Multi-Agents LLM Financial Trading Framework}, 
+      title={TradingAgents: Multi-Agents LLM Financial Trading Framework},
       author={Yijia Xiao and Edward Sun and Di Luo and Wei Wang},
       year={2025},
       eprint={2412.20138},
       archivePrefix={arXiv},
       primaryClass={q-fin.TR},
-      url={https://arxiv.org/abs/2412.20138}, 
+      url={https://arxiv.org/abs/2412.20138},
 }
 ```
