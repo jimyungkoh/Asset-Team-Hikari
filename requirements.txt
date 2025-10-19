@@ -1,3 +1,9 @@
+# ============================================================
+# Modified: See CHANGELOG.md for complete modification history
+# Last Updated: 2025-10-19
+# Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
+# ============================================================
+
 typing-extensions
 langchain-openai
 langchain-experimental

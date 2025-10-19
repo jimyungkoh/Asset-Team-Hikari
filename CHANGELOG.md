@@ -48,6 +48,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
 **Last Updated**: 2025-10-19
 
+#### [1.2] - 2025-10-19
+
+- **Changed**: Added modification header block at top of file
+
+**Impact**: 🟢 Low
+
 #### [1.1] - 2025-10-19
 
 - **Added**: pre-commit dependency for local hook execution
@@ -60,6 +66,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
 **Last Updated**: 2025-10-19
+
+#### [1.1] - 2025-10-19
+
+- **Changed**: Added modification header block at top of file
+
+**Impact**: 🟢 Low
 
 #### [1.0] - 2025-10-19
 
