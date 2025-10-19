@@ -15,6 +15,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### tradingagents/dataflows/gemini_browse.py
+
+**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
+**Last Updated**: 2025-10-19
+
+#### [1.0] - 2025-10-19
+
+- **Added**: New module for Gemini-powered news browsing and summarization
+- **Added**: get_news_gemini_web() function for company-specific news with Gemini summarization
+- **Added**: get_global_news_gemini_web() function for macroeconomic news with Gemini summarization
+- **Added**: \_summarize_with_gemini() helper for leveraging Gemini API
+- **Added**: Graceful fallback when GOOGLE_API_KEY not configured
+- **Note**: Uses Google News as source and Gemini (gemini-2.0-flash by default) for summarization
+- **Note**: Integrates with OpenRouter provider for web browsing capabilities
+
+**Impact**: 🟡 Medium
+
+---
+
+### tests/dataflows/test_gemini_browse.py
+
+**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
+**Last Updated**: 2025-10-19
+
+#### [1.0] - 2025-10-19
+
+- **Added**: New test module for gemini_browse dataflow
+- **Added**: test_get_news_gemini_web_summarizes() for company news summarization
+- **Added**: test_get_global_news_gemini_web_empty_when_no_news() for empty result handling
+- **Note**: Uses monkeypatch for stub testing without external API calls
+- **Note**: Achieves deterministic test execution without GOOGLE_API_KEY
+
+**Impact**: 🟢 Low
+
+---
+
 ### cli/main.py
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
