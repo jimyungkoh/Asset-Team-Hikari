@@ -1,10 +1,32 @@
+"""
+# ============================================================
+# Modified: See CHANGELOG.md for complete modification history
+# Last Updated: 2025-10-19
+# Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
+# ============================================================
+"""
+import os
 from openai import OpenAI
 from .config import get_config
 
 
 def get_stock_news_openai(query, start_date, end_date):
     config = get_config()
-    client = OpenAI(base_url=config["backend_url"])
+    # Initialize OpenAI/OpenRouter client for dataflow usage only
+    if "openrouter.ai" in config["backend_url"]:
+        client = OpenAI(base_url=config["backend_url"], api_key=os.getenv("OPENROUTER_API_KEY"))
+        # Inject OpenRouter-required headers
+        referer = os.getenv("OPENROUTER_SITE_URL", "https://example.com")
+        title = os.getenv("OPENROUTER_APP_TITLE", "TradingAgents")
+        try:
+            client._custom_headers = {
+                "HTTP-Referer": referer,
+                "X-Title": title,
+            }
+        except Exception:
+            pass
+    else:
+        client = OpenAI(base_url=config["backend_url"])
 
     response = client.responses.create(
         model=config["quick_think_llm"],
@@ -39,7 +61,19 @@ def get_stock_news_openai(query, start_date, end_date):
 
 def get_global_news_openai(curr_date, look_back_days=7, limit=5):
     config = get_config()
-    client = OpenAI(base_url=config["backend_url"])
+    if "openrouter.ai" in config["backend_url"]:
+        client = OpenAI(base_url=config["backend_url"], api_key=os.getenv("OPENROUTER_API_KEY"))
+        referer = os.getenv("OPENROUTER_SITE_URL", "https://example.com")
+        title = os.getenv("OPENROUTER_APP_TITLE", "TradingAgents")
+        try:
+            client._custom_headers = {
+                "HTTP-Referer": referer,
+                "X-Title": title,
+            }
+        except Exception:
+            pass
+    else:
+        client = OpenAI(base_url=config["backend_url"])
 
     response = client.responses.create(
         model=config["quick_think_llm"],
@@ -74,7 +108,19 @@ def get_global_news_openai(curr_date, look_back_days=7, limit=5):
 
 def get_fundamentals_openai(ticker, curr_date):
     config = get_config()
-    client = OpenAI(base_url=config["backend_url"])
+    if "openrouter.ai" in config["backend_url"]:
+        client = OpenAI(base_url=config["backend_url"], api_key=os.getenv("OPENROUTER_API_KEY"))
+        referer = os.getenv("OPENROUTER_SITE_URL", "https://example.com")
+        title = os.getenv("OPENROUTER_APP_TITLE", "TradingAgents")
+        try:
+            client._custom_headers = {
+                "HTTP-Referer": referer,
+                "X-Title": title,
+            }
+        except Exception:
+            pass
+    else:
+        client = OpenAI(base_url=config["backend_url"])
 
     response = client.responses.create(
         model=config["quick_think_llm"],

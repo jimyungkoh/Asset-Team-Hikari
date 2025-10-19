@@ -1,4 +1,12 @@
+"""
+# ============================================================
+# Modified: See CHANGELOG.md for complete modification history
+# Last Updated: 2025-10-19
+# Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
+# ============================================================
+"""
 from typing import Annotated
+import os
 
 # Import from vendor-specific modules
 from .local import get_YFin_data, get_finnhub_news, get_finnhub_company_insider_sentiment, get_finnhub_company_insider_transactions, get_simfin_balance_sheet, get_simfin_cashflow, get_simfin_income_statements, get_reddit_global_news, get_reddit_company_news
@@ -15,6 +23,7 @@ from .alpha_vantage import (
     get_insider_transactions as get_alpha_vantage_insider_transactions,
     get_news as get_alpha_vantage_news
 )
+from .gemini_browse import get_news_gemini_web, get_global_news_gemini_web
 from .alpha_vantage_common import AlphaVantageRateLimitError
 
 # Configuration and routing logic
@@ -58,7 +67,8 @@ VENDOR_LIST = [
     "local",
     "yfinance",
     "openai",
-    "google"
+    "google",
+    "gemini",
 ]
 
 # Mapping of methods to their vendor-specific implementations
@@ -100,10 +110,12 @@ VENDOR_METHODS = {
         "alpha_vantage": get_alpha_vantage_news,
         "openai": get_stock_news_openai,
         "google": get_google_news,
+        "gemini": get_news_gemini_web,
         "local": [get_finnhub_news, get_reddit_company_news, get_google_news],
     },
     "get_global_news": {
         "openai": get_global_news_openai,
+        "gemini": get_global_news_gemini_web,
         "local": get_reddit_global_news
     },
     "get_insider_sentiment": {
@@ -143,6 +155,19 @@ def route_to_vendor(method: str, *args, **kwargs):
     category = get_category_for_method(method)
     vendor_config = get_vendor(category, method)
 
+    # Provider-aware override: If OpenRouter is selected and news vendor is 'openai',
+    # switch to 'gemini' for news/global_news collection. If GOOGLE_API_KEY is missing,
+    # fallback to 'google' if available, else 'local'.
+    config = get_config()
+    if config.get("llm_provider", "").lower() == "openrouter" and category == "news_data":
+        if vendor_config == "openai":
+            if os.getenv("GOOGLE_API_KEY"):
+                print("INFO: Overriding news vendor to 'gemini' for OpenRouter mode")
+                vendor_config = "gemini"
+            else:
+                print("WARN: GOOGLE_API_KEY missing; falling back from 'gemini' to 'google'/'local'")
+                vendor_config = "google" if "google" in VENDOR_METHODS.get(method, {}) else "local"
+
     # Handle comma-separated vendors
     primary_vendors = [v.strip() for v in vendor_config.split(',')]
 
@@ -151,7 +176,7 @@ def route_to_vendor(method: str, *args, **kwargs):
 
     # Get all available vendors for this method for fallback
     all_available_vendors = list(VENDOR_METHODS[method].keys())
-    
+
     # Create fallback vendor list: primary vendors first, then remaining vendors as fallbacks
     fallback_vendors = primary_vendors.copy()
     for vendor in all_available_vendors:
@@ -202,7 +227,7 @@ def route_to_vendor(method: str, *args, **kwargs):
                 result = impl_func(*args, **kwargs)
                 vendor_results.append(result)
                 print(f"SUCCESS: {impl_func.__name__} from vendor '{vendor_name}' completed successfully")
-                    
+
             except AlphaVantageRateLimitError as e:
                 if vendor == "alpha_vantage":
                     print(f"RATE_LIMIT: Alpha Vantage rate limit exceeded, falling back to next available vendor")
@@ -220,7 +245,7 @@ def route_to_vendor(method: str, *args, **kwargs):
             successful_vendor = vendor
             result_summary = f"Got {len(vendor_results)} result(s)"
             print(f"SUCCESS: Vendor '{vendor}' succeeded - {result_summary}")
-            
+
             # Stopping logic: Stop after first successful vendor for single-vendor configs
             # Multiple vendor configs (comma-separated) may want to collect from multiple sources
             if len(primary_vendors) == 1:

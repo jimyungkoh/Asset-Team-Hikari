@@ -15,30 +15,108 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### .gitignore
+### cli/main.py
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
 **Last Updated**: 2025-10-19
 
-#### [1.2] - 2025-10-19
+#### [1.0] - 2025-10-19
 
-- **Added**: /memo directory to gitignore
-- **Note**: Prevents experimental memo/notes directory from being tracked
+- **Added**: Modification header block at top of file
+- **Added**: OpenRouter environment variable validation with warnings
+- **Added**: GOOGLE_API_KEY validation for Gemini news browsing
+- **Fixed**: Trailing whitespace issues throughout file
+- **Note**: Provides user feedback when required environment variables are missing
 
-**Impact**: 🟢 Low
+**Impact**: 🟡 Medium
 
-#### [1.1] - 2025-10-19
+---
 
-- **Changed**: Added modification header block at top of file
+### tradingagents/dataflows/interface.py
 
-**Impact**: 🟢 Low
+**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
+**Last Updated**: 2025-10-19
 
 #### [1.0] - 2025-10-19
 
-- **Changed**: Added AGENTS.md and CRUSH.md to ignored files
-- **Changed**: Added .cursor/ and .idea/ IDE directories to gitignore
-- **Changed**: Organized gitignore sections with descriptive comments
-- **Note**: Prevents generated documentation and IDE configuration files from being tracked in repository
+- **Added**: Modification header block at top of file
+- **Added**: Gemini news browsing integration (get_news_gemini_web, get_global_news_gemini_web)
+- **Added**: Provider-aware vendor routing for OpenRouter + Gemini
+- **Added**: Automatic fallback from gemini to google/local when GOOGLE_API_KEY missing
+- **Changed**: Enhanced vendor routing logic with OpenRouter detection
+- **Note**: When OpenRouter provider selected and news vendor is 'openai', automatically switches to 'gemini'
+
+**Impact**: 🟡 Medium
+
+---
+
+### tradingagents/dataflows/openai.py
+
+**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
+**Last Updated**: 2025-10-19
+
+#### [1.0] - 2025-10-19
+
+- **Added**: Modification header block at top of file
+- **Added**: OpenRouter API client initialization with proper header injection
+- **Added**: Support for HTTP-Referer and X-Title headers required by OpenRouter policy
+- **Changed**: Enhanced get_stock_news_openai() to support both OpenAI and OpenRouter backends
+- **Changed**: Enhanced get_global_news_openai() to support both OpenAI and OpenRouter backends
+- **Changed**: Enhanced get_fundamentals_openai() to support both OpenAI and OpenRouter backends
+- **Note**: Gracefully handles header injection failures for backward compatibility
+
+**Impact**: 🟡 Medium
+
+---
+
+### .env.example
+
+**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
+**Last Updated**: 2025-10-19
+
+#### [1.0] - 2025-10-19
+
+- **Added**: Modification header block at top of file
+- **Changed**: Replaced placeholder values with descriptive format (your-xxx-api-key)
+- **Added**: Comprehensive documentation for Core APIs section
+- **Added**: OpenRouter integration variables (OPENROUTER_API_KEY, OPENROUTER_SITE_URL, OPENROUTER_APP_TITLE)
+- **Added**: Gemini API key variable for news browsing support
+- **Added**: Optional local providers comment for Ollama
+- **Added**: Security note clarifying this is documentation-only file
+- **Note**: Comprehensive guide for all supported API providers and configurations
+
+**Impact**: 🟢 Low
+
+---
+
+### README.md
+
+**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
+**Last Updated**: 2025-10-19
+
+#### [1.0] - 2025-10-19
+
+- **Added**: Modification header block at top of file
+- **Added**: New section for OpenRouter + Gemini News Browsing configuration
+- **Added**: Documentation for GOOGLE_API_KEY environment variable
+- **Added**: Explanation of automatic fallback behavior when GOOGLE_API_KEY not set
+- **Added**: Code examples for required OpenRouter environment variables
+- **Fixed**: Trailing spaces and formatting inconsistencies throughout document
+- **Changed**: Improved formatting and readability with consistent spacing
+
+**Impact**: 🟢 Low
+
+---
+
+### requirements.txt
+
+**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
+**Last Updated**: 2025-10-19
+
+#### [1.0] - 2025-10-19
+
+- **Added**: Modification header block at top of file
+- **Added**: google-generativeai dependency for Gemini integration
 
 **Impact**: 🟢 Low
 
@@ -72,20 +150,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-### requirements.txt
+### .gitignore
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
 **Last Updated**: 2025-10-19
 
-#### [1.2] - 2025-10-19
+#### [1.1] - 2025-10-19
 
 - **Changed**: Added modification header block at top of file
 
 **Impact**: 🟢 Low
 
-#### [1.1] - 2025-10-19
+#### [1.0] - 2025-10-19
 
-- **Added**: pre-commit dependency for local hook execution
+- **Changed**: Added AGENTS.md and CRUSH.md to ignored files
+- **Changed**: Added .cursor/ and .idea/ IDE directories to gitignore
+- **Changed**: Organized gitignore sections with descriptive comments
+- **Note**: Prevents generated documentation and IDE configuration files from being tracked in repository
 
 **Impact**: 🟢 Low
 
@@ -94,6 +175,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Versioning
 
 This project follows Semantic Versioning (MAJOR.MINOR.PATCH):
+
 - MAJOR: Incompatible API changes
 - MINOR: New functionality (backward compatible)
 - PATCH: Bug fixes (backward compatible)

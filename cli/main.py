@@ -1,3 +1,10 @@
+"""
+# ============================================================
+# Modified: See CHANGELOG.md for complete modification history
+# Last Updated: 2025-10-19
+# Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
+# ============================================================
+"""
 from typing import Optional
 import datetime
 import typer
@@ -103,7 +110,7 @@ class MessageBuffer:
             if content is not None:
                 latest_section = section
                 latest_content = content
-               
+
         if latest_section and latest_content:
             # Format the current section for display
             section_titles = {
@@ -317,7 +324,7 @@ def update_display(layout, spinner_text=None):
             content_str = ' '.join(text_parts)
         elif not isinstance(content_str, str):
             content_str = str(content)
-            
+
         # Truncate message content if too long
         if len(content_str) > 200:
             content_str = content_str[:197] + "..."
@@ -474,7 +481,15 @@ def get_user_selections():
         )
     )
     selected_llm_provider, backend_url = select_llm_provider()
-    
+
+    # Warn for OpenRouter env when selected
+    if selected_llm_provider.lower() == "openrouter":
+        import os
+        if not os.getenv("OPENROUTER_API_KEY"):
+            console.print("[yellow]Warning:[/yellow] OPENROUTER_API_KEY is not set. Requests may fail.")
+        if not os.getenv("OPENROUTER_SITE_URL") or not os.getenv("OPENROUTER_APP_TITLE"):
+            console.print("[yellow]Notice:[/yellow] Consider setting OPENROUTER_SITE_URL and OPENROUTER_APP_TITLE for policy compliance.")
+
     # Step 6: Thinking agents
     console.print(
         create_question_box(
@@ -483,6 +498,12 @@ def get_user_selections():
     )
     selected_shallow_thinker = select_shallow_thinking_agent(selected_llm_provider)
     selected_deep_thinker = select_deep_thinking_agent(selected_llm_provider)
+
+    # Warn if Gemini will be used for news without GOOGLE_API_KEY
+    if selected_llm_provider.lower() == "openrouter":
+        import os
+        if not os.getenv("GOOGLE_API_KEY"):
+            console.print("[yellow]Warning:[/yellow] GOOGLE_API_KEY is not set. News vendor will fallback from Gemini to Google/Local.")
 
     return {
         "ticker": selected_ticker,
@@ -771,7 +792,7 @@ def run_analysis():
             with open(log_file, "a") as f:
                 f.write(f"{timestamp} [{message_type}] {content}\n")
         return wrapper
-    
+
     def save_tool_call_decorator(obj, func_name):
         func = getattr(obj, func_name)
         @wraps(func)
@@ -861,7 +882,7 @@ def run_analysis():
                     msg_type = "System"
 
                 # Add message to buffer
-                message_buffer.add_message(msg_type, content)                
+                message_buffer.add_message(msg_type, content)
 
                 # If it's a tool call, add it to tool calls
                 if hasattr(last_message, "tool_calls"):
