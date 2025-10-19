@@ -42,6 +42,7 @@ Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 This project is a **derived work** based on [TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents), which is licensed under the **Apache License 2.0**.
 
 **Original Project:**
+
 - Repository: [github.com/TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents)
 - Authors: Yijia Xiao, Edward Sun, Di Luo, Wei Wang
 - Paper: [arxiv.org/abs/2412.20138](https://arxiv.org/abs/2412.20138)
