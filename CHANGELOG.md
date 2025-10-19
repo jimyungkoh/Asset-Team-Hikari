@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+<!-- Trading graph thinking mode support added 2025-10-19 -->
+
 ### .env.example
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>

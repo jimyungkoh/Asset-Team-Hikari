@@ -1,3 +1,8 @@
+# ============================================================
+# Modified: See CHANGELOG.md for complete modification history
+# Last Updated: 2025-10-19
+# Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
+# ============================================================
 # TradingAgents/graph/trading_graph.py
 
 import os
@@ -73,8 +78,18 @@ class TradingAgentsGraph:
 
         # Initialize LLMs
         if self.config["llm_provider"].lower() == "openai" or self.config["llm_provider"] == "ollama" or self.config["llm_provider"] == "openrouter":
-            self.deep_thinking_llm = ChatOpenAI(model=self.config["deep_think_llm"], base_url=self.config["backend_url"])
-            self.quick_thinking_llm = ChatOpenAI(model=self.config["quick_think_llm"], base_url=self.config["backend_url"])
+            # Optional thinking mode for OpenRouter (allow separate efforts for deep/quick)
+            deep_kwargs = None
+            quick_kwargs = None
+            if self.config["llm_provider"].lower() == "openrouter" and self.config.get("enable_thinking_mode"):
+                deep_kwargs = {
+                    "reasoning": {"effort": self.config.get("thinking_effort_deep", self.config.get("thinking_effort", "medium"))}
+                }
+                quick_kwargs = {
+                    "reasoning": {"effort": self.config.get("thinking_effort_quick", self.config.get("thinking_effort", "medium"))}
+                }
+            self.deep_thinking_llm = ChatOpenAI(model=self.config["deep_think_llm"], base_url=self.config["backend_url"], model_kwargs=deep_kwargs)
+            self.quick_thinking_llm = ChatOpenAI(model=self.config["quick_think_llm"], base_url=self.config["backend_url"], model_kwargs=quick_kwargs)
         elif self.config["llm_provider"].lower() == "anthropic":
             self.deep_thinking_llm = ChatAnthropic(model=self.config["deep_think_llm"], base_url=self.config["backend_url"])
             self.quick_thinking_llm = ChatAnthropic(model=self.config["quick_think_llm"], base_url=self.config["backend_url"])
@@ -83,7 +98,7 @@ class TradingAgentsGraph:
             self.quick_thinking_llm = ChatGoogleGenerativeAI(model=self.config["quick_think_llm"])
         else:
             raise ValueError(f"Unsupported LLM provider: {self.config['llm_provider']}")
-        
+
         # Initialize memories
         self.bull_memory = FinancialSituationMemory("bull_memory", self.config)
         self.bear_memory = FinancialSituationMemory("bear_memory", self.config)
