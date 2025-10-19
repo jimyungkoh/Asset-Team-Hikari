@@ -17,6 +17,63 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- Trading graph thinking mode support added 2025-10-19 -->
 
+### cli/main.py
+
+**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
+**Last Updated**: 2025-10-19
+
+#### [2.2] - 2025-10-19 - Report Serialization For Structured Reasoning Output
+
+- **Fixed**: Normalized list-based reasoning payloads into markdown strings before logging and saving report sections to prevent `TypeError: write() argument must be str`.
+- **Changed**: Centralized message content stringification for live display and tooling logs so Anthropic/OpenRouter style blocks render cleanly.
+- **Rationale**: Maintain thinking-mode compatibility while ensuring CLI reporting handles structured response formats.
+
+**Impact**: 🟡 Medium
+
+#### [2.1] - 2025-10-19 - OpenRouter Config Integration
+
+- **Added**: Provider metadata handoff (identifier/url/settings) from CLI selection pipeline.
+- **Changed**: Applied OpenRouter default thinking options to runtime config when relevant.
+- **Fixed**: Ensured CLI lowercases provider identifiers consistently for downstream usage.
+- **Rationale**: Allow OpenRouter-specific presets to flow from external config into analysis without manual overrides.
+
+**Impact**: 🟡 Medium
+
+---
+
+### cli/utils.py
+
+**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
+**Last Updated**: 2025-10-19
+
+#### [2.1] - 2025-10-19 - Config-Driven OpenRouter Model Options
+
+- **Added**: TOML loader with caching for OpenRouter provider metadata and model menus.
+- **Changed**: Questionary provider/model prompts to honor config-defined defaults.
+- **Changed**: Respected `TRADINGAGENTS_LLM_PROVIDER` env var when pre-selecting providers.
+- **Fixed**: Added fallbacks when the OpenRouter config file is missing or malformed (with inline warnings).
+- **Fixed**: Aligned Questionary default values with choice payloads to avoid `Invalid default value` errors.
+- **Fixed**: Replaced unsupported prompt_toolkit color tokens with ANSI-safe variants to avoid CLI color parsing errors.
+- **Rationale**: Centralize OpenRouter menu data in configuration files while keeping the CLI resilient.
+
+**Impact**: 🟡 Medium
+
+---
+
+### cli/openrouter_llm.toml
+
+**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
+**Last Updated**: 2025-10-19
+
+#### [1.0] - 2025-10-19 - Initial OpenRouter Model Catalog
+
+- **Added**: Dedicated TOML file listing OpenRouter provider metadata plus quick/deep thinking model options.
+- **Rationale**: Manage OpenRouter menu entries without editing Python sources.
+
+**Impact**: 🟢 Low
+
+---
+
 ### .env.example
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
@@ -53,6 +110,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
 **Last Updated**: 2025-10-19
 
+#### [2.2] - 2025-10-19 - Reasoning Budget Mapping For OpenRouter
+
+- **Changed**: Translated thinking effort presets into OpenRouter `reasoning.budget_tokens` values instead of unsupported `effort` strings.
+- **Added**: Defensive parsing for numeric configuration inputs to let operators override token budgets precisely.
+- **Rationale**: Align thinking mode requests with OpenRouter's reasoning token contract to prevent schema validation failures while keeping deep/quick modes enabled.
+
+**Impact**: 🟡 Medium
+
+#### [2.1] - 2025-10-19 - OpenRouter Credential Handling
+
+- **Fixed**: Passed `OPENROUTER_API_KEY` into `ChatOpenAI` initialization to avoid missing-auth errors.
+- **Fixed**: Added explicit validation for absent OpenRouter credentials with actionable messaging.
+- **Changed**: Reused provider-aware kwargs when constructing deep/quick thinking chat models.
+- **Rationale**: Prevent runtime 401 errors when the CLI selects the OpenRouter backend.
+
+**Impact**: 🟡 Medium
+
 #### [1.1] - 2025-10-19
 
 - **Added**: File modification header block
@@ -60,6 +134,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Changed**: Dynamic model_kwargs generation based on LLM provider and thinking configuration
 - **Changed**: Whitespace cleanup (trailing whitespace removed)
 - **Note**: Allows separate thinking effort levels for deep vs quick analysis tasks
+
+**Impact**: 🟡 Medium
+
+---
+
+### tradingagents/agents/utils/memory.py
+
+**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
+**Last Updated**: 2025-10-19
+
+#### [1.0] - 2025-10-19 - OpenRouter Embedding Client Support
+
+- **Added**: File modification header block.
+- **Fixed**: Ensured the embeddings client forwards `OPENROUTER_API_KEY` when using the OpenRouter backend.
+- **Rationale**: Align memory embeddings with CLI OpenRouter selections and eliminate 401 errors.
 
 **Impact**: 🟡 Medium
 

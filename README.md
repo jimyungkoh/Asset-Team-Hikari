@@ -4,9 +4,9 @@ Last Updated: 2025-10-19
 Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 ============================================================ -->
 
-## 📌 Attribution
+## 📌 Attribution & Project Origin
 
-This project is a **derived work** based on [TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents), which is licensed under the **Apache License 2.0**.
+This project is a **derived work** based on [TauricResearch/TradingAgents](https://github.com/TauricResearch/TradingAgents), which is licensed under the **Apache License 2.0**. It has been hardforked as **Asset-Team-Hikari** with enhanced features and optimizations.
 
 **Original Project:**
 
@@ -15,7 +15,13 @@ This project is a **derived work** based on [TauricResearch/TradingAgents](https
 - Paper: [arxiv.org/abs/2412.20138](https://arxiv.org/abs/2412.20138)
 - License: Apache License 2.0
 
-**Modifications:** This project extends the original framework with enhanced features and improvements while maintaining Apache License 2.0 compliance. See [CHANGELOG.md](CHANGELOG.md) for detailed modification history.
+**Current Project (Asset-Team-Hikari):**
+
+- Repository: [github.com/jimyungkoh/Asset-Team-Hikari](https://github.com/jimyungkoh/Asset-Team-Hikari)
+- Maintained By: jimyungkoh
+- License: Apache License 2.0 (Compliant with original)
+
+**Modifications:** This hardforked framework extends the original with enhanced features and improvements while maintaining Apache License 2.0 compliance. See [CHANGELOG.md](CHANGELOG.md) for detailed modification history.
 
 ---
 
@@ -25,32 +31,19 @@ This project is a **derived work** based on [TauricResearch/TradingAgents](https
 
 <div align="center" style="line-height: 1;">
   <a href="https://arxiv.org/abs/2412.20138" target="_blank"><img alt="arXiv" src="https://img.shields.io/badge/arXiv-2412.20138-B31B1B?logo=arxiv"/></a>
-  <a href="https://discord.com/invite/hk9PGKShPK" target="_blank"><img alt="Discord" src="https://img.shields.io/badge/Discord-TradingResearch-7289da?logo=discord&logoColor=white&color=7289da"/></a>
-  <a href="./assets/wechat.png" target="_blank"><img alt="WeChat" src="https://img.shields.io/badge/WeChat-TauricResearch-brightgreen?logo=wechat&logoColor=white"/></a>
-  <a href="https://x.com/TauricResearch" target="_blank"><img alt="X Follow" src="https://img.shields.io/badge/X-TauricResearch-white?logo=x&logoColor=white"/></a>
+  <a href="https://github.com/jimyungkoh" target="_blank"><img alt="GitHub" src="https://img.shields.io/badge/GitHub-jimyungkoh-14C290?logo=github&logoColor=white"/></a>
+  <a href="https://github.com/jimyungkoh/Asset-Team-Hikari" target="_blank"><img alt="Repository" src="https://img.shields.io/badge/Repository-Asset--Team--Hikari-cyan?logo=github"/></a>
   <br>
-  <a href="https://github.com/TauricResearch/" target="_blank"><img alt="Community" src="https://img.shields.io/badge/Join_GitHub_Community-TauricResearch-14C290?logo=discourse"/></a>
-</div>
-
-<div align="center">
-  <!-- Keep these links. Translations will automatically update with the README. -->
-  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=de">Deutsch</a> |
-  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=es">Español</a> |
-  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=fr">français</a> |
-  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=ja">日本語</a> |
-  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=ko">한국어</a> |
-  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=pt">Português</a> |
-  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=ru">Русский</a> |
-  <a href="https://www.readme-i18n.com/TauricResearch/TradingAgents?lang=zh">中文</a>
+  <a href="https://github.com/TauricResearch/" target="_blank"><img alt="Original Project" src="https://img.shields.io/badge/Original_Project-TauricResearch-14C290?logo=discourse"/></a>
 </div>
 
 ---
 
-# TradingAgents: Multi-Agents LLM Financial Trading Framework
+# 🚀 Asset-Team-Hikari: Multi-Agents LLM Financial Trading Framework
 
-> 🎉 **TradingAgents** officially released! We have received numerous inquiries about the work, and we would like to express our thanks for the enthusiasm in our community.
+> ✨ **Asset-Team-Hikari** - An advanced hardforked implementation of the TradingAgents framework
 >
-> So we decided to fully open-source the framework. Looking forward to building impactful projects with you!
+> This is a **production-ready** multi-agent AI trading system featuring enhanced stability, improved performance, and modern UI/UX design.
 
 <div align="center">
 <a href="https://www.star-history.com/#TauricResearch/TradingAgents&Date">
@@ -64,7 +57,7 @@ This project is a **derived work** based on [TauricResearch/TradingAgents](https
 
 <div align="center">
 
-🚀 [TradingAgents](#tradingagents-framework) | ⚡ [Installation & CLI](#installation-and-cli) | 🎬 [Demo](https://www.youtube.com/watch?v=90gr5lwjIho) | 📦 [Package Usage](#tradingagents-package) | 🤝 [Contributing](#contributing) | 📄 [Citation](#citation)
+🚀 [Framework](#tradingagents-framework) | ⚡ [Installation & CLI](#installation-and-cli) | 🎬 [Demo](https://www.youtube.com/watch?v=90gr5lwjIho) | 📦 [Package Usage](#tradingagents-package) | 🤝 [Contributing](#contributing) | 📄 [Citation](#citation)
 
 </div>
 
