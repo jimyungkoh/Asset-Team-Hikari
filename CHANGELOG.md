@@ -15,67 +15,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### README.md
-
-**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
-**Last Updated**: 2025-10-19
-
-#### [1.3] - 2025-10-19
-
-- **Added**: Attribution section acknowledging original TauricResearch/TradingAgents project
-- **Added**: Original project repository, authors, and paper references
-- **Note**: Maintains Apache License 2.0 compliance as per derivative work requirements
-
-**Impact**: 🟢 Low
-
----
-
-### NOTICE
-
-**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
-**Last Updated**: 2025-10-19
-
-#### [1.0] - 2025-10-19
-
-- **Added**: New NOTICE file for Apache License 2.0 compliance
-- **Note**: Documents original project information and derivative work status per Apache 2.0 Section 4
-
-**Impact**: 🟢 Low
-
----
-
-### tradingagents/dataflows/gemini_browse.py
-
-**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
-**Last Updated**: 2025-10-19
-
-#### [1.2] - 2025-10-19
-
-- **Refactored**: Improved Gemini API integration with google-generativeai SDK
-- **Added**: Grounding citations extraction from web sources
-- **Added**: Helper functions `_response_as_dict()`, `_extract_citations()`, `_format_grounded_output()`, `_generate_with_grounding()`
-- **Changed**: Enhanced response parsing with fallback mechanisms
-- **Changed**: Graceful ImportError handling when google.genai is unavailable
-- **Note**: Maintains backward compatibility; refactors API integration pattern
-
-**Impact**: 🟡 Medium
-
----
-
-### tests/dataflows/test_gemini_browse.py
-
-**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
-**Last Updated**: 2025-10-19
-
-#### [1.1] - 2025-10-19
-
-- **Changed**: Updated test mocking to align with refactored gemini_browse.py functions
-- **Changed**: Improved test coverage for citation extraction and response handling
-
-**Impact**: 🟡 Medium
-
----
-
 ### .env.example
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
@@ -83,23 +22,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### [1.1] - 2025-10-19
 
-- **Changed**: Improved environment variable documentation
-- **Note**: Documentation enhancement only, no functional impact
+- **Added**: LLM provider configuration variables (TRADINGAGENTS_LLM_PROVIDER, TRADINGAGENTS_DEEP_THINK_LLM, TRADINGAGENTS_QUICK_THINK_LLM, TRADINGAGENTS_BACKEND_URL)
+- **Added**: Thinking mode configuration variables (TRADINGAGENTS_THINKING_MODE, TRADINGAGENTS_THINKING_EFFORT, TRADINGAGENTS_THINKING_EFFORT_DEEP, TRADINGAGENTS_THINKING_EFFORT_QUICK)
+- **Note**: Supports OpenRouter's extended thinking capabilities for trading analysis
 
-**Impact**: 🟢 Low
+**Impact**: 🟡 Medium
 
 ---
 
-### requirements.txt
+### tradingagents/default_config.py
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
 **Last Updated**: 2025-10-19
 
-#### [1.3] - 2025-10-19
+#### [1.1] - 2025-10-19
 
-- **Changed**: Updated dependencies for Gemini API integration
+- **Added**: File modification header block
+- **Changed**: LLM provider settings now use environment variables with fallback defaults (os.getenv)
+- **Added**: Thinking mode configuration support (enable_thinking_mode, thinking_effort, thinking_effort_deep, thinking_effort_quick)
+- **Note**: Enables flexible LLM provider switching and extended thinking mode for trading analysis
 
-**Impact**: 🟢 Low
+**Impact**: 🟡 Medium
+
+---
+
+### tradingagents/graph/trading_graph.py
+
+**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
+**Last Updated**: 2025-10-19
+
+#### [1.1] - 2025-10-19
+
+- **Added**: File modification header block
+- **Added**: OpenRouter extended thinking mode support for deep and quick thinking models
+- **Changed**: Dynamic model_kwargs generation based on LLM provider and thinking configuration
+- **Changed**: Whitespace cleanup (trailing whitespace removed)
+- **Note**: Allows separate thinking effort levels for deep vs quick analysis tasks
+
+**Impact**: 🟡 Medium
 
 ---
 
@@ -128,6 +88,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Changed**: Added CHANGELOG staged check when code/docs modified
 
 **Impact**: 🟡 Medium
+
+---
+
+### requirements.txt
+
+**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
+**Last Updated**: 2025-10-19
+
+#### [1.2] - 2025-10-19
+
+- **Changed**: Added modification header block at top of file
+
+**Impact**: 🟢 Low
+
+#### [1.1] - 2025-10-19
+
+- **Added**: pre-commit dependency for local hook execution
+
+**Impact**: 🟢 Low
 
 ---
 

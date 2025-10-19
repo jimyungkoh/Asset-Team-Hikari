@@ -1,3 +1,10 @@
+"""
+# ============================================================
+# Modified: See CHANGELOG.md for complete modification history
+# Last Updated: 2025-10-19
+# Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
+# ============================================================
+"""
 import os
 
 DEFAULT_CONFIG = {
@@ -9,10 +16,15 @@ DEFAULT_CONFIG = {
         "dataflows/data_cache",
     ),
     # LLM settings
-    "llm_provider": "openai",
-    "deep_think_llm": "o4-mini",
-    "quick_think_llm": "gpt-4o-mini",
-    "backend_url": "https://api.openai.com/v1",
+    "llm_provider": os.getenv("TRADINGAGENTS_LLM_PROVIDER", "openai"),
+    "deep_think_llm": os.getenv("TRADINGAGENTS_DEEP_THINK_LLM", "o4-mini"),
+    "quick_think_llm": os.getenv("TRADINGAGENTS_QUICK_THINK_LLM", "gpt-4o-mini"),
+    "backend_url": os.getenv("TRADINGAGENTS_BACKEND_URL", "https://api.openai.com/v1"),
+    # Reasoning / Thinking mode (primarily for OpenRouter)
+    "enable_thinking_mode": os.getenv("TRADINGAGENTS_THINKING_MODE", "false").lower() in ("1", "true", "yes", "on"),
+    "thinking_effort": os.getenv("TRADINGAGENTS_THINKING_EFFORT", "medium"),
+    "thinking_effort_deep": os.getenv("TRADINGAGENTS_THINKING_EFFORT_DEEP", os.getenv("TRADINGAGENTS_THINKING_EFFORT", "medium")),
+    "thinking_effort_quick": os.getenv("TRADINGAGENTS_THINKING_EFFORT_QUICK", os.getenv("TRADINGAGENTS_THINKING_EFFORT", "medium")),
     # Debate and discussion settings
     "max_debate_rounds": 1,
     "max_risk_discuss_rounds": 1,
