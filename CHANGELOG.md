@@ -15,6 +15,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### .gitignore
+
+**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
+**Last Updated**: 2025-10-19
+
+#### [1.2] - 2025-10-19
+
+- **Added**: /memo directory to gitignore
+- **Note**: Prevents experimental memo/notes directory from being tracked
+
+**Impact**: 🟢 Low
+
+#### [1.1] - 2025-10-19
+
+- **Changed**: Added modification header block at top of file
+
+**Impact**: 🟢 Low
+
+#### [1.0] - 2025-10-19
+
+- **Changed**: Added AGENTS.md and CRUSH.md to ignored files
+- **Changed**: Added .cursor/ and .idea/ IDE directories to gitignore
+- **Changed**: Organized gitignore sections with descriptive comments
+- **Note**: Prevents generated documentation and IDE configuration files from being tracked in repository
+
+**Impact**: 🟢 Low
+
+---
+
 ### .pre-commit-config.yaml
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
@@ -57,28 +86,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### [1.1] - 2025-10-19
 
 - **Added**: pre-commit dependency for local hook execution
-
-**Impact**: 🟢 Low
-
----
-
-### .gitignore
-
-**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
-**Last Updated**: 2025-10-19
-
-#### [1.1] - 2025-10-19
-
-- **Changed**: Added modification header block at top of file
-
-**Impact**: 🟢 Low
-
-#### [1.0] - 2025-10-19
-
-- **Changed**: Added AGENTS.md and CRUSH.md to ignored files
-- **Changed**: Added .cursor/ and .idea/ IDE directories to gitignore
-- **Changed**: Organized gitignore sections with descriptive comments
-- **Note**: Prevents generated documentation and IDE configuration files from being tracked in repository
 
 **Impact**: 🟢 Low
 
