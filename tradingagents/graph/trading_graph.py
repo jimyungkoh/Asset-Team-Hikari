@@ -77,23 +77,58 @@ class TradingAgentsGraph:
         )
 
         # Initialize LLMs
-        if self.config["llm_provider"].lower() == "openai" or self.config["llm_provider"] == "ollama" or self.config["llm_provider"] == "openrouter":
+        llm_provider = self.config["llm_provider"].lower()
+        openrouter_api_key = None
+        if llm_provider == "openrouter":
+            openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
+            if not openrouter_api_key:
+                raise RuntimeError(
+                    "OPENROUTER_API_KEY must be set when llm_provider is OpenRouter. "
+                    "Check your .env (see .env.example) or export the key before running the CLI."
+                )
+
+        if llm_provider in ("openai", "ollama", "openrouter"):
             # Optional thinking mode for OpenRouter (allow separate efforts for deep/quick)
             deep_kwargs = None
             quick_kwargs = None
-            if self.config["llm_provider"].lower() == "openrouter" and self.config.get("enable_thinking_mode"):
+            if llm_provider == "openrouter" and self.config.get("enable_thinking_mode"):
                 deep_kwargs = {
-                    "reasoning": {"effort": self.config.get("thinking_effort_deep", self.config.get("thinking_effort", "medium"))}
+                    "reasoning": {
+                        "budget_tokens": self._resolve_reasoning_budget(
+                            self.config.get(
+                                "thinking_effort_deep",
+                                self.config.get("thinking_effort"),
+                            )
+                        )
+                    }
                 }
                 quick_kwargs = {
-                    "reasoning": {"effort": self.config.get("thinking_effort_quick", self.config.get("thinking_effort", "medium"))}
+                    "reasoning": {
+                        "budget_tokens": self._resolve_reasoning_budget(
+                            self.config.get(
+                                "thinking_effort_quick",
+                                self.config.get("thinking_effort"),
+                            )
+                        )
+                    }
                 }
-            self.deep_thinking_llm = ChatOpenAI(model=self.config["deep_think_llm"], base_url=self.config["backend_url"], model_kwargs=deep_kwargs)
-            self.quick_thinking_llm = ChatOpenAI(model=self.config["quick_think_llm"], base_url=self.config["backend_url"], model_kwargs=quick_kwargs)
-        elif self.config["llm_provider"].lower() == "anthropic":
+            chat_kwargs = {"base_url": self.config["backend_url"]}
+            if llm_provider == "openrouter":
+                chat_kwargs["api_key"] = openrouter_api_key
+            self.deep_thinking_llm = ChatOpenAI(
+                model=self.config["deep_think_llm"],
+                model_kwargs=deep_kwargs,
+                **chat_kwargs,
+            )
+            self.quick_thinking_llm = ChatOpenAI(
+                model=self.config["quick_think_llm"],
+                model_kwargs=quick_kwargs,
+                **chat_kwargs,
+            )
+        elif llm_provider == "anthropic":
             self.deep_thinking_llm = ChatAnthropic(model=self.config["deep_think_llm"], base_url=self.config["backend_url"])
             self.quick_thinking_llm = ChatAnthropic(model=self.config["quick_think_llm"], base_url=self.config["backend_url"])
-        elif self.config["llm_provider"].lower() == "google":
+        elif llm_provider == "google":
             self.deep_thinking_llm = ChatGoogleGenerativeAI(model=self.config["deep_think_llm"])
             self.quick_thinking_llm = ChatGoogleGenerativeAI(model=self.config["quick_think_llm"])
         else:
@@ -171,6 +206,39 @@ class TradingAgentsGraph:
                 ]
             ),
         }
+
+    @staticmethod
+    def _resolve_reasoning_budget(effort: Optional[Any]) -> int:
+        """Map configuration effort values to OpenRouter reasoning budgets."""
+        default_budget = 800
+
+        if effort is None:
+            return default_budget
+
+        if isinstance(effort, (int, float)):
+            return max(1, int(effort))
+
+        try:
+            parsed = int(str(effort))
+            return max(1, parsed)
+        except (TypeError, ValueError):
+            normalized = str(effort).strip().lower()
+
+        effort_to_budget = {
+            "minimal": 256,
+            "low": 256,
+            "short": 256,
+            "lite": 256,
+            "medium": 800,
+            "balanced": 800,
+            "default": 800,
+            "high": 1200,
+            "deep": 1200,
+            "extended": 1600,
+            "max": 2000,
+        }
+
+        return effort_to_budget.get(normalized, default_budget)
 
     def propagate(self, company_name, trade_date):
         """Run the trading agents graph for a company on a specific date."""

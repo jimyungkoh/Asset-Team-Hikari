@@ -1,3 +1,12 @@
+"""
+# ============================================================
+# Modified: See CHANGELOG.md for complete modification history
+# Last Updated: 2025-10-19
+# Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
+# ============================================================
+"""
+import os
+
 import chromadb
 from chromadb.config import Settings
 from openai import OpenAI
@@ -9,13 +18,24 @@ class FinancialSituationMemory:
             self.embedding = "nomic-embed-text"
         else:
             self.embedding = "text-embedding-3-small"
-        self.client = OpenAI(base_url=config["backend_url"])
+
+        client_kwargs = {"base_url": config["backend_url"]}
+        if config.get("llm_provider", "").lower() == "openrouter" or "openrouter.ai" in config["backend_url"]:
+            api_key = os.getenv("OPENROUTER_API_KEY")
+            if not api_key:
+                raise RuntimeError(
+                    "OPENROUTER_API_KEY must be set to generate embeddings when using the OpenRouter backend. "
+                    "Refer to .env.example for the required environment variables."
+                )
+            client_kwargs["api_key"] = api_key
+
+        self.client = OpenAI(**client_kwargs)
         self.chroma_client = chromadb.Client(Settings(allow_reset=True))
         self.situation_collection = self.chroma_client.create_collection(name=name)
 
     def get_embedding(self, text):
         """Get OpenAI embedding for a text"""
-        
+
         response = self.client.embeddings.create(
             model=self.embedding, input=text
         )
@@ -96,7 +116,7 @@ if __name__ == "__main__":
 
     # Example query
     current_situation = """
-    Market showing increased volatility in tech sector, with institutional investors 
+    Market showing increased volatility in tech sector, with institutional investors
     reducing positions and rising interest rates affecting growth stock valuations
     """
 
