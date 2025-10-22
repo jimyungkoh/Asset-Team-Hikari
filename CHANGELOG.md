@@ -41,9 +41,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### [1.1] - 2025-10-22 - Import Optimization and File Header
 
 - **Added**: File modification header block
-- **Changed**: Moved `pandas` import from module level to function scope for optimized loading                                                                 
-- **Changed**: Localized pandas imports in `get_YFin_data_window`, `get_YFin_data`, and `get_simfin_*` functions                                               
-- **Rationale**: Reduce startup overhead by deferring pandas loading only when needed                                                                          
+- **Changed**: Moved `pandas` import from module level to function scope for optimized loading
+- **Changed**: Localized pandas imports in `get_YFin_data_window`, `get_YFin_data`, and `get_simfin_*` functions
+- **Rationale**: Reduce startup overhead by deferring pandas loading only when needed
 
 **Impact**: 🟢 Low
 
