@@ -151,6 +151,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
 **Last Updated**: 2025-10-23
 
+#### [1.1] - 2025-10-23 - Embedding Normalization
+
+- **Added**: Token limit detection with tiktoken encoder (max 7800 tokens for embeddings).
+- **Added**: `_stringify()` helper to normalize structured content blocks into strings before embedding.
+- **Added**: `_normalize_for_embedding()` method to handle truncation with `[truncated for embedding]` footer notation.
+- **Changed**: Improved text preparation pipeline to handle API-unfriendly structured payloads.
+- **Rationale**: Prevent embedding API errors from oversized or non-string inputs when upstream agents return complex data structures.
+
+**Impact**: 🟡 Medium
+
 #### [1.0] - 2025-10-23 - OpenRouter Embedding Client Support
 
 - **Added**: File modification header block.
