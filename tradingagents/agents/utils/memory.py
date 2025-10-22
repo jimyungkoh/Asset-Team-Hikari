@@ -19,6 +19,7 @@ class FinancialSituationMemory:
     MAX_EMBED_CHARS = int(MAX_EMBED_TOKENS * APPROX_CHARS_PER_TOKEN)
 
     def __init__(self, name, config):
+        self.config = config
         if config["backend_url"] == "http://localhost:11434/v1":
             self.embedding = "nomic-embed-text"
         else:
@@ -49,6 +50,9 @@ class FinancialSituationMemory:
         self.client = OpenAIClient(**client_kwargs)
         self.chroma_client = chromadb.Client(Settings(allow_reset=True))
         self.situation_collection = self.chroma_client.create_collection(name=name)
+        self._summarizer_client: OpenAIClient | None = None
+        self._summarizer_model = self.config.get("quick_think_llm", "gpt-4o-mini")
+        self._summarizer_enabled = self.config.get("llm_provider", "openai").lower() in ("openai", "openrouter")
 
     def _stringify(self, value) -> str:
         if value is None:
@@ -80,14 +84,127 @@ class FinancialSituationMemory:
         except Exception:
             return text[: self.MAX_EMBED_CHARS]
 
+    def _ensure_summarizer_client(self) -> OpenAIClient | None:
+        if not self._summarizer_enabled:
+            return None
+        if self._summarizer_client is not None:
+            return self._summarizer_client
+
+        provider = self.config.get("llm_provider", "openai").lower()
+        backend_url = self.config.get("backend_url", "https://api.openai.com/v1")
+        client_kwargs = {"base_url": backend_url}
+
+        if provider == "openrouter":
+            api_key = os.getenv("OPENROUTER_API_KEY")
+            if not api_key:
+                raise RuntimeError(
+                    "OPENROUTER_API_KEY must be set to summarize content when using the OpenRouter backend."
+                )
+            client_kwargs["api_key"] = api_key
+            client = OpenAIClient(**client_kwargs)
+            referer = os.getenv("OPENROUTER_SITE_URL", "https://example.com")
+            title = os.getenv("OPENROUTER_APP_TITLE", "TradingAgents")
+            try:
+                client._custom_headers = {
+                    "HTTP-Referer": referer,
+                    "X-Title": title,
+                }
+            except Exception:
+                pass
+        elif provider == "openai":
+            api_key = os.getenv("OPENAI_API_KEY")
+            if not api_key:
+                raise RuntimeError(
+                    "OPENAI_API_KEY must be set to summarize content when using the OpenAI backend."
+                )
+            client_kwargs["api_key"] = api_key
+            client = OpenAIClient(**client_kwargs)
+        else:
+            # Unsupported provider (e.g., local). Skip summarization.
+            self._summarizer_enabled = False
+            return None
+
+        self._summarizer_client = client
+        return client
+
+    def _extract_summary_text(self, response) -> str:
+        if response is None:
+            return ""
+
+        text = getattr(response, "output_text", None)
+        if isinstance(text, str) and text.strip():
+            return text.strip()
+
+        try:
+            data = response.model_dump()
+        except AttributeError:
+            data = response
+
+        if isinstance(data, dict):
+            for item in data.get("output", []):
+                contents = item.get("content", []) or []
+                for block in contents:
+                    if isinstance(block, dict) and block.get("type") in {"output_text", "text"}:
+                        value = block.get("text") or block.get("output_text")
+                        if isinstance(value, str) and value.strip():
+                            return value.strip()
+        return ""
+
+    def _summarize_for_embedding(self, text: str) -> str | None:
+        client = self._ensure_summarizer_client()
+        if client is None:
+            return None
+
+        instructions = (
+            "Summarize the following report into a concise yet information-dense format. "
+            "Preserve key figures, timeframes, tickers, risk factors, and actionable recommendations. "
+            "Limit the summary to roughly 1200 tokens while retaining essential context."
+        )
+
+        try:
+            response = client.responses.create(
+                model=self._summarizer_model,
+                input=[
+                    {
+                        "role": "system",
+                        "content": [
+                            {"type": "input_text", "text": instructions},
+                        ],
+                    },
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "input_text", "text": text},
+                        ],
+                    },
+                ],
+                temperature=0.3,
+                max_output_tokens=1500,
+            )
+            summary = self._extract_summary_text(response)
+            if summary:
+                return summary
+        except Exception:
+            # Any failure falls back to truncation logic.
+            return None
+
+        return None
+
     def _normalize_for_embedding(self, text) -> str:
         normalized = self._stringify(text).strip()
+        if len(normalized) <= self.MAX_EMBED_CHARS:
+            return normalized
+
+        summary = self._summarize_for_embedding(normalized)
+        if summary:
+            clipped_summary = self._clip_to_token_limit(summary)
+            if len(clipped_summary) < len(summary) and not clipped_summary.endswith("[truncated after summarization]"):
+                clipped_summary = f"{clipped_summary}\n\n[truncated after summarization]"
+            return clipped_summary
+
         clipped = self._clip_to_token_limit(normalized)
-        if clipped == normalized and len(clipped) > self.MAX_EMBED_CHARS:
-            clipped = clipped[: self.MAX_EMBED_CHARS]
-        if len(clipped) < len(normalized):
-            if not clipped.endswith("[truncated for embedding]"):
-                clipped = f"{clipped}\n\n[truncated for embedding]"
+        if len(clipped) < len(normalized) and not clipped.endswith("[truncated for embedding]"):
+            clipped = f"{clipped}\n\n[truncated for embedding]"
         return clipped
 
     def get_embedding(self, text):

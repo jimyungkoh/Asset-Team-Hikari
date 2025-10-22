@@ -168,17 +168,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
 **Last Updated**: 2025-10-23
 
-#### [1.1] - 2025-10-23 - Embedding Normalization
+#### [1.4] - 2025-10-23 - LLM Summaries Before Embedding
 
-- **Added**: Token limit detection with tiktoken encoder (max 7800 tokens for embeddings).
-- **Added**: `_stringify()` helper to normalize structured content blocks into strings before embedding.
-- **Added**: `_normalize_for_embedding()` method to handle truncation with `[truncated for embedding]` footer notation.
-- **Changed**: Improved text preparation pipeline to handle API-unfriendly structured payloads.
-- **Rationale**: Prevent embedding API errors from oversized or non-string inputs when upstream agents return complex data structures.
+- **Added**: Summarized lengthy reports with the configured `quick_think_llm` before generating embeddings to minimize context loss.
+- **Improved**: Applied precise token clipping to summary results via tiktoken and annotated any residual truncation.
+- **Rationale**: Keep homing in on salient details without blindly truncating to fit the 8K embedding limit.
+
+**Impact**: 🟢 Low
+
+#### [1.3] - 2025-10-23 - Large Input Normalization For Embeddings
+
+- **Fixed**: Normalized structured texts into plain strings and truncated inputs before embedding to stay within the 8K token limit.
+- **Rationale**: Prevent OpenAI `text-embedding-3-small` requests from failing when reports exceed the model’s maximum context length.
+
+**Impact**: 🟢 Low
+
+#### [1.2] - 2025-10-22 - OpenAI-Only Embedding Routing
+
+- **Fixed**: Forced embeddings to use OpenAI credentials/endpoints even when the chat provider is OpenRouter, while preserving local (Ollama) routing.
+- **Rationale**: Match project intent where embeddings always come from OpenAI, avoiding unexpected OpenRouter HTML responses.
+
+**Impact**: 🟢 Low
+
+#### [1.1] - 2025-10-19 - OpenRouter API Key Propagation for Embeddings
+
+- **Added**: File modification header block
+- **Fixed**: Ensured the embeddings client forwards `OPENROUTER_API_KEY` when using the OpenRouter backend
 
 **Impact**: 🟡 Medium
 
-#### [1.0] - 2025-10-23 - OpenRouter Embedding Client Support
+#### [1.0] - 2025-10-19 - OpenRouter Embedding Client Support
 
 - **Added**: File modification header block.
 - **Fixed**: Ensured the embeddings client forwards `OPENROUTER_API_KEY` when using the OpenRouter backend.
