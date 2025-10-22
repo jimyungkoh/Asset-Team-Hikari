@@ -1,7 +1,7 @@
 """
 # ============================================================
 # Modified: See CHANGELOG.md for complete modification history
-# Last Updated: 2025-10-22
+# Last Updated: 2025-10-23
 # Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 # ============================================================
 """
@@ -9,7 +9,7 @@ import os
 
 import chromadb
 from chromadb.config import Settings
-from openai import OpenAI
+from openai import OpenAI as OpenAIClient
 
 
 class FinancialSituationMemory:
@@ -19,28 +19,30 @@ class FinancialSituationMemory:
         else:
             self.embedding = "text-embedding-3-small"
 
-        client_kwargs = {"base_url": config["backend_url"]}
-        is_openrouter_backend = config.get("llm_provider", "").lower() == "openrouter" or "openrouter.ai" in config["backend_url"]
-        if is_openrouter_backend:
-            api_key = os.getenv("OPENROUTER_API_KEY")
+        backend_url = config["backend_url"]
+        llm_provider = config.get("llm_provider", "").lower()
+        client_kwargs = {}
+
+        if backend_url.startswith("http://localhost"):
+            # Local (Ollama-compatible) embeddings are expected to be served via the configured backend URL.
+            client_kwargs["base_url"] = backend_url
+            api_key = os.getenv("LOCAL_EMBEDDING_API_KEY")
+            if api_key:
+                client_kwargs["api_key"] = api_key
+        else:
+            # Always use OpenAI-hosted embeddings, even when OpenRouter is the chat provider.
+            api_key = os.getenv("OPENAI_API_KEY")
             if not api_key:
                 raise RuntimeError(
-                    "OPENROUTER_API_KEY must be set to generate embeddings when using the OpenRouter backend. "
+                    "OPENAI_API_KEY must be set to generate embeddings. "
                     "Refer to .env.example for the required environment variables."
                 )
             client_kwargs["api_key"] = api_key
+            if not backend_url.startswith("https://api.openai.com"):
+                # Override any non-OpenAI backend so embeddings hit OpenAI directly.
+                client_kwargs["base_url"] = "https://api.openai.com/v1"
 
-        self.client = OpenAI(**client_kwargs)
-        if is_openrouter_backend:
-            referer = os.getenv("OPENROUTER_SITE_URL", "https://example.com")
-            title = os.getenv("OPENROUTER_APP_TITLE", "TradingAgents")
-            try:
-                self.client._custom_headers = {
-                    "HTTP-Referer": referer,
-                    "X-Title": title,
-                }
-            except Exception:
-                pass
+        self.client = OpenAIClient(**client_kwargs)
         self.chroma_client = chromadb.Client(Settings(allow_reset=True))
         self.situation_collection = self.chroma_client.create_collection(name=name)
 
