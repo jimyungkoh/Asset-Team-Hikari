@@ -186,7 +186,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### tradingagents/agents/utils/memory.py
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
-**Last Updated**: 2025-10-19
+**Last Updated**: 2025-10-22
+
+#### [1.2] - 2025-10-22 - OpenRouter Embedding Header Support
+
+- **Fixed**: Injected OpenRouter-required `HTTP-Referer` and `X-Title` headers when initializing the OpenAI embeddings client.
+- **Rationale**: Ensure embedding requests succeed against OpenRouter's API gateway instead of returning HTML fallback pages.
+
+**Impact**: 🟢 Low
+
+---
 
 #### [1.0] - 2025-10-19 - OpenRouter Embedding Client Support
 

@@ -26,6 +26,7 @@ from tradingagents.agents.utils.agent_states import (
     RiskDebateState,
 )
 from tradingagents.dataflows.config import set_config
+from .openrouter_patch import apply_openrouter_responses_patch
 
 # Import the new abstract tool methods from agent_utils
 from tradingagents.agents.utils.agent_utils import (
@@ -86,62 +87,42 @@ class TradingAgentsGraph:
                     "OPENROUTER_API_KEY must be set when llm_provider is OpenRouter. "
                     "Check your .env (see .env.example) or export the key before running the CLI."
                 )
+            apply_openrouter_responses_patch()
 
         if llm_provider in ("openai", "ollama", "openrouter"):
-            # Optional thinking mode for OpenRouter (allow separate efforts for deep/quick)
-            deep_kwargs = None
-            quick_kwargs = None
-            use_responses_api_override: bool | None = None
-
-            if llm_provider == "openrouter":
-                use_responses_api_override = False
-                if self.config.get("enable_thinking_mode"):
-                    print(
-                        "WARN: OpenRouter thinking-mode budgets skipped because Responses API is disabled."
+            # Optional thinking mode support
+            deep_kwargs = {}
+            quick_kwargs = {}
+            if self.config.get("enable_thinking_mode"):
+                deep_kwargs["reasoning"] = {
+                    "budget_tokens": self._resolve_reasoning_budget(
+                        self.config.get(
+                            "thinking_effort_deep",
+                            self.config.get("thinking_effort"),
+                        )
                     )
-            elif self.config.get("enable_thinking_mode"):
-                deep_kwargs = {
-                    "reasoning": {
-                        "budget_tokens": self._resolve_reasoning_budget(
-                            self.config.get(
-                                "thinking_effort_deep",
-                                self.config.get("thinking_effort"),
-                            )
-                        )
-                    }
                 }
-                quick_kwargs = {
-                    "reasoning": {
-                        "budget_tokens": self._resolve_reasoning_budget(
-                            self.config.get(
-                                "thinking_effort_quick",
-                                self.config.get("thinking_effort"),
-                            )
+                quick_kwargs["reasoning"] = {
+                    "budget_tokens": self._resolve_reasoning_budget(
+                        self.config.get(
+                            "thinking_effort_quick",
+                            self.config.get("thinking_effort"),
                         )
-                    }
+                    )
                 }
 
             chat_kwargs = {"base_url": self.config["backend_url"]}
             if llm_provider == "openrouter":
                 chat_kwargs["api_key"] = openrouter_api_key
-            openai_kwargs = {
-                "model_kwargs": deep_kwargs,
-            }
-            if use_responses_api_override is not None:
-                openai_kwargs["use_responses_api"] = use_responses_api_override
+
             self.deep_thinking_llm = ChatOpenAI(
                 model=self.config["deep_think_llm"],
-                **openai_kwargs,
+                model_kwargs=deep_kwargs,
                 **chat_kwargs,
             )
-            openai_quick_kwargs = {
-                "model_kwargs": quick_kwargs,
-            }
-            if use_responses_api_override is not None:
-                openai_quick_kwargs["use_responses_api"] = use_responses_api_override
             self.quick_thinking_llm = ChatOpenAI(
                 model=self.config["quick_think_llm"],
-                **openai_quick_kwargs,
+                model_kwargs=quick_kwargs,
                 **chat_kwargs,
             )
         elif llm_provider == "anthropic":
