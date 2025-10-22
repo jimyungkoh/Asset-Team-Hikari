@@ -1,6 +1,6 @@
 # ============================================================
 # Modified: See CHANGELOG.md for complete modification history
-# Last Updated: 2025-10-22
+# Last Updated: 2025-10-23
 # Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 # ============================================================
 # TradingAgents/graph/trading_graph.py
@@ -90,11 +90,13 @@ class TradingAgentsGraph:
             apply_openrouter_responses_patch()
 
         if llm_provider in ("openai", "ollama", "openrouter"):
-            # Optional thinking mode support
-            deep_kwargs = {}
-            quick_kwargs = {}
+            deep_model_kwargs: dict = {}
+            quick_model_kwargs: dict = {}
+            deep_reasoning = None
+            quick_reasoning = None
+
             if self.config.get("enable_thinking_mode"):
-                deep_kwargs["reasoning"] = {
+                deep_reasoning = {
                     "budget_tokens": self._resolve_reasoning_budget(
                         self.config.get(
                             "thinking_effort_deep",
@@ -102,7 +104,7 @@ class TradingAgentsGraph:
                         )
                     )
                 }
-                quick_kwargs["reasoning"] = {
+                quick_reasoning = {
                     "budget_tokens": self._resolve_reasoning_budget(
                         self.config.get(
                             "thinking_effort_quick",
@@ -115,14 +117,26 @@ class TradingAgentsGraph:
             if llm_provider == "openrouter":
                 chat_kwargs["api_key"] = openrouter_api_key
 
+            deep_kwargs = {}
+            if deep_model_kwargs:
+                deep_kwargs["model_kwargs"] = deep_model_kwargs
+            if deep_reasoning:
+                deep_kwargs["reasoning"] = deep_reasoning
+
+            quick_kwargs = {}
+            if quick_model_kwargs:
+                quick_kwargs["model_kwargs"] = quick_model_kwargs
+            if quick_reasoning:
+                quick_kwargs["reasoning"] = quick_reasoning
+
             self.deep_thinking_llm = ChatOpenAI(
                 model=self.config["deep_think_llm"],
-                model_kwargs=deep_kwargs,
+                **deep_kwargs,
                 **chat_kwargs,
             )
             self.quick_thinking_llm = ChatOpenAI(
                 model=self.config["quick_think_llm"],
-                model_kwargs=quick_kwargs,
+                **quick_kwargs,
                 **chat_kwargs,
             )
         elif llm_provider == "anthropic":

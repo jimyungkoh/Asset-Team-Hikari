@@ -17,6 +17,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- Trading graph thinking mode support added 2025-10-19 -->
 
+### tradingagents/graph/trading_graph.py
+
+**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
+**Last Updated**: 2025-10-23
+
+#### [2.6] - 2025-10-23 - File Header Maintenance
+
+- **Changed**: Updated file modification header with current date (2025-10-23).
+- **Rationale**: Keep file metadata synchronized with actual modifications.
+
+**Impact**: 🟢 Low
+
+---
+
 ### cli/main.py
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
