@@ -17,10 +17,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- Trading graph thinking mode support added 2025-10-19 -->
 
+### tradingagents/graph/openrouter_patch.py
+
+**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
+**Last Updated**: 2025-10-22
+
+#### [1.0] - 2025-10-22 - OpenRouter Responses API Compatibility Patch
+
+- **Added**: New module to patch LangChain's Responses API payload builder for OpenRouter compatibility.
+- **Added**: `_stringify_tool_output` function to handle flexible tool output formats (strings, lists, dicts).
+- **Added**: `_transform_function_call_output` function to convert OpenRouter `function_call_output` messages to developer message format.
+- **Added**: `apply_openrouter_responses_patch` function to inject patched payload constructor into LangChain OpenAI base module.
+- **Rationale**: Enable structured tool output handling for OpenRouter without direct parameter support.
+
+**Impact**: 🟡 Medium
+
+---
+
 ### tradingagents/graph/trading_graph.py
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
 **Last Updated**: 2025-10-22
+
+#### [2.5] - 2025-10-22 - Simplify OpenRouter use_responses_api Handling
+
+- **Changed**: Refactored LLM initialization to remove conditional `use_responses_api` parameter logic.
+- **Changed**: Centralized OpenRouter compatibility patching by calling `apply_openrouter_responses_patch()` at initialization.
+- **Added**: Import statement for `apply_openrouter_responses_patch` from new `openrouter_patch` module.
+- **Changed**: Simplified `deep_kwargs` and `quick_kwargs` initialization to always use dict type (not conditional None).
+- **Rationale**: Decouple Responses API compatibility into dedicated patch module for cleaner separation of concerns.
+
+**Impact**: 🟡 Medium
 
 #### [2.4] - 2025-10-22 - OpenRouter use_responses_api Handling
 
@@ -31,21 +58,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 **Impact**: 🟡 Medium
 
----
+#### [2.3] - 2025-10-22 - Enhanced Reasoning Budget Mapping For OpenRouter
 
-### tradingagents/dataflows/local.py
+- **Changed**: Translated thinking effort presets into OpenRouter `reasoning.budget_tokens` values instead of unsupported `effort` strings.
+- **Added**: Defensive parsing for numeric configuration inputs to let operators override token budgets precisely.
+- **Rationale**: Align thinking mode requests with OpenRouter's reasoning token contract to prevent schema validation failures while keeping deep/quick modes enabled.
 
-**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
-**Last Updated**: 2025-10-22
+**Impact**: 🟡 Medium
 
-#### [1.1] - 2025-10-22 - Import Optimization and File Header
+#### [2.2] - 2025-10-19 - Reasoning Budget Mapping For OpenRouter
+
+- **Changed**: Translated thinking effort presets into OpenRouter `reasoning.budget_tokens` values instead of unsupported `effort` strings.
+- **Added**: Defensive parsing for numeric configuration inputs to let operators override token budgets precisely.
+- **Rationale**: Align thinking mode requests with OpenRouter's reasoning token contract to prevent schema validation failures while keeping deep/quick modes enabled.
+
+**Impact**: 🟡 Medium
+
+#### [2.1] - 2025-10-19 - OpenRouter Credential Handling
+
+- **Fixed**: Passed `OPENROUTER_API_KEY` into `ChatOpenAI` initialization to avoid missing-auth errors.
+- **Fixed**: Added explicit validation for absent OpenRouter credentials with actionable messaging.
+- **Changed**: Reused provider-aware kwargs when constructing deep/quick thinking chat models.
+- **Rationale**: Prevent runtime 401 errors when the CLI selects the OpenRouter backend.
+
+**Impact**: 🟡 Medium
+
+#### [1.1] - 2025-10-19
 
 - **Added**: File modification header block
-- **Changed**: Moved `pandas` import from module level to function scope for optimized loading
-- **Changed**: Localized pandas imports in `get_YFin_data_window`, `get_YFin_data`, and `get_simfin_*` functions
-- **Rationale**: Reduce startup overhead by deferring pandas loading only when needed
+- **Added**: OpenRouter extended thinking mode support for deep and quick thinking models
+- **Changed**: Dynamic model_kwargs generation based on LLM provider and thinking configuration
+- **Changed**: Whitespace cleanup (trailing whitespace removed)
+- **Note**: Allows separate thinking effort levels for deep vs quick analysis tasks
 
-**Impact**: 🟢 Low
+**Impact**: 🟡 Medium
 
 ---
 
@@ -132,40 +178,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Changed**: LLM provider settings now use environment variables with fallback defaults (os.getenv)
 - **Added**: Thinking mode configuration support (enable_thinking_mode, thinking_effort, thinking_effort_deep, thinking_effort_quick)
 - **Note**: Enables flexible LLM provider switching and extended thinking mode for trading analysis
-
-**Impact**: 🟡 Medium
-
----
-
-### tradingagents/graph/trading_graph.py
-
-**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
-**Last Updated**: 2025-10-19
-
-#### [2.2] - 2025-10-19 - Reasoning Budget Mapping For OpenRouter
-
-- **Changed**: Translated thinking effort presets into OpenRouter `reasoning.budget_tokens` values instead of unsupported `effort` strings.
-- **Added**: Defensive parsing for numeric configuration inputs to let operators override token budgets precisely.
-- **Rationale**: Align thinking mode requests with OpenRouter's reasoning token contract to prevent schema validation failures while keeping deep/quick modes enabled.
-
-**Impact**: 🟡 Medium
-
-#### [2.1] - 2025-10-19 - OpenRouter Credential Handling
-
-- **Fixed**: Passed `OPENROUTER_API_KEY` into `ChatOpenAI` initialization to avoid missing-auth errors.
-- **Fixed**: Added explicit validation for absent OpenRouter credentials with actionable messaging.
-- **Changed**: Reused provider-aware kwargs when constructing deep/quick thinking chat models.
-- **Rationale**: Prevent runtime 401 errors when the CLI selects the OpenRouter backend.
-
-**Impact**: 🟡 Medium
-
-#### [1.1] - 2025-10-19
-
-- **Added**: File modification header block
-- **Added**: OpenRouter extended thinking mode support for deep and quick thinking models
-- **Changed**: Dynamic model_kwargs generation based on LLM provider and thinking configuration
-- **Changed**: Whitespace cleanup (trailing whitespace removed)
-- **Note**: Allows separate thinking effort levels for deep vs quick analysis tasks
 
 **Impact**: 🟡 Medium
 
