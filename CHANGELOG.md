@@ -17,6 +17,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- Trading graph thinking mode support added 2025-10-19 -->
 
+### tradingagents/graph/trading_graph.py
+
+**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
+**Last Updated**: 2025-10-22
+
+#### [2.4] - 2025-10-22 - OpenRouter use_responses_api Handling
+
+- **Changed**: Refactored LLM initialization to conditionally set `use_responses_api` parameter based on provider
+- **Fixed**: Added logic to disable `use_responses_api` for OpenRouter compatibility, with warning message when thinking mode is requested
+- **Changed**: Updated Last Updated date to 2025-10-22
+- **Rationale**: Improve compatibility with OpenRouter while maintaining support for Anthropic's structured thinking mode
+
+**Impact**: 🟡 Medium
+
+---
+
 ### tradingagents/dataflows/local.py
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
@@ -25,26 +41,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### [1.1] - 2025-10-22 - Import Optimization and File Header
 
 - **Added**: File modification header block
-- **Changed**: Moved `pandas` import from module level to function scope for optimized loading
-- **Changed**: Localized pandas imports in `get_YFin_data_window`, `get_YFin_data`, and `get_simfin_*` functions
-- **Rationale**: Reduce startup overhead by deferring pandas loading only when needed
+- **Changed**: Moved `pandas` import from module level to function scope for optimized loading                                                                 
+- **Changed**: Localized pandas imports in `get_YFin_data_window`, `get_YFin_data`, and `get_simfin_*` functions                                               
+- **Rationale**: Reduce startup overhead by deferring pandas loading only when needed                                                                          
 
 **Impact**: 🟢 Low
-
----
-
-### tradingagents/graph/trading_graph.py
-
-**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
-**Last Updated**: 2025-10-22
-
-#### [2.3] - 2025-10-22 - Explicit use_responses_api Disable For OpenRouter Compatibility
-
-- **Fixed**: Added `use_responses_api=False` to both deep_thinking_llm and quick_thinking_llm ChatOpenAI instances
-- **Changed**: Updated Last Updated date to 2025-10-22
-- **Rationale**: Prevent API response format conflicts and ensure stable interaction with OpenRouter/OpenAI backends
-
-**Impact**: 🟡 Medium
 
 ---
 
