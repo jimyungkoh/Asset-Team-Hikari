@@ -1,6 +1,6 @@
 <!-- ============================================================
 Modified: See CHANGELOG.md for complete modification history
-Last Updated: 2025-10-19
+Last Updated: 2025-10-22
 Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 ============================================================ -->
 
@@ -17,21 +17,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- Trading graph thinking mode support added 2025-10-19 -->
 
+### tradingagents/dataflows/local.py
+
+**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
+**Last Updated**: 2025-10-22
+
+#### [1.1] - 2025-10-22 - Import Optimization and File Header
+
+- **Added**: File modification header block
+- **Changed**: Moved `pandas` import from module level to function scope for optimized loading
+- **Changed**: Localized pandas imports in `get_YFin_data_window`, `get_YFin_data`, and `get_simfin_*` functions
+- **Rationale**: Reduce startup overhead by deferring pandas loading only when needed
+
+**Impact**: 🟢 Low
+
+---
+
+### tradingagents/graph/trading_graph.py
+
+**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
+**Last Updated**: 2025-10-22
+
+#### [2.3] - 2025-10-22 - Explicit use_responses_api Disable For OpenRouter Compatibility
+
+- **Fixed**: Added `use_responses_api=False` to both deep_thinking_llm and quick_thinking_llm ChatOpenAI instances
+- **Changed**: Updated Last Updated date to 2025-10-22
+- **Rationale**: Prevent API response format conflicts and ensure stable interaction with OpenRouter/OpenAI backends
+
+**Impact**: 🟡 Medium
+
+---
+
 ### cli/main.py
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
 **Last Updated**: 2025-10-19
-
-#### [2.3] - 2025-10-19 - UI Branding and Content Stringification
-
-- **Changed**: Rebranded CLI from "TradingAgents" to "Asset-Team-Hikari"
-- **Added**: `_stringify_content()` utility function for converting mixed message types to printable strings
-- **Changed**: Updated header panel styling with modern cyan colors and emoji
-- **Changed**: Enhanced progress table with rounded borders (ROUNDED box) and improved visual hierarchy
-- **Fixed**: Report sections now normalize content, removing None values for cleaner output
-- **Rationale**: Improve user experience with better branding and reliable message serialization for structured LLM responses
-
-**Impact**: 🟡 Medium
 
 #### [2.2] - 2025-10-19 - Report Serialization For Structured Reasoning Output
 
@@ -121,17 +141,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
 **Last Updated**: 2025-10-19
 
-#### [2.3] - 2025-10-19 - Reasoning Budget Token Resolution for OpenRouter
-
-- **Added**: `_resolve_reasoning_budget()` static method to map configuration effort values to token budgets
-- **Changed**: Refactored OpenRouter LLM initialization with improved variable scoping and error handling
-- **Added**: Explicit OPENROUTER_API_KEY validation with actionable error messaging
-- **Changed**: Modified deep/quick kwargs to use `reasoning.budget_tokens` instead of effort strings
-- **Fixed**: Ensured API key is passed to ChatOpenAI when using OpenRouter backend
-- **Rationale**: Support flexible reasoning token budgets while maintaining configuration compatibility
-
-**Impact**: 🟡 Medium
-
 #### [2.2] - 2025-10-19 - Reasoning Budget Mapping For OpenRouter
 
 - **Changed**: Translated thinking effort presets into OpenRouter `reasoning.budget_tokens` values instead of unsupported `effort` strings.
@@ -165,14 +174,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
 **Last Updated**: 2025-10-19
-
-#### [1.1] - 2025-10-19 - OpenRouter API Key Propagation for Embeddings
-
-- **Added**: File modification header block
-- **Fixed**: Ensured the embeddings client forwards `OPENROUTER_API_KEY` environment variable when using OpenRouter backend
-- **Rationale**: Align memory embeddings with CLI OpenRouter selections and eliminate 401 authentication errors
-
-**Impact**: 🟡 Medium
 
 #### [1.0] - 2025-10-19 - OpenRouter Embedding Client Support
 

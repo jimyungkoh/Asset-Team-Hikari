@@ -1,5 +1,10 @@
+# ============================================================
+# Modified: See CHANGELOG.md for complete modification history
+# Last Updated: 2025-10-22
+# Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
+# ============================================================
+
 from typing import Annotated
-import pandas as pd
 import os
 from .config import DATA_DIR
 from datetime import datetime
@@ -13,6 +18,8 @@ def get_YFin_data_window(
     curr_date: Annotated[str, "Start date in yyyy-mm-dd format"],
     look_back_days: Annotated[int, "how many days to look back"],
 ) -> str:
+    import pandas as pd
+
     # calculate past days
     date_obj = datetime.strptime(curr_date, "%Y-%m-%d")
     before = date_obj - relativedelta(days=look_back_days)
@@ -53,6 +60,8 @@ def get_YFin_data(
     start_date: Annotated[str, "Start date in yyyy-mm-dd format"],
     end_date: Annotated[str, "End date in yyyy-mm-dd format"],
 ) -> str:
+    import pandas as pd
+
     # read in data
     data = pd.read_csv(
         os.path.join(
@@ -232,6 +241,8 @@ def get_simfin_balance_sheet(
     ],
     curr_date: Annotated[str, "current date you are trading at, yyyy-mm-dd"],
 ):
+    import pandas as pd
+
     data_path = os.path.join(
         DATA_DIR,
         "fundamental_data",
@@ -279,6 +290,8 @@ def get_simfin_cashflow(
     ],
     curr_date: Annotated[str, "current date you are trading at, yyyy-mm-dd"],
 ):
+    import pandas as pd
+
     data_path = os.path.join(
         DATA_DIR,
         "fundamental_data",
@@ -326,6 +339,8 @@ def get_simfin_income_statements(
     ],
     curr_date: Annotated[str, "current date you are trading at, yyyy-mm-dd"],
 ):
+    import pandas as pd
+
     data_path = os.path.join(
         DATA_DIR,
         "fundamental_data",

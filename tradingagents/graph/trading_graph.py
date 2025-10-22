@@ -1,6 +1,6 @@
 # ============================================================
 # Modified: See CHANGELOG.md for complete modification history
-# Last Updated: 2025-10-19
+# Last Updated: 2025-10-22
 # Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 # ============================================================
 # TradingAgents/graph/trading_graph.py
@@ -118,11 +118,13 @@ class TradingAgentsGraph:
             self.deep_thinking_llm = ChatOpenAI(
                 model=self.config["deep_think_llm"],
                 model_kwargs=deep_kwargs,
+                use_responses_api=False,
                 **chat_kwargs,
             )
             self.quick_thinking_llm = ChatOpenAI(
                 model=self.config["quick_think_llm"],
                 model_kwargs=quick_kwargs,
+                use_responses_api=False,
                 **chat_kwargs,
             )
         elif llm_provider == "anthropic":
