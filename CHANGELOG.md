@@ -117,7 +117,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
 **Last Updated**: 2025-10-23
 
-#### [2.3] - 2025-10-23 - Reasoning Budget Mapping For OpenRouter
+#### [2.2] - 2025-10-23 - Reasoning Budget Mapping For OpenRouter
 
 - **Changed**: Translated thinking effort presets into OpenRouter `reasoning.budget_tokens` values instead of unsupported `effort` strings.
 - **Added**: Defensive parsing for numeric configuration inputs to let operators override token budgets precisely.
@@ -151,14 +151,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
 **Last Updated**: 2025-10-23
 
-#### [1.1] - 2025-10-23
+#### [1.0] - 2025-10-23 - OpenRouter Embedding Client Support
 
-- **Fixed**: Updated file modification header with 2025-10-23 date
-- **Changed**: Added support for OpenRouter embeddings via OPENROUTER_API_KEY environment variable
-- **Improved**: Enhanced backend URL validation for embedding services compatibility
-- **Note**: Embeddings now properly forward API keys when using OpenRouter backend
+- **Added**: File modification header block.
+- **Fixed**: Ensured the embeddings client forwards `OPENROUTER_API_KEY` when using the OpenRouter backend.
+- **Rationale**: Align memory embeddings with CLI OpenRouter selections and eliminate 401 errors.
 
-**Impact**: 🟢 Low
+**Impact**: 🟡 Medium
 
 ---
 
