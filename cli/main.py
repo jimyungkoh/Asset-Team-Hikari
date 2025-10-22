@@ -1,7 +1,7 @@
 """
 # ============================================================
 # Modified: See CHANGELOG.md for complete modification history
-# Last Updated: 2025-10-19
+# Last Updated: 2025-10-23
 # Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 # ============================================================
 """
@@ -212,6 +212,14 @@ def _stringify_content(content, *, separator="\n\n") -> str:
     return str(content)
 
 
+def _as_markdown(content) -> Markdown:
+    """Convert rich content into a Markdown renderable."""
+    text = _stringify_content(content).strip()
+    if not text:
+        text = "_No content available_"
+    return Markdown(text)
+
+
 def create_layout():
     layout = Layout()
     layout.split_column(
@@ -399,7 +407,7 @@ def update_display(layout, spinner_text=None):
     if message_buffer.current_report:
         layout["analysis"].update(
             Panel(
-                Markdown(message_buffer.current_report),
+                _as_markdown(message_buffer.current_report),
                 title="📊 Analysis Report",
                 border_style="bright_magenta",
                 padding=(1, 2),
@@ -591,7 +599,7 @@ def display_complete_report(final_state):
     if final_state.get("market_report"):
         analyst_reports.append(
             Panel(
-                Markdown(final_state["market_report"]),
+                _as_markdown(final_state["market_report"]),
                 title="📈 Market Analyst",
                 border_style="bright_magenta",
                 padding=(1, 2),
@@ -602,7 +610,7 @@ def display_complete_report(final_state):
     if final_state.get("sentiment_report"):
         analyst_reports.append(
             Panel(
-                Markdown(final_state["sentiment_report"]),
+                _as_markdown(final_state["sentiment_report"]),
                 title="💬 Social Analyst",
                 border_style="bright_magenta",
                 padding=(1, 2),
@@ -613,7 +621,7 @@ def display_complete_report(final_state):
     if final_state.get("news_report"):
         analyst_reports.append(
             Panel(
-                Markdown(final_state["news_report"]),
+                _as_markdown(final_state["news_report"]),
                 title="📰 News Analyst",
                 border_style="bright_magenta",
                 padding=(1, 2),
@@ -624,7 +632,7 @@ def display_complete_report(final_state):
     if final_state.get("fundamentals_report"):
         analyst_reports.append(
             Panel(
-                Markdown(final_state["fundamentals_report"]),
+                _as_markdown(final_state["fundamentals_report"]),
                 title="💰 Fundamentals Analyst",
                 border_style="bright_magenta",
                 padding=(1, 2),
@@ -650,7 +658,7 @@ def display_complete_report(final_state):
         if debate_state.get("bull_history"):
             research_reports.append(
                 Panel(
-                    Markdown(debate_state["bull_history"]),
+                    _as_markdown(debate_state["bull_history"]),
                     title="🐂 Bull Researcher",
                     border_style="bright_magenta",
                     padding=(1, 2),
@@ -661,7 +669,7 @@ def display_complete_report(final_state):
         if debate_state.get("bear_history"):
             research_reports.append(
                 Panel(
-                    Markdown(debate_state["bear_history"]),
+                    _as_markdown(debate_state["bear_history"]),
                     title="🐻 Bear Researcher",
                     border_style="bright_magenta",
                     padding=(1, 2),
@@ -672,7 +680,7 @@ def display_complete_report(final_state):
         if debate_state.get("judge_decision"):
             research_reports.append(
                 Panel(
-                    Markdown(debate_state["judge_decision"]),
+                    _as_markdown(debate_state["judge_decision"]),
                     title="🎯 Research Manager",
                     border_style="bright_magenta",
                     padding=(1, 2),
@@ -694,7 +702,7 @@ def display_complete_report(final_state):
         console.print(
             Panel(
                 Panel(
-                    Markdown(final_state["trader_investment_plan"]),
+                    _as_markdown(final_state["trader_investment_plan"]),
                     title="💼 Trader",
                     border_style="bright_magenta",
                     padding=(1, 2),
@@ -714,7 +722,7 @@ def display_complete_report(final_state):
         if risk_state.get("risky_history"):
             risk_reports.append(
                 Panel(
-                    Markdown(risk_state["risky_history"]),
+                    _as_markdown(risk_state["risky_history"]),
                     title="⚡ Aggressive Analyst",
                     border_style="bright_magenta",
                     padding=(1, 2),
@@ -725,7 +733,7 @@ def display_complete_report(final_state):
         if risk_state.get("safe_history"):
             risk_reports.append(
                 Panel(
-                    Markdown(risk_state["safe_history"]),
+                    _as_markdown(risk_state["safe_history"]),
                     title="🛡️ Conservative Analyst",
                     border_style="bright_magenta",
                     padding=(1, 2),
@@ -736,7 +744,7 @@ def display_complete_report(final_state):
         if risk_state.get("neutral_history"):
             risk_reports.append(
                 Panel(
-                    Markdown(risk_state["neutral_history"]),
+                    _as_markdown(risk_state["neutral_history"]),
                     title="⚖️ Neutral Analyst",
                     border_style="bright_magenta",
                     padding=(1, 2),
@@ -758,7 +766,7 @@ def display_complete_report(final_state):
             console.print(
                 Panel(
                     Panel(
-                        Markdown(risk_state["judge_decision"]),
+                        _as_markdown(risk_state["judge_decision"]),
                         title="👨‍💼 Portfolio Manager",
                         border_style="bright_magenta",
                         padding=(1, 2),
