@@ -112,6 +112,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+### tradingagents/graph/openrouter_patch.py
+
+**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
+**Last Updated**: 2025-10-23
+
+#### [1.1] - 2025-10-23 - Improved Response Serialization
+
+- **Added**: `_extract_text_blocks()` function to safely extract strings from structured response blocks.
+- **Added**: `_collapse_items_to_string()` function to convert message items into human-readable string format.
+- **Changed**: Patched `_construct_responses_api_input` to return string instead of list for OpenRouter compatibility.
+- **Changed**: Added Sequence type import for proper type hints.
+- **Rationale**: Enable OpenRouter Responses API to properly serialize complex message structures with reasoning, function calls, and outputs.
+
+**Impact**: 🟡 Medium
+
+---
+
 ### tradingagents/graph/trading_graph.py
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
