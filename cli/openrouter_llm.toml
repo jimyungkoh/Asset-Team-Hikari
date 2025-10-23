@@ -1,6 +1,6 @@
 # ============================================================
 # Modified: See CHANGELOG.md for complete modification history
-# Last Updated: 2025-10-19
+# Last Updated: 2025-10-24
 # Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 # ============================================================
 
@@ -15,10 +15,21 @@ default_thinking_effort = "high"
 [[quick_thinking]]
 label = "xAI: Grok-4 Fast"
 value = "x-ai/grok-4-fast"
+default = false
+
+[[quick_thinking]]
+label = "DeepSeek: DeepSeek-V3.1-Terminus"
+value = "deepseek/deepseek-v3.1-terminus"
 default = true
 
 # Deep Thinking Models
 [[deep_thinking]]
 label = "DeepSeek: DeepSeek-V3.1-Terminus"
 value = "deepseek/deepseek-v3.1-terminus"
+default = false
+
+[[deep_thinking]]
+label = "DeepSeek: DeepSeek-R1-0528"
+value = "deepseek/deepseek-r1-0528"
 default = true
+
