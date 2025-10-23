@@ -1,7 +1,7 @@
 """
 # ============================================================
 # Modified: See CHANGELOG.md for complete modification history
-# Last Updated: 2025-10-23
+# Last Updated: 2025-10-24
 # Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 # ============================================================
 """
@@ -155,6 +155,18 @@ class FinancialSituationMemory:
         if client is None:
             return None
 
+        provider = self.config.get("llm_provider", "openai").lower()
+        reasoning_payload = None
+        if provider == "openrouter" and self.config.get("enable_thinking_mode"):
+            reasoning_payload = {
+                "budget_tokens": self._resolve_reasoning_budget(
+                    self.config.get(
+                        "thinking_effort_quick",
+                        self.config.get("thinking_effort"),
+                    )
+                )
+            }
+
         instructions = (
             "Summarize the following report into a concise yet information-dense format. "
             "Preserve key figures, timeframes, tickers, risk factors, and actionable recommendations. "
@@ -180,6 +192,7 @@ class FinancialSituationMemory:
                 ],
                 temperature=0.3,
                 max_output_tokens=1500,
+                reasoning=reasoning_payload,
             )
             summary = self._extract_summary_text(response)
             if summary:
@@ -206,6 +219,37 @@ class FinancialSituationMemory:
         if len(clipped) < len(normalized) and not clipped.endswith("[truncated for embedding]"):
             clipped = f"{clipped}\n\n[truncated for embedding]"
         return clipped
+
+    def _resolve_reasoning_budget(self, effort) -> int:
+        default_budget = 800
+
+        if effort is None:
+            return default_budget
+
+        if isinstance(effort, (int, float)):
+            return max(1, int(effort))
+
+        try:
+            parsed = int(str(effort))
+            return max(1, parsed)
+        except (TypeError, ValueError):
+            normalized = str(effort).strip().lower()
+
+        effort_to_budget = {
+            "minimal": 256,
+            "low": 256,
+            "short": 256,
+            "lite": 256,
+            "medium": 800,
+            "balanced": 800,
+            "default": 800,
+            "high": 1200,
+            "deep": 1200,
+            "extended": 1600,
+            "max": 2000,
+        }
+
+        return effort_to_budget.get(normalized, default_budget)
 
     def get_embedding(self, text):
         """Get OpenAI embedding for a text."""

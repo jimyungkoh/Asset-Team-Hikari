@@ -70,12 +70,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### cli/openrouter_llm.toml
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
-**Last Updated**: 2025-10-19
+**Last Updated**: 2025-10-24
 
-#### [1.0] - 2025-10-19 - Initial OpenRouter Model Catalog
+#### [1.1] - 2025-10-24 - Extended Model Options
 
-- **Added**: Dedicated TOML file listing OpenRouter provider metadata plus quick/deep thinking model options.
-- **Rationale**: Manage OpenRouter menu entries without editing Python sources.
+- **Added**: DeepSeek-V3.1-Terminus as secondary quick thinking model option.
+- **Added**: DeepSeek-R1-0528 as secondary deep thinking model option.
+- **Changed**: Updated Grok-4 Fast quick thinking default to `false`.
+- **Changed**: Updated DeepSeek-V3.1-Terminus deep thinking default to `false`.
+- **Rationale**: Expand LLM provider choices while maintaining DeepSeek models as primary defaults for both thinking modes.
 
 **Impact**: 🟢 Low
 
@@ -166,7 +169,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### tradingagents/agents/utils/memory.py
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
-**Last Updated**: 2025-10-23
+**Last Updated**: 2025-10-24
+
+#### [3.2] - 2025-10-24 - Reasoning Budget Resolution
+
+- **Added**: `_resolve_reasoning_budget()` method to map human-readable effort strings ("minimal", "low", "high", "deep", etc.) to token budgets for OpenRouter extended thinking.
+- **Added**: Integration of reasoning payload into `responses.create()` call when OpenRouter provider is configured with thinking mode enabled.
+- **Rationale**: Enable flexible reasoning budget configuration while maintaining backward compatibility with existing embedding and summarization workflows.
+
+**Impact**: 🟡 Medium
 
 #### [1.4] - 2025-10-23 - LLM Summaries Before Embedding
 
