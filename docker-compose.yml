@@ -1,0 +1,30 @@
+# ============================================================
+# Modified: See CHANGELOG.md for complete modification history
+# Last Updated: 2025-10-25
+# Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
+# ============================================================
+
+services:
+  trading-agents: &trading-agents-service
+    build:
+      context: ./TradingAgents
+    image: tradingagents:local
+    container_name: trading-agents
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./TradingAgents/.env
+    environment:
+      INTERNAL_API_TOKEN: ${INTERNAL_API_TOKEN:-changeme-internal-token}
+      SKIP_TOKEN_AUTH: ${SKIP_TOKEN_AUTH:-true}
+    volumes:
+      - ./TradingAgents/assets:/app/assets:ro
+      - ./TradingAgents/results:/app/results
+    command: uvicorn tradingagents.api.app:app --host 0.0.0.0 --port 8000
+
+  trading-agents-dev:
+    <<: *trading-agents-service
+    container_name: trading-agents-dev
+    command: uvicorn tradingagents.api.app:app --host 0.0.0.0 --port 8000 --reload
+    profiles:
+      - dev

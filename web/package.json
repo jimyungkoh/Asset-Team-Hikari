@@ -1,0 +1,42 @@
+{
+  "_metadata": {
+    "modified": "See CHANGELOG.md for complete modification history",
+    "lastUpdated": "2025-10-24",
+    "modifiedBy": "jimyungkoh<aqaqeqeq0511@gmail.com>"
+  },
+  "name": "tradingagents-web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@radix-ui/react-slot": "^1.0.4",
+    "autoprefixer": "^10.4.20",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.458.0",
+    "next": "15.1.8",
+    "next-auth": "^4.24.10",
+    "postcss": "^8.4.44",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "tailwind-merge": "^2.4.0",
+    "tailwindcss": "^3.4.13",
+    "tailwindcss-animate": "^1.0.7",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.0.0",
+    "@types/node": "^22.7.4",
+    "@types/react": "^18.3.8",
+    "@types/react-dom": "^18.3.0",
+    "eslint": "^9.12.0",
+    "eslint-config-next": "15.1.8",
+    "postcss": "^8.4.49",
+    "typescript": "^5.6.2"
+  }
+}

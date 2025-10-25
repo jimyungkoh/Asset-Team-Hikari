@@ -1,28 +1,27 @@
 # ============================================================
 # Modified: See CHANGELOG.md for complete modification history
-# Last Updated: 2025-10-19
-# Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
+# Last Updated: 2025-10-25
+# Modified By: Codex Agent<codex.agent@openai.com>
 # ============================================================
 
-.venv
-results
-env/
-__pycache__/
+# Root workspace ignores
 .DS_Store
-*.csv
-src/
-eval_results/
-eval_data/
-*.egg-info/
-.env
-
-# Agents
-AGENTS.md
-CRUSH.md
-
-# IDE
-.cursor/
 .idea/
+.cursor/
+**/.venv/
+node_modules/
+.env*
+!.env.example
 
-# etc.
+# Server build artifacts
+server/dist/
+
+# Next.js build output
+web/.next/
+
+# Python caches
+TradingAgents/.pytest_cache/
+TradingAgents/__pycache__/
+
 /memo
+**/AGENTS.md

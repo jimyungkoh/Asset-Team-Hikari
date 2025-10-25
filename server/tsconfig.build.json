@@ -1,0 +1,15 @@
+{
+  "_metadata": {
+    "modified": "See CHANGELOG.md for complete modification history",
+    "lastUpdated": "2025-10-24",
+    "modifiedBy": "jimyungkoh<aqaqeqeq0511@gmail.com>"
+  },
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "declaration": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "removeComments": true
+  },
+  "exclude": ["node_modules", "dist", "test", "tests", "src/**/*.spec.ts"]
+}

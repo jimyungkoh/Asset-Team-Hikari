@@ -1,0 +1,28 @@
+# ============================================================
+# Modified: See CHANGELOG.md for complete modification history
+# Last Updated: 2025-10-19
+# Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
+# ============================================================
+
+.venv
+results
+env/
+__pycache__/
+.DS_Store
+*.csv
+src/
+eval_results/
+eval_data/
+*.egg-info/
+.env
+
+# Agents
+AGENTS.md
+CRUSH.md
+
+# IDE
+.cursor/
+.idea/
+
+# etc.
+/memo
