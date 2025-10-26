@@ -1,6 +1,6 @@
 <!-- ============================================================
 Modified: See CHANGELOG.md for complete modification history
-Last Updated: 2025-10-27
+Last Updated: 2025-10-26
 Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 ============================================================ -->
 
@@ -204,5 +204,5 @@ Desktop (> 1024)  - 3+ 컬럼 레이아웃
 
 ---
 
-**마지막 업데이트**: 2025-10-27  
+**마지막 업데이트**: 2025-10-27
 **작성자**: jimyungkoh<aqaqeqeq0511@gmail.com>

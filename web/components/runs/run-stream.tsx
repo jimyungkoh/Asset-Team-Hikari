@@ -15,6 +15,14 @@ import { Progress } from "../ui/progress";
 
 type RunStatus = "pending" | "running" | "success" | "failed";
 
+type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | { [key: string]: JsonValue };
+
 interface RunError {
   message: string;
   traceback?: string;
@@ -27,7 +35,7 @@ interface RunSummary {
   updatedAt: string;
   ticker: string;
   tradeDate: string;
-  result?: unknown;
+  result?: JsonValue;
   error?: RunError;
 }
 
@@ -36,9 +44,9 @@ interface RunEvent {
   message?: string;
   percent?: number;
   status?: string;
-  result?: unknown;
+  result?: JsonValue;
   timestamp?: string;
-  [key: string]: unknown;
+  traceback?: string;
 }
 
 interface RunStreamProps {
@@ -51,7 +59,7 @@ export function RunStream({ run }: RunStreamProps): JSX.Element {
     run.status === "success" ? 100 : 5
   );
   const [logs, setLogs] = useState<RunEvent[]>([]);
-  const [result, setResult] = useState<unknown>(run.result);
+  const [result, setResult] = useState<JsonValue | null>(run.result ?? null);
   const [error, setError] = useState<RunError | null>(run.error ?? null);
   const [connected, setConnected] = useState(false);
   const [updatedAt, setUpdatedAt] = useState(run.updatedAt);
@@ -83,7 +91,10 @@ export function RunStream({ run }: RunStreamProps): JSX.Element {
           setUpdatedAt(new Date().toISOString());
         }
 
-        if (payload.event === "complete" && payload.result) {
+        if (
+          payload.event === "complete" &&
+          typeof payload.result !== "undefined"
+        ) {
           setStatus("success");
           setResult(payload.result);
         }
@@ -107,7 +118,6 @@ export function RunStream({ run }: RunStreamProps): JSX.Element {
           {
             event: "client-error",
             message: "Failed to parse stream payload",
-            raw: event.data,
           },
         ]);
       }
@@ -192,39 +202,46 @@ export function RunStream({ run }: RunStreamProps): JSX.Element {
               이벤트를 기다리는 중…
             </p>
           ) : (
-            logs.map((event, index) => (
-              <div
-                key={`${event.event}-${index}`}
-                className="space-y-1 pb-3 border-b border-white/20 last:border-0"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="font-semibold text-slate-900">
-                    {event.event === "complete" && "✅"}
-                    {event.event === "error" && "❌"}
-                    {event.event === "progress" && "⏳"}
-                    {!["complete", "error", "progress"].includes(
-                      event.event ?? ""
-                    ) && "📌"}{" "}
-                    {event.event ?? "message"}
-                  </span>
-                  <span className="text-xs text-slate-500">
-                    {event.timestamp
-                      ? new Date(event.timestamp).toLocaleTimeString()
-                      : new Date().toLocaleTimeString()}
-                  </span>
+            logs.map((event, index) => {
+              const typedEvent = event as RunEvent;
+              return (
+                <div
+                  key={`${String(typedEvent.event ?? "unknown")}-${index}`}
+                  className="space-y-1 pb-3 border-b border-white/20 last:border-0"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-semibold text-slate-900">
+                      {typedEvent.event === "complete" ? "✅" : null}
+                      {typedEvent.event === "error" ? "❌" : null}
+                      {typedEvent.event === "progress" ? "⏳" : null}
+                      {!["complete", "error", "progress"].includes(
+                        typedEvent.event ?? ""
+                      )
+                        ? "📌"
+                        : null}{" "}
+                      {String(typedEvent.event ?? "message")}
+                    </span>
+                    <span className="text-xs text-slate-500">
+                      {typedEvent.timestamp &&
+                      typeof typedEvent.timestamp === "string"
+                        ? new Date(typedEvent.timestamp).toLocaleTimeString()
+                        : new Date().toLocaleTimeString()}
+                    </span>
+                  </div>
+                  {typedEvent.message &&
+                    typeof typedEvent.message === "string" && (
+                      <p className="text-sm text-slate-700 leading-relaxed">
+                        {typedEvent.message}
+                      </p>
+                    )}
+                  {typeof typedEvent.percent === "number" && (
+                    <p className="text-xs text-slate-500">
+                      진행: {typedEvent.percent}%
+                    </p>
+                  )}
                 </div>
-                {event.message && (
-                  <p className="text-sm text-slate-700 leading-relaxed">
-                    {event.message}
-                  </p>
-                )}
-                {typeof event.percent === "number" && (
-                  <p className="text-xs text-slate-500">
-                    진행: {event.percent}%
-                  </p>
-                )}
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </div>
@@ -250,7 +267,7 @@ export function RunStream({ run }: RunStreamProps): JSX.Element {
       )}
 
       {/* Result Card */}
-      {result && (
+      {result !== null && (
         <div className="glass rounded-2xl p-8 space-y-4">
           <h3 className="text-lg font-bold text-green-600">📊 결과 요약</h3>
           <pre className="max-h-96 overflow-auto rounded-lg bg-slate-50/50 backdrop-blur p-4 text-xs text-slate-700 scrollbar-thin border border-white/30">

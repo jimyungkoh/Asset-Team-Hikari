@@ -1,3 +1,9 @@
+# ============================================================
+# Modified: See CHANGELOG.md for complete modification history
+# Last Updated: 2025-10-26
+# Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
+# ============================================================
+
 from tradingagents.graph.trading_graph import TradingAgentsGraph
 from tradingagents.default_config import DEFAULT_CONFIG
 
@@ -23,9 +29,12 @@ config["data_vendors"] = {
 # Initialize with custom config
 ta = TradingAgentsGraph(debug=True, config=config)
 
-# forward propagate
-_, decision = ta.propagate("NVDA", "2024-05-10")
-print(decision)
+try:
+    # forward propagate
+    _, decision = ta.propagate("NVDA", "2024-05-10")
+    print(decision)
+finally:
+    ta.cleanup()
 
 # Memorize mistakes and reflect
 # ta.reflect_and_remember(1000) # parameter is the position returns

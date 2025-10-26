@@ -1,7 +1,7 @@
 """
 # ============================================================
 # Modified: See CHANGELOG.md for complete modification history
-# Last Updated: 2025-10-24
+# Last Updated: 2025-10-26
 # Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 # ============================================================
 """
@@ -49,7 +49,12 @@ class FinancialSituationMemory:
 
         self.client = OpenAIClient(**client_kwargs)
         self.chroma_client = chromadb.Client(Settings(allow_reset=True))
-        self.situation_collection = self.chroma_client.create_collection(name=name)
+        self.collection_name = name
+        try:
+            self.situation_collection = self.chroma_client.get_or_create_collection(name=self.collection_name)
+        except AttributeError:
+            # Fallback for older chromadb versions without get_or_create_collection
+            self.situation_collection = self.chroma_client.create_collection(name=self.collection_name)
         self._summarizer_client: OpenAIClient | None = None
         self._summarizer_model = self.config.get("quick_think_llm", "gpt-4o-mini")
         self._summarizer_enabled = self.config.get("llm_provider", "openai").lower() in ("openai", "openrouter")
@@ -305,6 +310,14 @@ class FinancialSituationMemory:
             )
 
         return matched_results
+
+    def cleanup(self) -> None:
+        """Drop the collection to release resources after a run finishes."""
+        try:
+            self.chroma_client.delete_collection(name=self.collection_name)
+        except Exception:
+            # Best-effort cleanup; ignore if the collection is already gone or backend rejects the request.
+            pass
 
 
 if __name__ == "__main__":

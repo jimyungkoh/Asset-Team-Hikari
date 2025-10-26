@@ -1,7 +1,7 @@
 """
 # ============================================================
 # Modified: See CHANGELOG.md for complete modification history
-# Last Updated: 2025-10-27
+# Last Updated: 2025-10-26
 # Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 # ============================================================
 """
@@ -178,25 +178,30 @@ def run_tradingagents(
             if typed_values:
                 analysts_list = typed_values
 
-        if analysts_list:
-            graph = TradingAgentsGraph(
-                selected_analysts=analysts_list,
-                debug=False,
-                config=config,
-            )
-        else:
-            graph = TradingAgentsGraph(
-                debug=False,
-                config=config,
+        graph: Optional[TradingAgentsGraph] = None
+        try:
+            if analysts_list:
+                graph = TradingAgentsGraph(
+                    selected_analysts=analysts_list,
+                    debug=False,
+                    config=config,
+                )
+            else:
+                graph = TradingAgentsGraph(
+                    debug=False,
+                    config=config,
+                )
+
+            emitter(
+                "progress",
+                message="Running propagation",
+                percent=25,
             )
 
-        emitter(
-            "progress",
-            message="Running propagation",
-            percent=25,
-        )
-
-        final_state, decision = graph.propagate(ticker, trade_date)
+            final_state, decision = graph.propagate(ticker, trade_date)
+        finally:
+            if graph is not None:
+                graph.cleanup()
 
         emitter(
             "progress",

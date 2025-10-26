@@ -1,7 +1,7 @@
 """
 # ============================================================
 # Modified: See CHANGELOG.md for complete modification history
-# Last Updated: 2025-10-23
+# Last Updated: 2025-10-26
 # Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 # ============================================================
 """
@@ -882,100 +882,101 @@ def run_analysis():
     # Now start the display layout
     layout = create_layout()
 
-    with Live(layout, refresh_per_second=4) as live:
-        # Initial display
-        update_display(layout)
+    try:
+        with Live(layout, refresh_per_second=4) as live:
+            # Initial display
+            update_display(layout)
 
-        # Add initial messages
-        message_buffer.add_message("System", f"Selected ticker: {selections['ticker']}")
-        message_buffer.add_message(
-            "System", f"Analysis date: {selections['analysis_date']}"
-        )
-        message_buffer.add_message(
-            "System",
-            f"Selected analysts: {', '.join(analyst.value for analyst in selections['analysts'])}",
-        )
-        update_display(layout)
+            # Add initial messages
+            message_buffer.add_message("System", f"Selected ticker: {selections['ticker']}")
+            message_buffer.add_message(
+                "System", f"Analysis date: {selections['analysis_date']}"
+            )
+            message_buffer.add_message(
+                "System",
+                f"Selected analysts: {', '.join(analyst.value for analyst in selections['analysts'])}",
+            )
+            update_display(layout)
 
-        # Reset agent statuses
-        for agent in message_buffer.agent_status:
-            message_buffer.update_agent_status(agent, "pending")
+            # Reset agent statuses
+            for agent in message_buffer.agent_status:
+                message_buffer.update_agent_status(agent, "pending")
 
-        # Reset report sections
-        for section in message_buffer.report_sections:
-            message_buffer.report_sections[section] = None
-        message_buffer.current_report = None
-        message_buffer.final_report = None
+            # Reset report sections
+            for section in message_buffer.report_sections:
+                message_buffer.report_sections[section] = None
+            message_buffer.current_report = None
+            message_buffer.final_report = None
 
-        # Update agent status to in_progress for the first analyst
-        first_analyst = f"{selections['analysts'][0].value.capitalize()} Analyst"
-        message_buffer.update_agent_status(first_analyst, "in_progress")
-        update_display(layout)
+            # Update agent status to in_progress for the first analyst
+            first_analyst = f"{selections['analysts'][0].value.capitalize()} Analyst"
+            message_buffer.update_agent_status(first_analyst, "in_progress")
+            update_display(layout)
 
-        # Create spinner text
-        spinner_text = (
-            f"Analyzing {selections['ticker']} on {selections['analysis_date']}..."
-        )
-        update_display(layout, spinner_text)
+            # Create spinner text
+            spinner_text = (
+                f"Analyzing {selections['ticker']} on {selections['analysis_date']}..."
+            )
+            update_display(layout, spinner_text)
 
-        # Initialize state and get graph args
-        init_agent_state = graph.propagator.create_initial_state(
-            selections["ticker"], selections["analysis_date"]
-        )
-        args = graph.propagator.get_graph_args()
+            # Initialize state and get graph args
+            init_agent_state = graph.propagator.create_initial_state(
+                selections["ticker"], selections["analysis_date"]
+            )
+            args = graph.propagator.get_graph_args()
 
-        # Stream the analysis
-        trace = []
-        for chunk in graph.graph.stream(init_agent_state, **args):
-            if len(chunk["messages"]) > 0:
-                # Get the last message from the chunk
-                last_message = chunk["messages"][-1]
+            # Stream the analysis
+            trace = []
+            for chunk in graph.graph.stream(init_agent_state, **args):
+                if len(chunk["messages"]) > 0:
+                    # Get the last message from the chunk
+                    last_message = chunk["messages"][-1]
 
-                # Extract message content and type
-                if hasattr(last_message, "content"):
-                    content = extract_content_string(last_message.content)  # Use the helper function
-                    msg_type = "Reasoning"
-                else:
-                    content = str(last_message)
-                    msg_type = "System"
+                    # Extract message content and type
+                    if hasattr(last_message, "content"):
+                        content = extract_content_string(last_message.content)  # Use the helper function
+                        msg_type = "Reasoning"
+                    else:
+                        content = str(last_message)
+                        msg_type = "System"
 
-                # Add message to buffer
-                message_buffer.add_message(msg_type, content)
+                    # Add message to buffer
+                    message_buffer.add_message(msg_type, content)
 
-                # If it's a tool call, add it to tool calls
-                if hasattr(last_message, "tool_calls"):
-                    for tool_call in last_message.tool_calls:
-                        # Handle both dictionary and object tool calls
-                        if isinstance(tool_call, dict):
-                            message_buffer.add_tool_call(
-                                tool_call["name"], tool_call["args"]
+                    # If it's a tool call, add it to tool calls
+                    if hasattr(last_message, "tool_calls"):
+                        for tool_call in last_message.tool_calls:
+                            # Handle both dictionary and object tool calls
+                            if isinstance(tool_call, dict):
+                                message_buffer.add_tool_call(
+                                    tool_call["name"], tool_call["args"]
+                                )
+                            else:
+                                message_buffer.add_tool_call(tool_call.name, tool_call.args)
+
+                    # Update reports and agent status based on chunk content
+                    # Analyst Team Reports
+                    if "market_report" in chunk and chunk["market_report"]:
+                        message_buffer.update_report_section(
+                            "market_report", chunk["market_report"]
+                        )
+                        message_buffer.update_agent_status("Market Analyst", "completed")
+                        # Set next analyst to in_progress
+                        if "social" in selections["analysts"]:
+                            message_buffer.update_agent_status(
+                                "Social Analyst", "in_progress"
                             )
-                        else:
-                            message_buffer.add_tool_call(tool_call.name, tool_call.args)
 
-                # Update reports and agent status based on chunk content
-                # Analyst Team Reports
-                if "market_report" in chunk and chunk["market_report"]:
-                    message_buffer.update_report_section(
-                        "market_report", chunk["market_report"]
-                    )
-                    message_buffer.update_agent_status("Market Analyst", "completed")
-                    # Set next analyst to in_progress
-                    if "social" in selections["analysts"]:
-                        message_buffer.update_agent_status(
-                            "Social Analyst", "in_progress"
+                    if "sentiment_report" in chunk and chunk["sentiment_report"]:
+                        message_buffer.update_report_section(
+                            "sentiment_report", chunk["sentiment_report"]
                         )
-
-                if "sentiment_report" in chunk and chunk["sentiment_report"]:
-                    message_buffer.update_report_section(
-                        "sentiment_report", chunk["sentiment_report"]
-                    )
-                    message_buffer.update_agent_status("Social Analyst", "completed")
-                    # Set next analyst to in_progress
-                    if "news" in selections["analysts"]:
-                        message_buffer.update_agent_status(
-                            "News Analyst", "in_progress"
-                        )
+                        message_buffer.update_agent_status("Social Analyst", "completed")
+                        # Set next analyst to in_progress
+                        if "news" in selections["analysts"]:
+                            message_buffer.update_agent_status(
+                                "News Analyst", "in_progress"
+                            )
 
                 if "news_report" in chunk and chunk["news_report"]:
                     message_buffer.update_report_section(
@@ -1156,27 +1157,29 @@ def run_analysis():
 
             trace.append(chunk)
 
-        # Get final state and decision
-        final_state = trace[-1]
-        decision = graph.process_signal(final_state["final_trade_decision"])
+            # Get final state and decision
+            final_state = trace[-1]
+            decision = graph.process_signal(final_state["final_trade_decision"])
 
-        # Update all agent statuses to completed
-        for agent in message_buffer.agent_status:
-            message_buffer.update_agent_status(agent, "completed")
+            # Update all agent statuses to completed
+            for agent in message_buffer.agent_status:
+                message_buffer.update_agent_status(agent, "completed")
 
-        message_buffer.add_message(
-            "Analysis", f"Completed analysis for {selections['analysis_date']}"
-        )
+            message_buffer.add_message(
+                "Analysis", f"Completed analysis for {selections['analysis_date']}"
+            )
 
-        # Update final report sections
-        for section in message_buffer.report_sections.keys():
-            if section in final_state:
-                message_buffer.update_report_section(section, final_state[section])
+            # Update final report sections
+            for section in message_buffer.report_sections.keys():
+                if section in final_state:
+                    message_buffer.update_report_section(section, final_state[section])
 
-        # Display the complete final report
-        display_complete_report(final_state)
+            # Display the complete final report
+            display_complete_report(final_state)
 
-        update_display(layout)
+            update_display(layout)
+    finally:
+        graph.cleanup()
 
 
 @app.command()

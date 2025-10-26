@@ -17,9 +17,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- Trading graph thinking mode support added 2025-10-19 -->
 
+### TradingAgents/ (Python Core)
+
+**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
+**Last Updated**: 2025-10-26
+
+#### [1.3] - 2025-10-26 - Core System Improvements
+
+- **Added**: TradingAgents/main.py에 Apache License compliance header 추가 및 cleanup() 호출을 위한 try/finally 블록 구현
+- **Changed**: CLI 인터페이스(run_analysis 함수)에서 실시간 디스플레이 레이아웃 및 메시지 버퍼링 로직 개선
+- **Changed**: 메모리 유틸리티(memory.py)에서 ChromaDB 설정 및 OpenAI 클라이언트 초기화 최적화
+- **Changed**: API 서비스(app.py)에서 비동기 처리 및 UUID 생성 로직 개선
+- **Changed**: 트레이딩 그래프(trading_graph.py)에서 노드 연결 및 신호 처리 로직 강화
+- **Changed**: 러너 모듈(run_graph.py)에서 인자 파싱 및 실행 흐름 개선
+
+**Impact**: 🟢 Low
+
+### server/ (NestJS API)
+
+**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
+**Last Updated**: 2025-10-26
+
+#### [1.1] - 2025-10-26 - API Service Updates
+
+- **Changed**: Python 실행 클라이언트, 컨트롤러, 모듈, 서비스 파일들에서 타입 정의 및 인터페이스 개선
+
+**Impact**: 🟢 Low
+
+### web/ (Next.js UI)
+
+**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
+**Last Updated**: 2025-10-26
+
+#### [1.3] - 2025-10-26 - UI Component Refinements
+
+- **Changed**: UI_REDESIGN.md에서 헤더 블록 제거 및 문서 구조 간소화
+- **Changed**: RunForm 컴포넌트에서 모델 선택 로직 및 기본값 처리 개선
+- **Changed**: RunStream 컴포넌트에서 실시간 데이터 처리 및 표시 로직 최적화
+- **Changed**: Button 컴포넌트에서 스타일링 및 상호작용 개선
+- **Changed**: run-config.ts에서 구성 관리 및 타입 정의 강화
+
+**Impact**: 🟢 Low
+
 ### web/ (root-level)
 
-**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>  
+**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
 **Last Updated**: 2025-10-27
 
 #### [1.2] - 2025-10-27 - Design System & CLI Parity UI
@@ -50,7 +92,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### server/ (root-level)
 
-**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>  
+**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
 **Last Updated**: 2025-10-27
 
 #### [1.2] - 2025-10-27 - Node LTS Alignment
@@ -76,7 +118,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### tradingagents/runner/run_graph.py
 
-**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>  
+**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
 **Last Updated**: 2025-10-27
 
 #### [1.1] - 2025-10-27 - Selected Analysts Config Bridge
@@ -161,7 +203,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### .env.example
 
-**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>  
+**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
 **Last Updated**: 2025-10-24
 
 #### [1.2] - 2025-10-24 - Web UI & Orchestrator Settings
@@ -350,7 +392,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### .gitignore
 
-**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>  
+**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
 **Last Updated**: 2025-10-24
 
 #### [1.2] - 2025-10-24 - Node Build Artifacts
@@ -360,7 +402,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 **Impact**: 🟢 Low
 
-**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>  
+**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
 **Last Updated**: 2025-10-19
 
 #### [1.1] - 2025-10-19

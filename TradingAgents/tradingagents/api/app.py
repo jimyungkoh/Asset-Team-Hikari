@@ -1,6 +1,6 @@
 # ============================================================
 # Modified: See CHANGELOG.md for complete modification history
-# Last Updated: 2025-10-25
+# Last Updated: 2025-10-26
 # Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 # ============================================================
 
@@ -190,12 +190,27 @@ async def _execute_run(record: RunRecord, request: RunCreateRequest) -> None:
         event_payload = _build_event(event, **payload)
         loop.call_soon_threadsafe(_enqueue_event, record.id, event_payload)
 
+    config_overrides: Dict[str, Any] = {}
+    if request.config:
+        config_overrides = dict(request.config)
+
+    memory_namespace = f"run_{record.id}"
+    metadata = config_overrides.get("metadata")
+    if isinstance(metadata, dict):
+        metadata = dict(metadata)
+    else:
+        metadata = {}
+    metadata.setdefault("run_id", record.id)
+    metadata["memory_namespace"] = memory_namespace
+    config_overrides["metadata"] = metadata
+    config_overrides["memory_namespace"] = memory_namespace
+
     try:
         result = await asyncio.to_thread(
             run_tradingagents,
             ticker=request.ticker,
             trade_date=request.trade_date,
-            config_overrides=request.config,
+            config_overrides=config_overrides,
             config_json=None,
             config_path=request.config_path,
             result_path=request.result_path,

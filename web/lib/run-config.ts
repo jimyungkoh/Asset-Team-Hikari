@@ -1,6 +1,6 @@
 // ============================================================
 // Modified: See CHANGELOG.md for complete modification history
-// Last Updated: 2025-10-27
+// Last Updated: 2025-10-28
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
@@ -32,6 +32,8 @@ interface ProviderBase {
   description: string;
   quickModels: ModelOption[];
   deepModels: ModelOption[];
+  defaultQuickModel?: string;
+  defaultDeepModel?: string;
 }
 
 export interface ThinkingSettings {
@@ -119,15 +121,39 @@ const OPENAI_DEEP: ModelOption[] = [
 ];
 
 const OPENROUTER_QUICK: ModelOption[] = [
-  { value: 'meta-llama/llama-4-scout:free', label: 'Llama 4 Scout', hint: '초기 스크리닝에 적합' },
-  { value: 'meta-llama/llama-3.3-8b-instruct:free', label: 'Llama 3.3 8B Instruct', hint: '경량형, 빠른 응답' },
-  { value: 'google/gemini-2.0-flash-exp:free', label: 'Gemini 2.0 Flash', hint: '다중 모달 빠른 대응' },
+  {
+    value: 'x-ai/grok-4-fast',
+    label: 'xAI: Grok-4 Fast',
+    hint: '초고속 응답, 초기 스크리닝',
+  },
+  {
+    value: 'deepseek/deepseek-v3.1-terminus',
+    label: 'DeepSeek: DeepSeek-V3.1-Terminus',
+    hint: '고정밀 토론, 빠른 결론 도출',
+  },
+  {
+    value: 'deepseek/deepseek-v3.2-exp',
+    label: 'DeepSeek: DeepSeek-V3.2-Exp',
+    hint: '기본 빠른 분석, DeepSeek 실험형',
+  },
 ];
 
 const OPENROUTER_DEEP: ModelOption[] = [
-  { value: 'deepseek/deepseek-chat-v3-0324:free', label: 'DeepSeek V3', hint: 'MOE 기반 심층 분석' },
-  { value: 'deepseek/deepseek-r1:free', label: 'DeepSeek R1', hint: '장기 논증 최적화' },
-  { value: 'qwen/qwen2.5-72b-instruct:free', label: 'Qwen 2.5 72B', hint: '대규모 파라미터 정밀 추론' },
+  {
+    value: 'deepseek/deepseek-v3.1-terminus',
+    label: 'DeepSeek: DeepSeek-V3.1-Terminus',
+    hint: '토론 안정성, 리스크 점검 특화',
+  },
+  {
+    value: 'deepseek/deepseek-r1-0528',
+    label: 'DeepSeek: DeepSeek-R1-0528',
+    hint: '기본 심층 분석, 장기 추론 강화',
+  },
+  {
+    value: 'deepseek/deepseek-v3.2-exp',
+    label: 'DeepSeek: DeepSeek-V3.2-Exp',
+    hint: '실험형 장기 추론, 고난도 시나리오',
+  },
 ];
 
 const LOCAL_QUICK: ModelOption[] = [
@@ -158,10 +184,12 @@ export const PROVIDER_OPTIONS: ProviderOption[] = [
     description: '멀티 벤더 모델을 사용할 수 있는 OpenRouter 설정입니다.',
     quickModels: OPENROUTER_QUICK,
     deepModels: OPENROUTER_DEEP,
+    defaultQuickModel: 'deepseek/deepseek-v3.2-exp',
+    defaultDeepModel: 'deepseek/deepseek-r1-0528',
     defaultThinking: {
       enableThinkingMode: true,
-      thinkingEffort: 'medium',
-      thinkingEffortQuick: 'medium',
+      thinkingEffort: 'heavy',
+      thinkingEffortQuick: 'heavy',
       thinkingEffortDeep: 'heavy',
     },
   },

@@ -1,6 +1,6 @@
 // ============================================================
 // Modified: See CHANGELOG.md for complete modification history
-// Last Updated: 2025-10-27
+// Last Updated: 2025-10-28
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
@@ -65,8 +65,12 @@ export function RunForm(): JSX.Element {
   const isThinkingEditable = provider.id === "openrouter";
 
   useEffect(() => {
-    setQuickModel(provider.quickModels[0]?.value ?? "");
-    setDeepModel(provider.deepModels[0]?.value ?? "");
+    const nextQuick =
+      provider.defaultQuickModel ?? provider.quickModels[0]?.value ?? "";
+    const nextDeep =
+      provider.defaultDeepModel ?? provider.deepModels[0]?.value ?? "";
+    setQuickModel(nextQuick);
+    setDeepModel(nextDeep);
     setThinking(provider.defaultThinking);
   }, [provider]);
 
@@ -77,8 +81,16 @@ export function RunForm(): JSX.Element {
       analysts: selectedAnalysts,
       researchDepth,
       provider,
-      quickModel: quickModel || provider.quickModels[0]?.value || "",
-      deepModel: deepModel || provider.deepModels[0]?.value || "",
+      quickModel:
+        quickModel ||
+        provider.defaultQuickModel ||
+        provider.quickModels[0]?.value ||
+        "",
+      deepModel:
+        deepModel ||
+        provider.defaultDeepModel ||
+        provider.deepModels[0]?.value ||
+        "",
       thinking: isThinkingEditable ? thinking : undefined,
     };
 

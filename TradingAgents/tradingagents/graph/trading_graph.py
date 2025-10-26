@@ -1,6 +1,6 @@
 # ============================================================
 # Modified: See CHANGELOG.md for complete modification history
-# Last Updated: 2025-10-23
+# Last Updated: 2025-10-26
 # Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 # ============================================================
 # TradingAgents/graph/trading_graph.py
@@ -8,6 +8,7 @@
 import os
 from pathlib import Path
 import json
+import uuid
 from datetime import date
 from typing import Dict, Any, Tuple, List, Optional
 
@@ -54,9 +55,10 @@ class TradingAgentsGraph:
 
     def __init__(
         self,
-        selected_analysts=["market", "social", "news", "fundamentals"],
+        selected_analysts: Optional[List[str]] = None,
         debug=False,
         config: Dict[str, Any] = None,
+        memory_namespace: Optional[str] = None,
     ):
         """Initialize the trading agents graph and components.
 
@@ -65,8 +67,12 @@ class TradingAgentsGraph:
             debug: Whether to run in debug mode
             config: Configuration dictionary. If None, uses default config
         """
+        if selected_analysts is None:
+            selected_analysts = ["market", "social", "news", "fundamentals"]
+
         self.debug = debug
         self.config = config or DEFAULT_CONFIG
+        self.memory_namespace = self._resolve_memory_namespace(memory_namespace)
 
         # Update the interface's config
         set_config(self.config)
@@ -146,11 +152,18 @@ class TradingAgentsGraph:
             raise ValueError(f"Unsupported LLM provider: {self.config['llm_provider']}")
 
         # Initialize memories
-        self.bull_memory = FinancialSituationMemory("bull_memory", self.config)
-        self.bear_memory = FinancialSituationMemory("bear_memory", self.config)
-        self.trader_memory = FinancialSituationMemory("trader_memory", self.config)
-        self.invest_judge_memory = FinancialSituationMemory("invest_judge_memory", self.config)
-        self.risk_manager_memory = FinancialSituationMemory("risk_manager_memory", self.config)
+        self.bull_memory = FinancialSituationMemory(self._memory_name("bull_memory"), self.config)
+        self.bear_memory = FinancialSituationMemory(self._memory_name("bear_memory"), self.config)
+        self.trader_memory = FinancialSituationMemory(self._memory_name("trader_memory"), self.config)
+        self.invest_judge_memory = FinancialSituationMemory(self._memory_name("invest_judge_memory"), self.config)
+        self.risk_manager_memory = FinancialSituationMemory(self._memory_name("risk_manager_memory"), self.config)
+        self._memories = [
+            self.bull_memory,
+            self.bear_memory,
+            self.trader_memory,
+            self.invest_judge_memory,
+            self.risk_manager_memory,
+        ]
 
         # Create tool nodes
         self.tool_nodes = self._create_tool_nodes()
@@ -180,6 +193,50 @@ class TradingAgentsGraph:
 
         # Set up the graph
         self.graph = self.graph_setup.setup_graph(selected_analysts)
+
+    def _resolve_memory_namespace(self, provided: Optional[str]) -> str:
+        """Determine a per-run namespace for Chroma collections."""
+
+        def _normalize(value: str) -> str:
+            cleaned = value.strip()
+            if not cleaned:
+                return ""
+            return "".join(ch if ch.isalnum() or ch in {"-", "_"} else "_" for ch in cleaned)
+
+        if isinstance(provided, str):
+            normalized = _normalize(provided)
+            if normalized:
+                return normalized
+
+        config_namespace = self.config.get("memory_namespace")
+        if isinstance(config_namespace, str):
+            normalized = _normalize(config_namespace)
+            if normalized:
+                return normalized
+
+        metadata = self.config.get("metadata")
+        if isinstance(metadata, dict):
+            for key in ("memory_namespace", "memoryNamespace", "run_id", "runId"):
+                candidate = metadata.get(key)
+                if isinstance(candidate, str):
+                    normalized = _normalize(candidate)
+                    if normalized:
+                        return normalized
+
+        return f"ta_run_{uuid.uuid4().hex}"
+
+    def _memory_name(self, base: str) -> str:
+        """Compose a namespaced collection identifier for this run."""
+        return f"{self.memory_namespace}_{base}"
+
+    def cleanup(self) -> None:
+        """Tear down any Chroma collections created for this run."""
+        for memory in getattr(self, "_memories", []):
+            try:
+                memory.cleanup()
+            except Exception:
+                # Best-effort cleanup: ignore backend-specific errors.
+                pass
 
     def _create_tool_nodes(self) -> Dict[str, ToolNode]:
         """Create tool nodes for different data sources using abstract methods."""
