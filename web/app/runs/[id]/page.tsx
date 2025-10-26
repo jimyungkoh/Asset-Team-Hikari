@@ -1,12 +1,14 @@
 // ============================================================
 // Modified: See CHANGELOG.md for complete modification history
-// Last Updated: 2025-10-24
+// Last Updated: 2025-10-27
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
 import { notFound } from "next/navigation";
 
 import { RunStream } from "../../../components/runs/run-stream";
+import { PageShell } from "../../../components/design/page-shell";
+import { Section } from "../../../components/design/section";
 import { auth } from "../../../lib/auth";
 
 interface RunSummary {
@@ -63,8 +65,14 @@ export default async function RunDetailPage({
   const run = (await response.json()) as RunSummary;
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-6 py-8">
-      <RunStream run={run} />
-    </main>
+    <PageShell authenticatedEmail={session.user?.email ?? null}>
+      <Section
+        title={`런 ${run.id}`}
+        description="실시간 스트리밍 로그와 최종 리포트를 확인하세요."
+        variant="soft"
+      >
+        <RunStream run={run} />
+      </Section>
+    </PageShell>
   );
 }

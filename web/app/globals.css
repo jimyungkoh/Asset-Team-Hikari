@@ -1,38 +1,362 @@
 /* ============================================================
  * Modified: See CHANGELOG.md for complete modification history
- * Last Updated: 2025-10-24
+ * Last Updated: 2025-10-27
  * Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
  * ============================================================
  */
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-:root {
-  --background: 0 0% 100%;
-  --foreground: 222.2 84% 4.9%;
-  --card: 0 0% 100%;
-  --card-foreground: 222.2 84% 4.9%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 222.2 84% 4.9%;
-  --primary: 222.2 47.4% 11.2%;
-  --primary-foreground: 210 40% 98%;
-  --secondary: 210 40% 96.1%;
-  --secondary-foreground: 222.2 47.4% 11.2%;
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-  --accent: 210 40% 96.1%;
-  --accent-foreground: 222.2 47.4% 11.2%;
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 222.2 84% 4.9%;
+@theme {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-success: hsl(var(--success));
+  --color-success-foreground: hsl(var(--success-foreground));
+  --color-warning: hsl(var(--warning));
+  --color-warning-foreground: hsl(var(--warning-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --radius-lg: 0.5rem;
+  --radius-md: calc(0.5rem - 2px);
+  --radius-sm: calc(0.5rem - 4px);
 }
 
-body {
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
-  min-height: 100vh;
+:root {
+  /* Modern Finance Color Palette */
+  --background: 0 0% 100%;
+  --foreground: 220 15% 15%;
+  --card: 0 0% 100%;
+  --card-foreground: 220 15% 20%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 220 15% 15%;
+
+  /* Primary - Professional Blue */
+  --primary: 217 90% 52%;
+  --primary-foreground: 0 0% 100%;
+
+  /* Secondary - Slate Gray */
+  --secondary: 210 40% 96%;
+  --secondary-foreground: 220 15% 30%;
+
+  /* Muted - Soft Gray */
+  --muted: 210 40% 96%;
+  --muted-foreground: 220 12% 40%;
+
+  /* Accent - Cyan/Teal */
+  --accent: 174 85% 50%;
+  --accent-foreground: 0 0% 100%;
+
+  /* Semantic */
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --success: 142 76% 36%;
+  --success-foreground: 0 0% 100%;
+  --warning: 38 92% 50%;
+  --warning-foreground: 0 0% 100%;
+
+  /* Borders & Input */
+  --border: 210 40% 96%;
+  --input: 210 40% 96%;
+  --ring: 217 90% 52%;
+  --shadow-color: 220 16% 75%;
+}
+
+.dark {
+  --background: 220 13% 8%;
+  --foreground: 220 15% 95%;
+  --card: 220 13% 14%;
+  --card-foreground: 220 15% 95%;
+  --popover: 220 13% 14%;
+  --popover-foreground: 220 15% 95%;
+  --primary: 217 90% 62%;
+  --primary-foreground: 220 13% 8%;
+  --secondary: 220 15% 20%;
+  --secondary-foreground: 220 15% 95%;
+  --muted: 220 15% 20%;
+  --muted-foreground: 220 12% 70%;
+  --accent: 174 85% 60%;
+  --accent-foreground: 220 13% 8%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 220 13% 8%;
+  --success: 142 76% 46%;
+  --success-foreground: 220 13% 8%;
+  --warning: 38 92% 50%;
+  --warning-foreground: 220 13% 8%;
+  --border: 220 13% 25%;
+  --input: 220 13% 25%;
+  --ring: 217 90% 62%;
+  --shadow-color: 220 13% 3%;
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply min-h-screen bg-gradient-to-br from-white via-blue-50/50 to-cyan-50/50 text-foreground antialiased;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      "Helvetica Neue", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  * {
+    font-feature-settings: "kern" 1, "liga" 1, "clig" 1, "calt" 1;
+  }
+
+  ::selection {
+    @apply bg-primary/20 text-primary;
+  }
+
+  /* Headings */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-bold;
+  }
+
+  h1 {
+    @apply text-4xl md:text-5xl lg:text-6xl;
+  }
+
+  h2 {
+    @apply text-3xl md:text-4xl;
+  }
+
+  h3 {
+    @apply text-2xl;
+  }
+}
+
+@layer components {
+  /* Financial Status Indicators */
+  .status-positive {
+    @apply text-success;
+  }
+
+  .status-negative {
+    @apply text-destructive;
+  }
+
+  .status-neutral {
+    @apply text-warning;
+  }
+
+  /* Financial Value Display */
+  .financial-value-positive {
+    @apply text-success font-semibold;
+  }
+
+  .financial-value-negative {
+    @apply text-destructive font-semibold;
+  }
+
+  .financial-value-neutral {
+    @apply text-warning font-semibold;
+  }
+
+  /* Glassmorphism Effect */
+  .glass {
+    @apply backdrop-blur-xl bg-white/40 border border-white/60;
+  }
+
+  .glass-soft {
+    @apply backdrop-blur-lg bg-white/60 border border-white/30;
+  }
+
+  .glass-strong {
+    @apply backdrop-blur-2xl bg-white/80 border border-white/20;
+  }
+
+  /* Card Styles */
+  .card-elevated {
+    @apply rounded-2xl bg-white shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-white/20;
+  }
+
+  .card-flat {
+    @apply rounded-2xl bg-white/80 backdrop-blur-xl border border-white/20;
+  }
+
+  .card-outline {
+    @apply rounded-2xl bg-gradient-to-br from-white/40 to-blue-50/20 backdrop-blur-xl border border-white/40 shadow-[0_8px_32px_rgba(10,132,255,0.08)];
+  }
+
+  /* Input Styles */
+  .input-base {
+    @apply rounded-lg bg-white/80 backdrop-blur-sm border border-white/30 px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20;
+  }
+
+  /* Button Base */
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg hover:shadow-xl hover:from-blue-600 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-lg bg-slate-100/80 backdrop-blur px-4 py-2.5 text-sm font-semibold text-slate-900 border border-slate-200/50 hover:bg-slate-200/80 transition-colors;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-900 hover:bg-slate-100/50 transition-colors;
+  }
+
+  /* Badge */
+  .badge-primary {
+    @apply inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary;
+  }
+
+  .badge-success {
+    @apply inline-flex items-center rounded-full bg-success/10 px-3 py-1 text-xs font-semibold text-success;
+  }
+
+  .badge-warning {
+    @apply inline-flex items-center rounded-full bg-warning/10 px-3 py-1 text-xs font-semibold text-warning;
+  }
+
+  .badge-destructive {
+    @apply inline-flex items-center rounded-full bg-destructive/10 px-3 py-1 text-xs font-semibold text-destructive;
+  }
+
+  /* Financial Data Table */
+  .financial-table {
+    @apply w-full text-sm;
+  }
+
+  .financial-table th {
+    @apply px-4 py-3 text-left font-semibold text-slate-600 bg-white/50 border-b border-white/30;
+  }
+
+  .financial-table td {
+    @apply px-4 py-3 border-b border-white/20;
+  }
+
+  .financial-table tbody tr:hover {
+    @apply bg-white/30 transition-colors;
+  }
+}
+
+@layer utilities {
+  /* Scrollbar Styling */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 rounded-full hover:bg-slate-400;
+  }
+
+  /* Animations */
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
+  }
+
+  .animate-shimmer {
+    animation: shimmer 2s infinite;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.4),
+      transparent
+    );
+    background-size: 1000px 100%;
+  }
+
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.3s ease-out;
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.3s ease-out;
+  }
+
+  /* Gradient Text */
+  .text-gradient {
+    @apply bg-gradient-to-r from-slate-900 via-slate-800 to-slate-700 bg-clip-text text-transparent;
+  }
+
+  /* Blur backgrounds */
+  .blur-bg {
+    @apply backdrop-blur-xl bg-white/30;
+  }
+
+  .blur-bg-strong {
+    @apply backdrop-blur-2xl bg-white/60;
+  }
+}
+
+/* Dark mode adjustments */
+.dark body {
+  @apply bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950;
+}
+
+.dark .glass {
+  @apply bg-slate-900/40 border-white/10;
+}
+
+.dark .glass-soft {
+  @apply bg-slate-900/60 border-white/20;
+}
+
+.dark .glass-strong {
+  @apply bg-slate-900/80 border-white/30;
+}
+
+.dark .card-elevated {
+  @apply bg-slate-900 shadow-[0_8px_32px_rgba(0,0,0,0.4)];
+}
+
+.dark .card-flat {
+  @apply bg-slate-900/80 backdrop-blur-xl;
 }
