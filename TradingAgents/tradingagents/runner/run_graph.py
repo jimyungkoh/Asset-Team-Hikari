@@ -1,7 +1,7 @@
 """
 # ============================================================
 # Modified: See CHANGELOG.md for complete modification history
-# Last Updated: 2025-10-25
+# Last Updated: 2025-10-27
 # Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 # ============================================================
 """
@@ -13,7 +13,7 @@ import traceback
 from dataclasses import asdict, is_dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, Optional, List
 
 from dotenv import load_dotenv
 
@@ -170,10 +170,25 @@ def run_tradingagents(
             config_path=config_path,
             config_overrides=config_overrides,
         )
-        graph = TradingAgentsGraph(
-            debug=False,
-            config=config,
-        )
+
+        selected_analysts_override = config.get("selected_analysts")
+        analysts_list: Optional[List[str]] = None
+        if isinstance(selected_analysts_override, list):
+            typed_values = [value for value in selected_analysts_override if isinstance(value, str)]
+            if typed_values:
+                analysts_list = typed_values
+
+        if analysts_list:
+            graph = TradingAgentsGraph(
+                selected_analysts=analysts_list,
+                debug=False,
+                config=config,
+            )
+        else:
+            graph = TradingAgentsGraph(
+                debug=False,
+                config=config,
+            )
 
         emitter(
             "progress",

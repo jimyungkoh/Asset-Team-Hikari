@@ -1,6 +1,6 @@
 <!-- ============================================================
 Modified: See CHANGELOG.md for complete modification history
-Last Updated: 2025-10-24
+Last Updated: 2025-10-27
 Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 ============================================================ -->
 
@@ -20,7 +20,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### web/ (root-level)
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>  
-**Last Updated**: 2025-10-24
+**Last Updated**: 2025-10-27
+
+#### [1.2] - 2025-10-27 - Design System & CLI Parity UI
+
+- **Added**: Finance-focused design 시스템(`web/lib/design-system.ts`)과 페이지 셸/섹션/메트릭 컴포넌트로 일관된 레이아웃을 구축.
+- **Changed**: 홈 런처 페이지를 현대적인 금융 대시보드 스타일로 개편하고, CLI 선택지(애널리스트·연구 심도·LLM 스택)를 그대로 반영한 RunForm으로 교체.
+- **Changed**: Apple Human Interface Guidelines 원칙을 적용해 밝은 톤, 여백 중심의 UI로 재구성하고 핵심 상호작용을 명료하게 정리.
+- **Added**: 향후 DB 영속화를 고려한 `metadata` 구성 및 구성 미리보기 패널을 제공하여 운영 투명성 확보.
+- **Changed**: Node.js 엔진 요구 버전을 최신 LTS(>=20.11.0)로 상향해 lint/build 명령이 Next.js 요구사항과 일치하도록 조정.
+- **Note**: OpenRouter Thinking Mode, 모델 선택, 추가 JSON override 등 CLI 가용 기능을 전면 지원.
 
 #### [1.1] - 2025-10-24 - Tailwind 4 & Root Layout Alignment
 
@@ -42,7 +51,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### server/ (root-level)
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>  
-**Last Updated**: 2025-10-24
+**Last Updated**: 2025-10-27
+
+#### [1.2] - 2025-10-27 - Node LTS Alignment
+
+- **Changed**: `package.json`의 Node.js 엔진 범위를 최신 LTS(>=20.11.0)로 고정해 NestJS 개발 서버와 빌드 단계가 동일한 런타임을 사용하도록 통일.
 
 #### [1.1] - 2025-10-24 - Dependency Refresh & Root Relocation
 
@@ -64,7 +77,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### tradingagents/runner/run_graph.py
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>  
-**Last Updated**: 2025-10-24
+**Last Updated**: 2025-10-27
+
+#### [1.1] - 2025-10-27 - Selected Analysts Config Bridge
+
+- **Added**: `selected_analysts` 목록을 config override에서 추출해 TradingAgentsGraph 초기화 시 전달, 웹 UI와 CLI 간 에이전트 선택 기능을 정렬.
+- **Note**: 리스트가 비어있거나 문자열이 아닐 경우 기존 기본값을 그대로 유지해 역호환성 보장.
 
 #### [1.0] - 2025-10-24 - JSONL Runner Wrapper
 
