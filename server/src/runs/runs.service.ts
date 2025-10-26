@@ -1,17 +1,15 @@
 // ============================================================
 // Modified: See CHANGELOG.md for complete modification history
-// Last Updated: 2025-10-24
+// Last Updated: 2025-10-27
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { MessageEvent } from '@nestjs/common/interfaces';
-import { spawn } from 'child_process';
-import { randomUUID } from 'crypto';
-import { resolve } from 'path';
 import { Observable, ReplaySubject } from 'rxjs';
 
 import { CreateRunDto } from './dto/create-run.dto';
+import { PythonRunsClient, PythonRunEvent, PythonRunStatusResponse } from './python-runs.client';
 import { RunStatus, RunSummary } from './run.types';
 
 interface RunContext {
@@ -27,50 +25,58 @@ interface RunContext {
     message: string;
     traceback?: string;
   };
+  streamActive: boolean;
+  stopStream?: () => void;
 }
+
+const TERMINAL_STATUSES = new Set<RunStatus>(['success', 'failed']);
 
 @Injectable()
 export class RunsService {
   private readonly logger = new Logger(RunsService.name);
   private readonly runs = new Map<string, RunContext>();
-  private readonly stdoutBuffers = new Map<string, string>();
 
-  startRun(dto: CreateRunDto): RunSummary {
-    const id = randomUUID();
+  constructor(private readonly pythonRunsClient: PythonRunsClient) {}
+
+  async startRun(dto: CreateRunDto): Promise<RunSummary> {
     const now = new Date();
+    const createResponse = await this.pythonRunsClient.createRun(dto);
+    const id = createResponse.id;
 
-    const subject = new ReplaySubject<MessageEvent>(50);
-    const context: RunContext = {
-      id,
-      ticker: dto.ticker,
-      tradeDate: dto.tradeDate,
-      status: 'pending',
-      createdAt: now,
-      updatedAt: now,
-      subject,
-    };
+    let context = this.runs.get(id);
+    if (!context) {
+      context = {
+        id,
+        ticker: dto.ticker,
+        tradeDate: dto.tradeDate,
+        status: this.mapRemoteStatus(createResponse.status),
+        createdAt: now,
+        updatedAt: now,
+        subject: new ReplaySubject<MessageEvent>(50),
+        streamActive: false,
+      };
+      this.runs.set(id, context);
+    } else {
+      context.ticker = dto.ticker;
+      context.tradeDate = dto.tradeDate;
+      context.status = this.mapRemoteStatus(createResponse.status);
+      context.updatedAt = now;
+    }
 
-    this.runs.set(id, context);
-    subject.next({
-      data: {
-        event: 'created',
-        runId: id,
-        status: context.status,
-        timestamp: now.toISOString(),
-      },
+    this.emit(context, {
+      event: 'created',
+      runId: id,
+      status: context.status,
+      timestamp: now.toISOString(),
     });
 
-    this.launchRunProcess(context, dto);
+    this.ensureRemoteStream(context);
 
     return this.toSummary(context);
   }
 
-  getRun(id: string): RunSummary {
-    const context = this.runs.get(id);
-    if (!context) {
-      throw new NotFoundException(`Run ${id} was not found`);
-    }
-
+  async getRun(id: string): Promise<RunSummary> {
+    const context = await this.hydrateFromRemote(id);
     return this.toSummary(context);
   }
 
@@ -79,6 +85,8 @@ export class RunsService {
     if (!context) {
       throw new NotFoundException(`Run ${id} was not found`);
     }
+
+    this.ensureRemoteStream(context);
     return context.subject.asObservable();
   }
 
@@ -95,181 +103,206 @@ export class RunsService {
     };
   }
 
-  private launchRunProcess(context: RunContext, dto: CreateRunDto): void {
-    const repoRoot = process.env.PROJECT_ROOT
-      ? resolve(process.env.PROJECT_ROOT)
-      : resolve(process.cwd(), '../TradingAgents');
-    const runnerPath = process.env.PYTHON_RUNNER_PATH
-      ? resolve(process.env.PYTHON_RUNNER_PATH)
-      : resolve(repoRoot, 'tradingagents/runner/run_graph.py');
-    const pythonBin = process.env.PYTHON_BIN ?? 'python3';
-
-    const args = [runnerPath, '--ticker', dto.ticker, '--date', dto.tradeDate];
-    if (dto.config) {
-      args.push('--config', JSON.stringify(dto.config));
+  private ensureRemoteStream(context: RunContext): void {
+    if (TERMINAL_STATUSES.has(context.status) || context.streamActive) {
+      return;
     }
 
-    this.logger.log(`Starting run ${context.id} for ${dto.ticker} on ${dto.tradeDate}`);
+    context.stopStream?.();
+    context.streamActive = true;
 
-    const child = spawn(pythonBin, args, {
-      cwd: repoRoot,
-      env: {
-        ...process.env,
-        PYTHONUNBUFFERED: '1',
-      },
-      stdio: ['ignore', 'pipe', 'pipe'],
+    context.stopStream = this.pythonRunsClient.streamRun(context.id, {
+      onEvent: (event) => this.handleRemoteEvent(context, event),
+      onError: (error) => this.handleRemoteError(context, error),
+      onClose: () => this.handleRemoteClose(context),
     });
+  }
 
-    context.status = 'running';
-    context.updatedAt = new Date();
-    context.subject.next({
-      data: {
-        event: 'spawned',
+  private handleRemoteEvent(context: RunContext, event: PythonRunEvent): void {
+    const timestamp = event.timestamp ?? new Date().toISOString();
+    const payload = event.payload ?? {};
+
+    if (event.event === 'status') {
+      const stateValue = typeof payload.state === 'string' ? payload.state : undefined;
+      if (stateValue) {
+        context.status = this.mapRemoteStatus(stateValue);
+      }
+
+      context.updatedAt = this.safeDate(timestamp);
+
+      if (payload.result !== undefined) {
+        context.result = payload.result;
+      }
+
+      if (payload.error) {
+        context.error = {
+          message: String(payload.error),
+        };
+      } else if (context.status !== 'failed') {
+        context.error = undefined;
+      }
+
+      this.emit(context, {
+        event: 'status',
         runId: context.id,
         status: context.status,
-        timestamp: context.updatedAt.toISOString(),
-      },
-    });
-
-    child.stdout.setEncoding('utf8');
-    child.stdout.on('data', (chunk: string) => {
-      this.handleStdout(context, chunk);
-    });
-
-    child.stderr.setEncoding('utf8');
-    child.stderr.on('data', (chunk: string) => {
-      const message = chunk.trim();
-      if (message) {
-        this.logger.warn(`[${context.id}] ${message}`);
-        context.subject.next({
-          data: {
-            event: 'stderr',
-            runId: context.id,
-            message,
-            timestamp: new Date().toISOString(),
-          },
-        });
-      }
-    });
-
-    child.on('close', (code) => {
-      this.logger.log(`Run ${context.id} closed with code ${code}`);
-      if (context.status === 'running') {
-        if (code === 0) {
-          context.status = 'success';
-        } else {
-          context.status = 'failed';
-          if (!context.error) {
-            context.error = {
-              message: `Process exited with code ${code}`,
-            };
-          }
-        }
-        context.updatedAt = new Date();
-        context.subject.next({
-          data: {
-            event: 'terminated',
-            runId: context.id,
-            status: context.status,
-            exitCode: code,
-            timestamp: context.updatedAt.toISOString(),
-          },
-        });
-        context.subject.complete();
-      }
-    });
-
-    child.on('error', (error) => {
-      this.logger.error(`Failed to start python process for run ${context.id}`, error);
-      context.status = 'failed';
-      context.error = {
-        message: error.message,
-      };
-      context.updatedAt = new Date();
-      context.subject.next({
-        data: {
-          event: 'error',
-          runId: context.id,
-          message: error.message,
-          timestamp: context.updatedAt.toISOString(),
-        },
+        payload,
+        timestamp,
       });
-      context.subject.complete();
-    });
-  }
 
-  private handleStdout(context: RunContext, chunk: string): void {
-    const buffer = (this.stdoutBuffers.get(context.id) ?? '') + chunk;
-    const lines = buffer.split('\n');
-    const remainder = lines.pop() ?? '';
-    this.stdoutBuffers.set(context.id, remainder);
-
-    for (const line of lines) {
-      const trimmed = line.trim();
-      if (!trimmed) {
-        continue;
+      if (TERMINAL_STATUSES.has(context.status)) {
+        void this.hydrateFromRemote(context.id)
+          .catch((error) => {
+            this.logger.error(`Failed to hydrate completed run ${context.id}`, error);
+          })
+          .finally(() => {
+            this.complete(context);
+          });
       }
-      this.dispatchPythonEvent(context, trimmed);
-    }
-  }
 
-  private dispatchPythonEvent(context: RunContext, rawLine: string): void {
-    let payload: Record<string, unknown> = {};
-    try {
-      payload = JSON.parse(rawLine);
-    } catch (error) {
-      this.logger.error(`Failed to parse runner output for run ${context.id}: ${rawLine}`, error as Error);
-      context.subject.next({
-        data: {
-          event: 'parse_error',
-          runId: context.id,
-          raw: rawLine,
-          timestamp: new Date().toISOString(),
-        },
-      });
       return;
     }
 
-    const event: Record<string, unknown> = {
+    this.emit(context, {
+      event: event.event ?? 'message',
       runId: context.id,
-      ...payload,
-    };
-    const timestamp = new Date().toISOString();
-    if (typeof event.timestamp !== 'string') {
-      event.timestamp = timestamp;
-    }
-
-    if (event['event'] === 'complete') {
-      context.status = 'success';
-      context.result = event['result'];
-      context.updatedAt = new Date();
-      event.status = context.status;
-      context.subject.next({
-        data: event,
-      });
-      context.subject.complete();
-      return;
-    }
-
-    if (event['event'] === 'error') {
-      context.status = 'failed';
-      context.error = {
-        message: typeof event['message'] === 'string' ? (event['message'] as string) : 'Runner error',
-        traceback: typeof event['traceback'] === 'string' ? (event['traceback'] as string) : undefined,
-      };
-      context.updatedAt = new Date();
-      event.status = context.status;
-      context.subject.next({
-        data: event,
-      });
-      context.subject.complete();
-      return;
-    }
-
-    context.updatedAt = new Date();
-    event.status = context.status;
-    context.subject.next({
-      data: event,
+      payload,
+      timestamp,
     });
+  }
+
+  private handleRemoteError(context: RunContext, error: Error): void {
+    this.logger.error(`Python stream error for run ${context.id}`, error);
+
+    if (TERMINAL_STATUSES.has(context.status)) {
+      return;
+    }
+
+    this.emit(context, {
+      event: 'error',
+      runId: context.id,
+      message: error.message,
+      timestamp: new Date().toISOString(),
+    });
+
+    context.streamActive = false;
+
+    const retry = setTimeout(() => {
+      this.ensureRemoteStream(context);
+    }, 1000);
+
+    if (typeof (retry as NodeJS.Timeout).unref === 'function') {
+      (retry as NodeJS.Timeout).unref();
+    }
+  }
+
+  private handleRemoteClose(context: RunContext): void {
+    if (TERMINAL_STATUSES.has(context.status)) {
+      this.complete(context);
+      return;
+    }
+
+    this.logger.warn(`Python stream closed for run ${context.id}, retrying connection`);
+    context.streamActive = false;
+
+    const retry = setTimeout(() => {
+      this.ensureRemoteStream(context);
+    }, 1000);
+
+    if (typeof (retry as NodeJS.Timeout).unref === 'function') {
+      (retry as NodeJS.Timeout).unref();
+    }
+  }
+
+  private async hydrateFromRemote(id: string): Promise<RunContext> {
+    let remote: PythonRunStatusResponse;
+    try {
+      remote = await this.pythonRunsClient.getRun(id);
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('status 404')) {
+        throw new NotFoundException(`Run ${id} was not found on the Python service`);
+      }
+
+      this.logger.error(`Failed to fetch run ${id} from Python service`, error as Error);
+
+      const existing = this.runs.get(id);
+      if (existing) {
+        return existing;
+      }
+
+      throw error;
+    }
+
+    const context = this.getOrCreateContext(remote);
+    this.updateContextFromRemote(context, remote);
+    return context;
+  }
+
+  private getOrCreateContext(remote: PythonRunStatusResponse): RunContext {
+    let context = this.runs.get(remote.id);
+    if (!context) {
+      context = {
+        id: remote.id,
+        ticker: remote.ticker,
+        tradeDate: remote.trade_date,
+        status: this.mapRemoteStatus(remote.status),
+        createdAt: this.safeDate(remote.created_at),
+        updatedAt: this.safeDate(remote.updated_at),
+        subject: new ReplaySubject<MessageEvent>(50),
+        streamActive: false,
+      };
+      this.runs.set(remote.id, context);
+    }
+    return context;
+  }
+
+  private updateContextFromRemote(context: RunContext, remote: PythonRunStatusResponse): void {
+    context.ticker = remote.ticker;
+    context.tradeDate = remote.trade_date;
+    context.status = this.mapRemoteStatus(remote.status);
+    context.createdAt = this.safeDate(remote.created_at);
+    context.updatedAt = this.safeDate(remote.updated_at);
+    context.result = remote.result;
+    context.error = remote.error ? { message: remote.error } : undefined;
+  }
+
+  private mapRemoteStatus(status: string | undefined): RunStatus {
+    switch ((status ?? '').toLowerCase()) {
+      case 'running':
+        return 'running';
+      case 'success':
+        return 'success';
+      case 'failed':
+        return 'failed';
+      default:
+        return 'pending';
+    }
+  }
+
+  private emit(context: RunContext, data: Record<string, unknown>): void {
+    context.subject.next({ data });
+  }
+
+  private complete(context: RunContext): void {
+    context.stopStream?.();
+    context.stopStream = undefined;
+    context.streamActive = false;
+
+    if (!context.subject.closed) {
+      context.subject.complete();
+    }
+  }
+
+  private safeDate(value: string | undefined): Date {
+    if (!value) {
+      return new Date();
+    }
+
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) {
+      return new Date();
+    }
+
+    return parsed;
   }
 }

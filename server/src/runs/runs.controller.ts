@@ -1,6 +1,6 @@
 // ============================================================
 // Modified: See CHANGELOG.md for complete modification history
-// Last Updated: 2025-10-24
+// Last Updated: 2025-10-27
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
@@ -21,20 +21,20 @@ export class RunsController {
   ) {}
 
   @Post()
-  createRun(
+  async createRun(
     @Headers('x-internal-token') token: string | undefined,
     @Body() body: CreateRunDto,
-  ): { id: string } {
+  ): Promise<{ id: string }> {
     this.authService.verify(token);
-    const run = this.runsService.startRun(body);
+    const run = await this.runsService.startRun(body);
     return { id: run.id };
   }
 
   @Get(':id')
-  getRun(
+  async getRun(
     @Headers('x-internal-token') token: string | undefined,
     @Param('id') id: string,
-  ): RunSummary {
+  ): Promise<RunSummary> {
     this.authService.verify(token);
     return this.runsService.getRun(id);
   }
