@@ -4,12 +4,13 @@
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
-import { Module } from '@nestjs/common';
+import { Global, Module } from "@nestjs/common";
 
-import { InfrastructureModule } from './infrastructure/infrastructure.module';
-import { RunsModule } from './runs/runs.module';
+import { DynamoDbService } from "./dynamodb/dynamodb.service";
 
+@Global()
 @Module({
-  imports: [InfrastructureModule, RunsModule],
+  providers: [DynamoDbService],
+  exports: [DynamoDbService],
 })
-export class AppModule {}
+export class InfrastructureModule {}

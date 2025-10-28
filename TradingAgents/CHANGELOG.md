@@ -22,6 +22,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
 **Last Updated**: 2025-10-26
 
+#### [1.4] - 2025-10-29 - Streaming Support Implementation
+
+- **Added**: 실시간 스트리밍을 위한 `_StreamAggregator` 클래스 및 `_stringify_content` 헬퍼 함수 구현
+- **Added**: Server-Sent Events(SSE) 지원을 위한 그래프 스트리밍 로직 추가
+- **Added**: 투자 토론 및 리스크 토론 상태 실시간 업데이트 기능
+- **Added**: 보고서 섹션별 스트리밍 업데이트 지원 (_REPORT_SECTIONS 상수 추가)
+- **Changed**: run_tradingagents 함수에서 그래프 실행을 스트리밍 모드로 전환하여 실시간 이벤트 발행
+- **Changed**: 최종 거래 결정 텍스트 처리 및 직렬화 로직 개선
+
+**Impact**: 🟡 Medium
+
 #### [1.3] - 2025-10-26 - Core System Improvements
 
 - **Added**: TradingAgents/main.py에 Apache License compliance header 추가 및 cleanup() 호출을 위한 try/finally 블록 구현
@@ -38,6 +49,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
 **Last Updated**: 2025-10-26
 
+#### [1.2] - 2025-10-28 - DynamoDB Infrastructure Integration
+
+- **Added**: AWS SDK DynamoDB 의존성 추가 (@aws-sdk/client-dynamodb, @aws-sdk/lib-dynamodb)
+- **Added**: InfrastructureModule 생성 및 AppModule에 통합
+- **Added**: DynamoDB 서비스 구현 (dynamodb.service.ts)
+- **Added**: 환경변수 설정 파일 (.env.example) 생성 (AWS 설정, DynamoDB 설정 포함)
+- **Changed**: app.module.ts에서 InfrastructureModule 임포트 및 설정
+
+**Impact**: 🟡 Medium
+
 #### [1.1] - 2025-10-26 - API Service Updates
 
 - **Changed**: Python 실행 클라이언트, 컨트롤러, 모듈, 서비스 파일들에서 타입 정의 및 인터페이스 개선
@@ -48,6 +69,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
 **Last Updated**: 2025-10-26
+
+#### [1.4] - 2025-10-29 - Streaming UI Implementation
+
+- **Added**: RunStream 컴포넌트에 실시간 스트리밍 이벤트 처리 기능 구현
+- **Added**: 보고서 섹션별 실시간 업데이트 표시 UI 추가 (시장 분석, 뉴스 분석 등)
+- **Added**: 스트리밍 메시지에서 발신자/역할 정보 표시 기능
+- **Added**: 투자 토론 및 리스크 토론 상태 실시간 표시
+- **Changed**: UI_REDESIGN.md에서 코드 블록 포맷팅 및 문서 구조 개선
+- **Changed**: RunStream 컴포넌트에서 이벤트 정규화 및 페이로드 처리 로직 강화
+
+**Impact**: 🟡 Medium
 
 #### [1.3] - 2025-10-26 - UI Component Refinements
 

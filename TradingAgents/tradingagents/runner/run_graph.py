@@ -1,7 +1,7 @@
 """
 # ============================================================
 # Modified: See CHANGELOG.md for complete modification history
-# Last Updated: 2025-10-26
+# Last Updated: 2025-10-29
 # Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 # ============================================================
 """
@@ -13,7 +13,7 @@ import traceback
 from dataclasses import asdict, is_dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional, List
+from typing import Any, Callable, Dict, Optional, List, Tuple
 
 from dotenv import load_dotenv
 
@@ -94,6 +94,147 @@ def _to_serializable(value: Any) -> Any:
     if is_dataclass(value):
         return _to_serializable(asdict(value))
     return str(value)
+
+
+def _stringify_content(content: Any, *, separator: str = "\n\n") -> str:
+    """Convert mixed structured content into a printable string."""
+    if content is None:
+        return ""
+
+    if isinstance(content, str):
+        return content
+
+    if isinstance(content, (int, float, bool)):
+        return str(content)
+
+    if isinstance(content, dict):
+        if "text" in content:
+            return _stringify_content(content["text"], separator=separator)
+        if "content" in content:
+            return _stringify_content(content["content"], separator=separator)
+        return json.dumps(content, ensure_ascii=False)
+
+    if isinstance(content, (list, tuple, set)):
+        parts: List[str] = []
+        for item in content:
+            normalized = _stringify_content(item, separator=separator)
+            if normalized:
+                parts.append(normalized)
+        return separator.join(parts)
+
+    return str(content)
+
+
+_REPORT_SECTIONS: Tuple[str, ...] = (
+    "market_report",
+    "sentiment_report",
+    "news_report",
+    "fundamentals_report",
+    "investment_plan",
+    "trader_investment_plan",
+    "final_trade_decision",
+)
+
+
+class _StreamAggregator:
+    """Aggregate streaming updates for SSE consumers."""
+
+    def __init__(self) -> None:
+        self.reports: Dict[str, str] = {}
+        self.messages: List[Dict[str, Any]] = []
+        self.latest_state: Optional[Dict[str, Any]] = None
+        self._last_message_signature: Optional[Tuple[str, str]] = None
+        self._last_invest_state: Optional[str] = None
+        self._last_risk_state: Optional[str] = None
+
+    def process_chunk(self, chunk: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """Process a graph chunk and return a payload for emission if changed."""
+        self.latest_state = chunk
+        payload: Dict[str, Any] = {}
+
+        message_info = self._extract_message(chunk)
+        if message_info is not None:
+            payload["message"] = message_info
+            self.messages.append(message_info)
+
+        report_updates = self._extract_reports(chunk)
+        if report_updates:
+            payload["reports"] = report_updates
+
+        invest_state = chunk.get("investment_debate_state")
+        if isinstance(invest_state, dict):
+            serializable = _to_serializable(invest_state)
+            digest = json.dumps(serializable, sort_keys=True)
+            if digest != self._last_invest_state:
+                payload["investment_debate_state"] = serializable
+                self._last_invest_state = digest
+
+        risk_state = chunk.get("risk_debate_state")
+        if isinstance(risk_state, dict):
+            serializable = _to_serializable(risk_state)
+            digest = json.dumps(serializable, sort_keys=True)
+            if digest != self._last_risk_state:
+                payload["risk_debate_state"] = serializable
+                self._last_risk_state = digest
+
+        return payload or None
+
+    def _extract_message(self, chunk: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        messages = chunk.get("messages")
+        if not isinstance(messages, list) or not messages:
+            return None
+
+        last_message = messages[-1]
+        content = _stringify_content(getattr(last_message, "content", last_message)).strip()
+        if not content:
+            return None
+
+        role = getattr(last_message, "type", None)
+        sender = getattr(last_message, "name", None) or getattr(last_message, "sender", None)
+        signature = (role or "", content)
+        if signature == self._last_message_signature:
+            return None
+
+        self._last_message_signature = signature
+
+        tool_calls_payload: List[Dict[str, Any]] = []
+        tool_calls = getattr(last_message, "tool_calls", None)
+        if isinstance(tool_calls, list):
+            for call in tool_calls:
+                if isinstance(call, dict):
+                    name = str(call.get("name", ""))
+                    args = _to_serializable(call.get("args"))
+                else:
+                    name = str(getattr(call, "name", "") or getattr(call, "id", ""))
+                    args = _to_serializable(getattr(call, "args", None))
+                tool_calls_payload.append({"name": name, "args": args})
+
+        message_payload: Dict[str, Any] = {
+            "timestamp": datetime.utcnow().isoformat(),
+            "content": content,
+        }
+        if sender:
+            message_payload["sender"] = sender
+        if role:
+            message_payload["role"] = role
+        if tool_calls_payload:
+            message_payload["tool_calls"] = tool_calls_payload
+
+        return message_payload
+
+    def _extract_reports(self, chunk: Dict[str, Any]) -> Dict[str, str]:
+        updates: Dict[str, str] = {}
+        for section in _REPORT_SECTIONS:
+            if section not in chunk:
+                continue
+            normalized = _stringify_content(chunk.get(section)).strip()
+            if not normalized:
+                continue
+            if self.reports.get(section) == normalized:
+                continue
+            self.reports[section] = normalized
+            updates[section] = normalized
+        return updates
 
 
 def _build_result_payload(
@@ -179,6 +320,8 @@ def run_tradingagents(
                 analysts_list = typed_values
 
         graph: Optional[TradingAgentsGraph] = None
+        final_state: Optional[Dict[str, Any]] = None
+        decision: Any = None
         try:
             if analysts_list:
                 graph = TradingAgentsGraph(
@@ -198,10 +341,41 @@ def run_tradingagents(
                 percent=25,
             )
 
-            final_state, decision = graph.propagate(ticker, trade_date)
+            aggregator = _StreamAggregator()
+
+            graph.ticker = ticker
+            initial_state = graph.propagator.create_initial_state(ticker, trade_date)
+            graph_args = graph.propagator.get_graph_args()
+
+            for chunk in graph.graph.stream(initial_state, **graph_args):
+                final_state = chunk
+                stream_payload = aggregator.process_chunk(chunk)
+                if stream_payload:
+                    emitter("state", **stream_payload)
+
+            if final_state is None:
+                raise RuntimeError("TradingAgents graph produced no state during propagation.")
+
+            graph.curr_state = final_state
+            graph._log_state(trade_date, final_state)
+
+            final_trade_decision_raw = final_state.get("final_trade_decision")
+            if isinstance(final_trade_decision_raw, str):
+                final_trade_decision_text = final_trade_decision_raw.strip()
+            else:
+                final_trade_decision_text = _stringify_content(final_trade_decision_raw).strip()
+
+            if not final_trade_decision_text:
+                raise RuntimeError("TradingAgents graph did not produce a final trade decision.")
+
+            final_state["final_trade_decision"] = final_trade_decision_text
+            decision = graph.process_signal(final_trade_decision_text)
         finally:
             if graph is not None:
                 graph.cleanup()
+
+        if final_state is None or decision is None:
+            raise RuntimeError("TradingAgents graph did not complete successfully.")
 
         emitter(
             "progress",

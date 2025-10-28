@@ -1,6 +1,6 @@
 // ============================================================
 // Modified: See CHANGELOG.md for complete modification history
-// Last Updated: 2025-10-24
+// Last Updated: 2025-10-29
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
@@ -47,10 +47,93 @@ interface RunEvent {
   result?: JsonValue;
   timestamp?: string;
   traceback?: string;
+  payload?: Record<string, JsonValue>;
 }
 
 interface RunStreamProps {
   run: RunSummary;
+}
+
+const SECTION_LABELS: Record<string, string> = {
+  market_report: "시장 분석",
+  sentiment_report: "소셜 정서",
+  news_report: "뉴스 분석",
+  fundamentals_report: "펀더멘털 분석",
+  investment_plan: "투자 계획",
+  trader_investment_plan: "트레이더 전략",
+  final_trade_decision: "포트폴리오 결론",
+};
+
+function asObject(
+  value: JsonValue | undefined | null
+): Record<string, JsonValue> | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return null;
+  }
+  return value as Record<string, JsonValue>;
+}
+
+function coerceReportSections(
+  source: JsonValue | undefined | null
+): Record<string, string> {
+  const sections: Record<string, string> = {};
+  const top = asObject(source);
+  const reports = top ? asObject(top["reports"]) : null;
+  if (!reports) {
+    return sections;
+  }
+  for (const [key, value] of Object.entries(reports)) {
+    if (typeof value === "string" && value.trim().length > 0) {
+      sections[key] = value;
+    }
+  }
+  return sections;
+}
+
+function extractStreamMessage(
+  payload?: Record<string, JsonValue>
+): {
+  sender?: string;
+  role?: string;
+  content?: string;
+  timestamp?: string;
+  toolCalls?: JsonValue;
+} | null {
+  if (!payload) {
+    return null;
+  }
+  const message = asObject(payload["message"]);
+  if (!message) {
+    return null;
+  }
+
+  const toolCalls = message["tool_calls"];
+  return {
+    sender: typeof message["sender"] === "string" ? (message["sender"] as string) : undefined,
+    role: typeof message["role"] === "string" ? (message["role"] as string) : undefined,
+    content: typeof message["content"] === "string" ? (message["content"] as string) : undefined,
+    timestamp:
+      typeof message["timestamp"] === "string" ? (message["timestamp"] as string) : undefined,
+    toolCalls:
+      Array.isArray(toolCalls) || (typeof toolCalls === "object" && toolCalls !== null)
+        ? (toolCalls as JsonValue)
+        : undefined,
+  };
+}
+
+function normalizeStreamEvent(raw: RunEvent): RunEvent {
+  if (raw.event !== "state") {
+    return raw;
+  }
+
+  const payload = raw.payload ? raw.payload : undefined;
+  const messageDetails = payload ? extractStreamMessage(payload) : null;
+
+  return {
+    ...raw,
+    message: messageDetails?.content ?? raw.message,
+    timestamp: messageDetails?.timestamp ?? raw.timestamp,
+  };
 }
 
 export function RunStream({ run }: RunStreamProps): JSX.Element {
@@ -59,6 +142,9 @@ export function RunStream({ run }: RunStreamProps): JSX.Element {
     run.status === "success" ? 100 : 5
   );
   const [logs, setLogs] = useState<RunEvent[]>([]);
+  const [reportSections, setReportSections] = useState<Record<string, string>>(
+    () => coerceReportSections(run.result ?? null)
+  );
   const [result, setResult] = useState<JsonValue | null>(run.result ?? null);
   const [error, setError] = useState<RunError | null>(run.error ?? null);
   const [connected, setConnected] = useState(false);
@@ -74,41 +160,62 @@ export function RunStream({ run }: RunStreamProps): JSX.Element {
 
     source.onmessage = (event: MessageEvent<string>) => {
       try {
-        const payload: RunEvent = JSON.parse(event.data);
-        setLogs((prev) => [...prev, payload]);
+        const raw: RunEvent = JSON.parse(event.data);
+        const normalized = normalizeStreamEvent(raw);
 
-        if (typeof payload.percent === "number") {
-          setProgress(payload.percent);
+        setLogs((prev) => [...prev, normalized]);
+
+        if (typeof normalized.percent === "number") {
+          setProgress(normalized.percent);
         }
 
-        if (typeof payload.status === "string") {
-          setStatus(payload.status as RunStatus);
+        if (typeof normalized.status === "string") {
+          setStatus(normalized.status as RunStatus);
         }
 
-        if (typeof payload.timestamp === "string") {
-          setUpdatedAt(payload.timestamp);
+        if (typeof normalized.timestamp === "string") {
+          setUpdatedAt(normalized.timestamp);
         } else {
           setUpdatedAt(new Date().toISOString());
         }
 
-        if (
-          payload.event === "complete" &&
-          typeof payload.result !== "undefined"
-        ) {
-          setStatus("success");
-          setResult(payload.result);
+        if (raw.event === "state" && raw.payload) {
+          const reportUpdates = asObject(raw.payload["reports"]);
+          if (reportUpdates) {
+            setReportSections((prev) => {
+              let changed = false;
+              const next = { ...prev };
+              for (const [key, value] of Object.entries(reportUpdates)) {
+                if (typeof value === "string" && value.trim().length > 0) {
+                  if (next[key] !== value) {
+                    next[key] = value;
+                    changed = true;
+                  }
+                }
+              }
+              return changed ? next : prev;
+            });
+          }
         }
 
-        if (payload.event === "error") {
+        if (normalized.event === "complete" && typeof normalized.result !== "undefined") {
+          setStatus("success");
+          setResult(normalized.result);
+          setReportSections(coerceReportSections(normalized.result));
+        }
+
+        if (normalized.event === "error") {
           setStatus("failed");
           setError({
             message:
-              typeof payload.message === "string"
-                ? payload.message
+              typeof normalized.message === "string"
+                ? normalized.message
                 : "Runner reported error",
             traceback:
-              typeof payload.traceback === "string"
-                ? payload.traceback
+              typeof normalized.traceback === "string"
+                ? normalized.traceback
+                : typeof raw.traceback === "string"
+                ? raw.traceback
                 : undefined,
           });
         }
@@ -204,6 +311,9 @@ export function RunStream({ run }: RunStreamProps): JSX.Element {
           ) : (
             logs.map((event, index) => {
               const typedEvent = event as RunEvent;
+              const messageDetails = extractStreamMessage(
+                typedEvent.payload
+              );
               return (
                 <div
                   key={`${String(typedEvent.event ?? "unknown")}-${index}`}
@@ -228,6 +338,15 @@ export function RunStream({ run }: RunStreamProps): JSX.Element {
                         : new Date().toLocaleTimeString()}
                     </span>
                   </div>
+                  {messageDetails &&
+                    (messageDetails.sender || messageDetails.role) && (
+                      <p className="text-xs text-slate-500">
+                        {messageDetails.sender ?? messageDetails.role}
+                        {messageDetails.sender && messageDetails.role
+                          ? ` · ${messageDetails.role}`
+                          : ""}
+                      </p>
+                    )}
                   {typedEvent.message &&
                     typeof typedEvent.message === "string" && (
                       <p className="text-sm text-slate-700 leading-relaxed">
@@ -243,8 +362,29 @@ export function RunStream({ run }: RunStreamProps): JSX.Element {
               );
             })
           )}
-        </div>
       </div>
+    </div>
+
+      {Object.keys(reportSections).length > 0 && (
+        <div className="glass rounded-2xl p-8 space-y-6">
+          <h3 className="text-lg font-bold text-slate-900">📑 리포트 스냅샷</h3>
+          <div className="space-y-6">
+            {Object.entries(reportSections).map(([key, value]) => {
+              const label = SECTION_LABELS[key] ?? key;
+              return (
+                <div key={key} className="space-y-2">
+                  <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    {label}
+                  </div>
+                  <div className="whitespace-pre-wrap rounded-xl bg-white/60 border border-white/40 p-4 text-sm leading-relaxed text-slate-700 shadow-inner">
+                    {value}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Error Card */}
       {error && (
