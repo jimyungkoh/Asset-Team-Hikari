@@ -20,17 +20,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### TradingAgents/ (Python Core)
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
-**Last Updated**: 2025-10-30
-
-#### [1.4] - 2025-10-30 - News Data Vendor Enhancement
-
-- **Changed**: `default_config.py`에서 `news_data` 기본값을 `alpha_vantage,gemini`로 변경하여 Gemini 뉴스 소스 추가
-
-**Impact**: 🟢 Low
-
-### TradingAgents/ (Python Core)
-
-**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
 **Last Updated**: 2025-10-26
 
 #### [1.3] - 2025-10-26 - Core System Improvements
@@ -47,21 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### server/ (NestJS API)
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
-**Last Updated**: 2025-10-30
-
-#### [1.3] - 2025-10-30 - DynamoDB Artifacts Management & Supabase Auth
-
-- **Added**: DynamoDB 기반 아티팩트 관리 시스템 구현 (`ArtifactsService`, `TickerArtifactDto`, `TickerRunSummaryDto`)
-- **Added**: Supabase 기반 데이터베이스 서비스 구현 (`DatabaseService`) - 이메일 허용 목록 및 티커 실행 이력 관리
-- **Added**: 인증 모듈 구현 (`AuthModule`, `AuthController`, `AuthService`) - 이메일 기반 접근 제어
-- **Added**: `RunsController`에 티커 및 실행 날짜 조회 엔드포인트 추가 (`GET /runs/tickers`, `GET /runs/:ticker/dates`)
-- **Changed**: `DynamoDbService`에 테이블 생성, 쿼리, 업데이트 기능 확장
-- **Changed**: `InfrastructureModule`에 `DatabaseService` 추가 및 글로벌 모듈로 설정
-- **Changed**: `RunsModule`에 `ArtifactsService` 추가
-- **Changed**: `package.json`에 `@supabase/supabase-js`, `drizzle-orm` 의존성 추가
-- **Changed**: `.env.example`에 Supabase 및 DynamoDB 설정 환경 변수 문서화
-
-**Impact**: 🟡 Medium
+**Last Updated**: 2025-10-26
 
 #### [1.1] - 2025-10-26 - API Service Updates
 
@@ -72,13 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### web/ (Next.js UI)
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
-**Last Updated**: 2025-10-30
-
-#### [1.4] - 2025-10-30 - Server-Side Email Verification
-
-- **Changed**: `auth.config.ts`에서 서버 API를 통한 이메일 검증 로직 구현 - `isEmailAllowed()` 함수가 NestJS `/auth/verify-email` 엔드포인트 호출
-
-**Impact**: 🟢 Low
+**Last Updated**: 2025-10-26
 
 #### [1.3] - 2025-10-26 - UI Component Refinements
 
@@ -424,13 +393,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### .gitignore
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
-**Last Updated**: 2025-10-30
-
-#### [1.3] - 2025-10-30 - IDE & CSV Files
-
-- **Added**: `.kiro/` 디렉토리 및 `**/*.csv` 파일을 무시 목록에 추가
-
-**Impact**: 🟢 Low
+**Last Updated**: 2025-10-24
 
 #### [1.2] - 2025-10-24 - Node Build Artifacts
 
