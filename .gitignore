@@ -1,13 +1,14 @@
 # ============================================================
 # Modified: See CHANGELOG.md for complete modification history
-# Last Updated: 2025-10-25
-# Modified By: Codex Agent<codex.agent@openai.com>
+# Last Updated: 2025-10-30
+# Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 # ============================================================
 
 # Root workspace ignores
 .DS_Store
 .idea/
 .cursor/
+.kiro/
 **/.venv/
 node_modules/
 .env*
@@ -25,3 +26,4 @@ TradingAgents/__pycache__/
 
 /memo
 **/AGENTS.md
+**/*.csv
