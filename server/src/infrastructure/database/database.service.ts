@@ -5,44 +5,52 @@
 // ============================================================
 
 import { Injectable, Logger } from "@nestjs/common";
-import { createClient, SupabaseClient } from "@supabase/supabase-js";
-import { drizzle } from "drizzle-orm/supabase-js";
+import { Pool, PoolConfig } from "pg";
+import { drizzle, NodePgDatabase } from "drizzle-orm/node-postgres";
 import { asc, desc, eq } from "drizzle-orm";
 
 import { allowedUsers, tickerRuns } from "./schema";
 
+type DatabaseSchema = {
+  allowedUsers: typeof allowedUsers;
+  tickerRuns: typeof tickerRuns;
+};
+
 @Injectable()
 export class DatabaseService {
   private readonly logger = new Logger(DatabaseService.name);
-  private readonly supabase: SupabaseClient | null;
-  private readonly db: ReturnType<typeof drizzle> | null;
+  private readonly pool: Pool | null;
+  private readonly db: NodePgDatabase<DatabaseSchema> | null;
 
   constructor() {
-    const url = process.env.SUPABASE_URL;
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const connectionString = process.env.DB_URL ?? process.env.DATABASE_URL;
 
-    if (!url || !serviceKey) {
+    if (!connectionString) {
       this.logger.warn(
-        "Supabase 환경 변수가 설정되지 않아 DatabaseService가 비활성화됩니다."
+        "DB_URL (또는 DATABASE_URL) 값이 없어 DatabaseService가 비활성화됩니다."
       );
-      this.supabase = null;
+      this.pool = null;
       this.db = null;
       return;
     }
 
-    this.supabase = createClient(url, serviceKey, {
-      auth: {
-        persistSession: false,
-      },
-    });
+    const poolConfig: PoolConfig = {
+      connectionString,
+    };
 
-    this.db = drizzle(this.supabase, {
+    if (this.requiresSsl(connectionString)) {
+      poolConfig.ssl = { rejectUnauthorized: false };
+    }
+
+    this.pool = new Pool(poolConfig);
+    this.db = drizzle(this.pool, {
       schema: {
         allowedUsers,
         tickerRuns,
       },
     });
-    this.logger.log("DatabaseService initialized with Supabase client");
+
+    this.logger.log("DatabaseService initialized with PostgreSQL connection");
   }
 
   get isEnabled(): boolean {
@@ -51,7 +59,9 @@ export class DatabaseService {
 
   async isEmailAllowed(email: string): Promise<boolean> {
     if (!this.db) {
-      this.logger.warn("isEmailAllowed 호출 시 DatabaseService가 비활성화 상태입니다.");
+      this.logger.warn(
+        "isEmailAllowed 호출 시 DatabaseService가 비활성화 상태입니다."
+      );
       return false;
     }
 
@@ -72,14 +82,13 @@ export class DatabaseService {
     }
 
     const normalizedTicker = ticker.trim().toUpperCase();
-    const runDateValue = new Date(`${runDate}T00:00:00Z`);
     const now = new Date();
 
     await this.db
       .insert(tickerRuns)
       .values({
         ticker: normalizedTicker,
-        runDate: runDateValue,
+        runDate,
         lastSeenAt: now,
       })
       .onConflictDoUpdate({
@@ -117,11 +126,19 @@ export class DatabaseService {
       .where(eq(tickerRuns.ticker, normalizedTicker))
       .orderBy(desc(tickerRuns.runDate));
 
-    return rows.map((row) => {
-      if (row.runDate instanceof Date) {
-        return row.runDate.toISOString().slice(0, 10);
-      }
-      return String(row.runDate);
-    });
+    return rows.map((row) => row.runDate);
+  }
+
+  async terminate(): Promise<void> {
+    if (this.pool) {
+      await this.pool.end();
+    }
+  }
+
+  private requiresSsl(connectionString: string): boolean {
+    return (
+      connectionString.includes("supabase.co") ||
+      connectionString.startsWith("postgresql://")
+    );
   }
 }
