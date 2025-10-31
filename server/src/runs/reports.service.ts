@@ -1,0 +1,101 @@
+// ============================================================
+// Modified: See CHANGELOG.md for complete modification history
+// Last Updated: 2025-10-31
+// Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
+// ============================================================
+
+import { Injectable, Logger, NotFoundException } from "@nestjs/common";
+
+import { ReportsRepository } from "./reports.repository";
+import { DynamoDbService } from "../infrastructure/dynamodb/dynamodb.service";
+import { TickerArtifact } from "./artifacts.service";
+
+export interface ReportListItem {
+  id: number;
+  ticker: string;
+  runDate: string;
+  reportType: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ReportDetail extends ReportListItem {
+  content: string;
+  contentType?: string;
+  metadata?: Record<string, unknown>;
+}
+
+@Injectable()
+export class ReportsService {
+  private readonly logger = new Logger(ReportsService.name);
+  private readonly tableName: string;
+
+  constructor(
+    private readonly reportsRepository: ReportsRepository,
+    private readonly dynamoDbService: DynamoDbService,
+  ) {
+    this.tableName = process.env.DYNAMODB_TABLE_NAME ?? "TickerDailyArtifacts";
+  }
+
+  /**
+   * 특정 ticker의 모든 리포트 목록을 반환합니다.
+   */
+  async listByTicker(ticker: string): Promise<ReportListItem[]> {
+    const metadata = await this.reportsRepository.findByTicker(ticker);
+
+    return metadata.map((m) => ({
+      id: m.id,
+      ticker: m.ticker,
+      runDate: m.runDate,
+      reportType: m.reportType,
+      status: m.status,
+      createdAt: m.createdAt.toISOString(),
+      updatedAt: m.updatedAt.toISOString(),
+    }));
+  }
+
+  /**
+   * 특정 리포트의 상세 내용을 반환합니다.
+   */
+  async getDetail(reportId: number): Promise<ReportDetail> {
+    // 1. PostgreSQL에서 메타데이터 조회
+    const metadata = await this.reportsRepository.findById(reportId);
+    if (!metadata) {
+      throw new NotFoundException(`Report ${reportId} not found`);
+    }
+
+    // 2. DynamoDB에서 콘텐츠 조회
+    const artifact = await this.dynamoDbService.getItem<TickerArtifact>({
+      tableName: this.tableName,
+      key: {
+        tickerDate: metadata.dynamoTickerDate,
+        artifactKey: metadata.dynamoArtifactKey,
+      },
+    });
+
+    if (!artifact) {
+      this.logger.warn(
+        `Report content not found in DynamoDB for report ${reportId}`
+      );
+      throw new NotFoundException(
+        `Report content not found for report ${reportId}`
+      );
+    }
+
+    // 3. 병합하여 반환
+    return {
+      id: metadata.id,
+      ticker: metadata.ticker,
+      runDate: metadata.runDate,
+      reportType: metadata.reportType,
+      status: metadata.status,
+      createdAt: metadata.createdAt.toISOString(),
+      updatedAt: metadata.updatedAt.toISOString(),
+      content: artifact.content,
+      contentType: artifact.contentType,
+      metadata: artifact.metadata,
+    };
+  }
+}
+

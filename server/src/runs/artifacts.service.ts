@@ -9,6 +9,7 @@ import { Injectable, Logger } from "@nestjs/common";
 import { DynamoDbService } from "../infrastructure/dynamodb/dynamodb.service";
 import { DatabaseService } from "../infrastructure/database/database.service";
 import { TickerArtifactDto, TickerRunSummaryDto } from "./dto/ticker-artifact.dto";
+import { ReportsRepository } from "./reports.repository";
 
 export interface TickerArtifact extends Record<string, unknown> {
   tickerDate: string; // PK: <TICKER>#<YYYY-MM-DD>
@@ -47,6 +48,7 @@ export class ArtifactsService {
   constructor(
     private readonly dynamoDbService: DynamoDbService,
     private readonly databaseService: DatabaseService,
+    private readonly reportsRepository: ReportsRepository,
   ) {
     this.tableName =
       process.env.DYNAMODB_TABLE_NAME ?? "TickerDailyArtifacts";
@@ -77,11 +79,16 @@ export class ArtifactsService {
       updatedAt: now,
     };
 
+    // 1. DynamoDB에 저장 (primary)
     await this.dynamoDbService.putItem({
       tableName: this.tableName,
       item: artifact,
     });
 
+    // 2. PostgreSQL에 메타데이터 저장 (secondary, best-effort)
+    await this.saveReportMetadataSafe(dto);
+
+    // 3. ticker_runs 기록
     await this.recordTickerRunSafe(dto.ticker, dto.runDate);
 
     this.logger.log(
@@ -172,6 +179,42 @@ export class ArtifactsService {
         error as Error,
       );
       return [];
+    }
+  }
+
+  /**
+   * PostgreSQL에 리포트 메타데이터를 안전하게 저장합니다.
+   * 실패 시 로그만 남기고 예외를 던지지 않습니다.
+   */
+  private async saveReportMetadataSafe(dto: TickerArtifactDto): Promise<void> {
+    try {
+      // artifactNamespace가 "reports"인 경우만 처리
+      if (dto.artifactNamespace !== "reports") {
+        return;
+      }
+
+      // artifactKey에서 reportType 추출
+      // 예: "reports#market_report" → "market_report"
+      const reportType = dto.artifactKey.split("#")[1] || "unknown";
+
+      await this.reportsRepository.upsert({
+        ticker: dto.ticker,
+        runDate: dto.runDate,
+        dynamoTickerDate: `${dto.ticker}#${dto.runDate}`,
+        dynamoArtifactKey: dto.artifactKey,
+        status: "success",
+        reportType,
+      });
+
+      this.logger.log(
+        `Report metadata saved: ${dto.ticker}/${dto.runDate}/${reportType}`
+      );
+    } catch (error) {
+      this.logger.error(
+        `Failed to save report metadata for ${dto.ticker}/${dto.runDate}`,
+        error as Error
+      );
+      // 예외를 던지지 않음 - best-effort
     }
   }
 

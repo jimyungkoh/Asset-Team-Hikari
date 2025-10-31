@@ -11,10 +11,20 @@ import { ArtifactsService } from './artifacts.service';
 import { PythonRunsClient } from './python-runs.client';
 import { RunsController } from './runs.controller';
 import { RunsService } from './runs.service';
+import { ReportsRepository } from './reports.repository';
+import { ReportsService } from './reports.service';
+import { ReportsController } from './reports.controller';
 
 @Module({
-  controllers: [RunsController],
-  providers: [RunsService, ArtifactsService, InternalAuthService, PythonRunsClient],
+  controllers: [RunsController, ReportsController],
+  providers: [
+    RunsService,
+    ArtifactsService,
+    InternalAuthService,
+    PythonRunsClient,
+    ReportsRepository,
+    ReportsService,
+  ],
   exports: [ArtifactsService],
 })
 export class RunsModule {}
