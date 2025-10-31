@@ -36,7 +36,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### server/ (NestJS API)
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
-**Last Updated**: 2025-10-31
+**Last Updated**: 2025-11-01
+
+#### [1.5] - 2025-11-01 - Schema Refactoring: ticker_runs → ticker
+
+- **Changed**: server/src/infrastructure/database/schema.ts - `tickerRuns` 테이블을 `ticker`로 리네임
+- **Changed**: server/src/infrastructure/database/database.service.ts - 모든 `tickerRuns` 참조를 `ticker`로 변경
+- **Changed**: 외래 키 제약 조건 업데이트 (reports_ticker_run_fk)
+- **Added**: server/migrations/rename_ticker_runs_to_ticker.sql - 안전한 테이블 리네임 마이그레이션 스크립트
+
+**Impact**: 🟡 Medium - 데이터베이스 스키마 변경 필요
 
 #### [1.4] - 2025-10-31 - Database Migration Tooling Setup
 
