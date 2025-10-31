@@ -9,11 +9,11 @@ import { Pool, PoolConfig } from "pg";
 import { drizzle, NodePgDatabase } from "drizzle-orm/node-postgres";
 import { asc, desc, eq } from "drizzle-orm";
 
-import { users, tickerRuns, reports } from "./schema";
+import { users, ticker, reports } from "./schema";
 
 type DatabaseSchema = {
   users: typeof users;
-  tickerRuns: typeof tickerRuns;
+  ticker: typeof ticker;
   reports: typeof reports;
 };
 
@@ -47,7 +47,7 @@ export class DatabaseService {
     this._db = drizzle(this.pool, {
       schema: {
         users,
-        tickerRuns,
+        ticker,
         reports,
       },
     });
@@ -82,23 +82,23 @@ export class DatabaseService {
     return rows.length > 0;
   }
 
-  async recordTickerRun(ticker: string, runDate: string): Promise<void> {
+  async recordTickerRun(tickerSymbol: string, runDate: string): Promise<void> {
     if (!this._db) {
       return;
     }
 
-    const normalizedTicker = ticker.trim().toUpperCase();
+    const normalizedTicker = tickerSymbol.trim().toUpperCase();
     const now = new Date();
 
     await this._db
-      .insert(tickerRuns)
+      .insert(ticker)
       .values({
         ticker: normalizedTicker,
         runDate,
         lastSeenAt: now,
       })
       .onConflictDoUpdate({
-        target: [tickerRuns.ticker, tickerRuns.runDate],
+        target: [ticker.ticker, ticker.runDate],
         set: {
           lastSeenAt: now,
         },
@@ -111,26 +111,26 @@ export class DatabaseService {
     }
 
     const rows = await this._db
-      .select({ ticker: tickerRuns.ticker })
-      .from(tickerRuns)
-      .groupBy(tickerRuns.ticker)
-      .orderBy(asc(tickerRuns.ticker));
+      .select({ ticker: ticker.ticker })
+      .from(ticker)
+      .groupBy(ticker.ticker)
+      .orderBy(asc(ticker.ticker));
 
     return rows.map((row) => row.ticker);
   }
 
-  async listRunDates(ticker: string): Promise<string[]> {
+  async listRunDates(tickerSymbol: string): Promise<string[]> {
     if (!this._db) {
       return [];
     }
 
-    const normalizedTicker = ticker.trim().toUpperCase();
+    const normalizedTicker = tickerSymbol.trim().toUpperCase();
 
     const rows = await this._db
-      .select({ runDate: tickerRuns.runDate })
-      .from(tickerRuns)
-      .where(eq(tickerRuns.ticker, normalizedTicker))
-      .orderBy(desc(tickerRuns.runDate));
+      .select({ runDate: ticker.runDate })
+      .from(ticker)
+      .where(eq(ticker.ticker, normalizedTicker))
+      .orderBy(desc(ticker.runDate));
 
     return rows.map((row) => row.runDate);
   }
