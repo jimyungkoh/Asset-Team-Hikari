@@ -1,6 +1,6 @@
 // ============================================================
 // Modified: See CHANGELOG.md for complete modification history
-// Last Updated: 2025-10-30
+// Last Updated: 2025-10-31
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
@@ -9,18 +9,19 @@ import { Pool, PoolConfig } from "pg";
 import { drizzle, NodePgDatabase } from "drizzle-orm/node-postgres";
 import { asc, desc, eq } from "drizzle-orm";
 
-import { allowedUsers, tickerRuns } from "./schema";
+import { users, tickerRuns, reports } from "./schema";
 
 type DatabaseSchema = {
-  allowedUsers: typeof allowedUsers;
+  users: typeof users;
   tickerRuns: typeof tickerRuns;
+  reports: typeof reports;
 };
 
 @Injectable()
 export class DatabaseService {
   private readonly logger = new Logger(DatabaseService.name);
   private readonly pool: Pool | null;
-  private readonly db: NodePgDatabase<DatabaseSchema> | null;
+  private readonly _db: NodePgDatabase<DatabaseSchema> | null;
 
   constructor() {
     const connectionString = process.env.DB_URL ?? process.env.DATABASE_URL;
@@ -30,7 +31,7 @@ export class DatabaseService {
         "DB_URL (또는 DATABASE_URL) 값이 없어 DatabaseService가 비활성화됩니다."
       );
       this.pool = null;
-      this.db = null;
+      this._db = null;
       return;
     }
 
@@ -43,10 +44,11 @@ export class DatabaseService {
     }
 
     this.pool = new Pool(poolConfig);
-    this.db = drizzle(this.pool, {
+    this._db = drizzle(this.pool, {
       schema: {
-        allowedUsers,
+        users,
         tickerRuns,
+        reports,
       },
     });
 
@@ -54,11 +56,15 @@ export class DatabaseService {
   }
 
   get isEnabled(): boolean {
-    return Boolean(this.db);
+    return Boolean(this._db);
+  }
+
+  get db(): NodePgDatabase<DatabaseSchema> | null {
+    return this._db;
   }
 
   async isEmailAllowed(email: string): Promise<boolean> {
-    if (!this.db) {
+    if (!this._db) {
       this.logger.warn(
         "isEmailAllowed 호출 시 DatabaseService가 비활성화 상태입니다."
       );
@@ -67,24 +73,24 @@ export class DatabaseService {
 
     const normalizedEmail = email.trim().toLowerCase();
 
-    const rows = await this.db
-      .select({ email: allowedUsers.email })
-      .from(allowedUsers)
-      .where(eq(allowedUsers.email, normalizedEmail))
+    const rows = await this._db
+      .select({ email: users.email })
+      .from(users)
+      .where(eq(users.email, normalizedEmail))
       .limit(1);
 
     return rows.length > 0;
   }
 
   async recordTickerRun(ticker: string, runDate: string): Promise<void> {
-    if (!this.db) {
+    if (!this._db) {
       return;
     }
 
     const normalizedTicker = ticker.trim().toUpperCase();
     const now = new Date();
 
-    await this.db
+    await this._db
       .insert(tickerRuns)
       .values({
         ticker: normalizedTicker,
@@ -100,11 +106,11 @@ export class DatabaseService {
   }
 
   async listTickers(): Promise<string[]> {
-    if (!this.db) {
+    if (!this._db) {
       return [];
     }
 
-    const rows = await this.db
+    const rows = await this._db
       .select({ ticker: tickerRuns.ticker })
       .from(tickerRuns)
       .groupBy(tickerRuns.ticker)
@@ -114,13 +120,13 @@ export class DatabaseService {
   }
 
   async listRunDates(ticker: string): Promise<string[]> {
-    if (!this.db) {
+    if (!this._db) {
       return [];
     }
 
     const normalizedTicker = ticker.trim().toUpperCase();
 
-    const rows = await this.db
+    const rows = await this._db
       .select({ runDate: tickerRuns.runDate })
       .from(tickerRuns)
       .where(eq(tickerRuns.ticker, normalizedTicker))
