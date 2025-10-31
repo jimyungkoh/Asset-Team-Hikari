@@ -36,7 +36,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### server/ (NestJS API)
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
-**Last Updated**: 2025-10-26
+**Last Updated**: 2025-10-31
+
+#### [1.3] - 2025-10-31 - Ticker Reports Integration
+
+- **Added**: PostgreSQL `reports` 테이블 스키마 추가 (ticker, runDate, reportType 복합 unique 제약, 외래키, 인덱스 포함)
+- **Added**: `ReportsRepository` - 리포트 메타데이터 CRUD 작업 담당
+- **Added**: `ReportsService` - 리포트 목록 조회 및 상세 조회 비즈니스 로직
+- **Added**: `ReportsController` - `GET /reports/tickers/:ticker`, `GET /reports/:id` 엔드포인트
+- **Changed**: `ArtifactsService` - 리포트 저장 시 PostgreSQL 메타데이터 동기화 로직 추가 (best-effort 패턴)
+- **Changed**: `DatabaseService` - reports 스키마 등록 및 db getter 추가
+- **Changed**: `RunsModule` - ReportsRepository, ReportsService, ReportsController 등록
+
+**Impact**: 🟡 Medium - 데이터베이스 마이그레이션 필요 (reports 테이블 생성)
+
+#### [1.2] - 2025-10-31 - Database Schema Refactoring
+
+- **Changed**: server/src/infrastructure/database/schema.ts - `allowed_users` 테이블명을 `users`로 변경
+- **Changed**: server/src/infrastructure/database/schema.ts - `allowedUsers` export를 `users`로 변경
+- **Changed**: server/src/infrastructure/database/database.service.ts - 모든 `allowedUsers` 참조를 `users`로 변경
+- **Changed**: server/src/infrastructure/database/database.service.ts - DatabaseSchema 타입 정의 업데이트
+
+**Impact**: 🟡 Medium - 데이터베이스 마이그레이션 필요 (테이블명 변경)
 
 #### [1.1] - 2025-10-26 - API Service Updates
 
@@ -47,7 +68,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### web/ (Next.js UI)
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
-**Last Updated**: 2025-10-26
+**Last Updated**: 2025-10-31
+
+#### [1.4] - 2025-10-31 - Ticker Reports Pages & Components
+
+- **Added**: `/tickers/[ticker]/reports` - ticker별 리포트 목록 페이지
+- **Added**: `/reports/[id]` - 리포트 상세 조회 페이지
+- **Added**: `ReportsList` 컴포넌트 - 리포트 목록 표시 및 상태 배지
+- **Added**: `ReportContent` 컴포넌트 - 리포트 상세 내용 마크다운 렌더링
+- **Added**: `lib/api-helpers.ts` - `getNestBase()`, `getInternalHeaders()` 헬퍼 함수
+- **Added**: `lib/date-utils.ts` - 날짜 포맷팅 및 리포트 타입 포맷팅 유틸리티
+
+**Impact**: 🟢 Low
 
 #### [1.3] - 2025-10-26 - UI Component Refinements
 
