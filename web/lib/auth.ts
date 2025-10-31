@@ -4,8 +4,8 @@
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
-import { getServerSession } from 'next-auth';
+import { getServerSession } from "next-auth";
 
-import { authConfig } from '../auth.config';
+import { authConfig } from "../auth.config";
 
 export const auth = () => getServerSession(authConfig);
