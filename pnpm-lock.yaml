@@ -29,6 +29,9 @@ importers:
       '@nestjs/platform-express':
         specifier: ^10.4.9
         version: 10.4.20(@nestjs/common@10.4.20(class-transformer@0.5.1)(class-validator@0.14.2)(reflect-metadata@0.1.14)(rxjs@7.8.2))(@nestjs/core@10.4.20)
+      '@types/pg':
+        specifier: ^8.15.6
+        version: 8.15.6
       class-transformer:
         specifier: ^0.5.1
         version: 0.5.1
@@ -40,7 +43,7 @@ importers:
         version: 16.6.1
       drizzle-orm:
         specifier: ^0.34.0
-        version: 0.34.1(@types/react@18.3.26)(pg@8.16.3)(react@18.3.1)
+        version: 0.34.1(@types/pg@8.15.6)(@types/react@18.3.26)(pg@8.16.3)(react@18.3.1)
       pg:
         specifier: ^8.13.1
         version: 8.16.3
@@ -1007,6 +1010,9 @@ packages:
 
   '@types/node@22.18.12':
     resolution: {integrity: sha512-BICHQ67iqxQGFSzfCFTT7MRQ5XcBjG5aeKh5Ok38UBbPe5fxTyE+aHFxwVrGyr8GNlqFMLKD1D3P2K/1ks8tog==}
+
+  '@types/pg@8.15.6':
+    resolution: {integrity: sha512-NoaMtzhxOrubeL/7UZuNTrejB4MPAJ0RpxZqXQf2qXuVlTPuG6Y8p4u9dKRaue4yjmC7ZhzVO2/Yyyn25znrPQ==}
 
   '@types/prop-types@15.7.15':
     resolution: {integrity: sha512-F6bEyamV9jKGAFBEmlQnesRPGOQqS2+Uwi0Em15xenOxHaf2hv6L8YCVn3rPdPJOiJfPiCnLIRyvwVaqMY3MIw==}
@@ -4400,6 +4406,12 @@ snapshots:
     dependencies:
       undici-types: 6.21.0
 
+  '@types/pg@8.15.6':
+    dependencies:
+      '@types/node': 22.18.12
+      pg-protocol: 1.10.3
+      pg-types: 2.2.0
+
   '@types/prop-types@15.7.15': {}
 
   '@types/react-dom@18.3.7(@types/react@18.3.26)':
@@ -4923,8 +4935,9 @@ snapshots:
 
   dotenv@16.6.1: {}
 
-  drizzle-orm@0.34.1(@types/react@18.3.26)(pg@8.16.3)(react@18.3.1):
+  drizzle-orm@0.34.1(@types/pg@8.15.6)(@types/react@18.3.26)(pg@8.16.3)(react@18.3.1):
     optionalDependencies:
+      '@types/pg': 8.15.6
       '@types/react': 18.3.26
       pg: 8.16.3
       react: 18.3.1
