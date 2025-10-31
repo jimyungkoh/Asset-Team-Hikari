@@ -38,6 +38,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
 **Last Updated**: 2025-10-31
 
+#### [1.4] - 2025-10-31 - Database Migration Tooling Setup
+
+- **Added**: drizzle-kit 패키지 추가 (devDependencies)
+- **Added**: drizzle.config.ts 설정 파일 생성 (PostgreSQL 연결 설정)
+- **Added**: 데이터베이스 마이그레이션 스크립트 추가 (db:generate, db:migrate, db:push, db:studio)
+- **Changed**: drizzle-orm 버전 업데이트 (0.34.0 → 0.44.7)
+
+**Impact**: 🟢 Low
+
 #### [1.3] - 2025-10-31 - Ticker Reports Integration
 
 - **Added**: PostgreSQL `reports` 테이블 스키마 추가 (ticker, runDate, reportType 복합 unique 제약, 외래키, 인덱스 포함)
