@@ -14,7 +14,7 @@ import { HTTP_STATUS, ERROR_MESSAGES } from '@/lib/constants';
 // Auth Middleware
 // ============================================================
 
-export async function withAuth(
+export function withAuth(
   handler: (request: Request, context?: unknown) => Promise<Response>
 ) {
   return async (request: Request, context?: unknown): Promise<Response> => {
