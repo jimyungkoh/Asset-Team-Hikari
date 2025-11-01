@@ -9,6 +9,7 @@
 .idea/
 .cursor/
 .kiro/
+.vscode/
 **/.venv/
 node_modules/
 .env*
