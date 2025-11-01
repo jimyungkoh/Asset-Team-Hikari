@@ -1,6 +1,6 @@
 <!-- ============================================================
 Modified: See CHANGELOG.md for complete modification history
-Last Updated: 2025-11-01
+Last Updated: 2025-11-02
 Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 ============================================================ -->
 
@@ -20,7 +20,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### server/ (NestJS API) & web/ (Next.js Client)
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
-**Last Updated**: 2025-11-01
+**Last Updated**: 2025-11-02
+
+#### [1.8] - 2025-11-02 - Report Date Filtering and Ticker Navigation
+
+**server/**:
+- **Added**: `ReportsService.listDetailsByTickerAndDate()` method for filtering reports by ticker and date
+- **Added**: `ReportMetadata` interface in reports repository for type safety
+- **Added**: Enhanced error handling in report content retrieval with fallback mechanisms
+- **Changed**: `reports.controller.ts` updated with date filtering endpoints
+- **Changed**: `run.service.ts` improved metadata tracking for better report association
+- **Changed**: `runs.module.ts` updated module configuration for better service organization
+
+**Impact**: 🟡 Medium - New filtering capabilities, backward compatible
+
+**web/**:
+- **Added**: `web/app/tickers/page.tsx` - Main tickers list page for browsing all available tickers
+- **Added**: `web/app/tickers/[ticker]/page.tsx` - Ticker details page showing ticker information
+- **Added**: `web/app/tickers/[ticker]/dates/[date]/page.tsx` - Date-specific reports view page
+- **Added**: `web/app/api/reports/tickers/[ticker]/dates/[date]/route.ts` - API route for fetching reports by ticker and date
+- **Added**: `web/components/reports/daily-report-sections.tsx` - Component for organizing and displaying daily report sections
+- **Added**: `web/components/reports/status-badge.tsx` - Component for visualizing report status indicators
+- **Changed**: `web/components/reports/report-content.tsx` - Enhanced rendering with improved content organization
+- **Changed**: `web/components/reports/reports-list.tsx` - Better list rendering and filtering capabilities
+- **Changed**: `web/components/design/page-shell.tsx` - Improved layout and styling for consistent UI
+- **Changed**: `web/components/runs/run-form.tsx` - Enhanced UX with better validation and error handling
+- **Changed**: `web/lib/services/backend-api.service.ts` - Added report fetching endpoints and improved error handling
+- **Changed**: `web/lib/constants.ts` - Added report-related API routes and parameters
+- **Changed**: `web/types/api.ts` - Extended with new report and filtering interfaces
+- **Changed**: `web/app/api/runs/route.ts` - Enhanced query handling for improved filtering
+- **Changed**: `web/package.json` - Dependency synchronization
+- **Changed**: `pnpm-lock.yaml` - Updated lock file with latest dependencies
+
+**Impact**: 🟡 Medium - New navigation features, improved report browsing experience
 
 #### [1.7] - 2025-11-01 - Module Architecture Refactoring
 
