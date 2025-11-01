@@ -51,10 +51,19 @@ class FinancialSituationMemory:
         self.chroma_client = chromadb.Client(Settings(allow_reset=True))
         self.collection_name = name
         try:
-            self.situation_collection = self.chroma_client.get_or_create_collection(name=self.collection_name)
+            self.situation_collection = self.chroma_client.get_or_create_collection(
+                name=self.collection_name
+            )
         except AttributeError:
             # Fallback for older chromadb versions without get_or_create_collection
-            self.situation_collection = self.chroma_client.create_collection(name=self.collection_name)
+            self.situation_collection = self._create_or_get_collection(self.collection_name)
+        except Exception as exc:
+            if self._collection_exists_error(exc):
+                self.situation_collection = self.chroma_client.get_collection(
+                    name=self.collection_name
+                )
+            else:
+                raise
         self._summarizer_client: OpenAIClient | None = None
         self._summarizer_model = self.config.get("quick_think_llm", "gpt-4o-mini")
         self._summarizer_enabled = self.config.get("llm_provider", "openai").lower() in ("openai", "openrouter")
@@ -318,6 +327,20 @@ class FinancialSituationMemory:
         except Exception:
             # Best-effort cleanup; ignore if the collection is already gone or backend rejects the request.
             pass
+
+    def _collection_exists_error(self, exc: Exception) -> bool:
+        message = str(exc).lower()
+        return "already exists" in message or ("collection" in message and "exists" in message)
+
+    def _create_or_get_collection(self, name: str):
+        """Create collection or reuse existing one when old Chroma client lacks helpers."""
+        try:
+            return self.chroma_client.create_collection(name=name)
+        except Exception as exc:
+            # Some Chroma builds raise InternalError/ValueError strings when the collection already exists.
+            if self._collection_exists_error(exc):
+                return self.chroma_client.get_collection(name=name)
+            raise
 
 
 if __name__ == "__main__":
