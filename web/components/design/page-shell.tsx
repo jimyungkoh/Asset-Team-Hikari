@@ -12,11 +12,13 @@ import { surfaceClass, textStyles } from "../../lib/design-system";
 
 interface PageShellProps extends PropsWithChildren {
   authenticatedEmail: string | null;
+  showHero?: boolean;
 }
 
 export function PageShell({
   authenticatedEmail,
   children,
+  showHero = false,
 }: PageShellProps): JSX.Element {
   const navigationLinks: Array<{ href: string; label: string }> = [
     { href: ROUTES.HOME, label: "새 분석" },
@@ -90,16 +92,18 @@ export function PageShell({
       <div className="relative z-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20">
           {/* Hero Section */}
-          <div className="mb-20 animate-fade-in">
-            <div className="space-y-6 max-w-3xl">
-              <div className={surfaceClass("pill") + " w-fit"}>
-                🚀 Asset Team Hikari
+          {showHero && (
+            <div className="mb-20 animate-fade-in">
+              <div className="space-y-6 max-w-3xl">
+                <div className={surfaceClass("pill") + " w-fit"}>
+                  🚀 Asset Team Hikari
+                </div>
+                <h1 className={textStyles.heroTitle}>
+                  AI 분석 팀과 함께하는 투자 리서치
+                </h1>
               </div>
-              <h1 className={textStyles.heroTitle}>
-                AI 분석 팀과 함께하는 투자 리서치
-              </h1>
             </div>
-          </div>
+          )}
 
           {/* Content */}
           <main className="space-y-20">{children}</main>
