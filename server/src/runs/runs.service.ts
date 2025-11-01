@@ -1,6 +1,6 @@
 // ============================================================
 // Modified: See CHANGELOG.md for complete modification history
-// Last Updated: 2025-10-26
+// Last Updated: 2025-11-01
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
@@ -8,6 +8,7 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { MessageEvent } from '@nestjs/common/interfaces';
 import { Observable, ReplaySubject } from 'rxjs';
 
+import { RunConfigService } from './config/run-config.service';
 import { CreateRunDto } from './dto/create-run.dto';
 import { PythonRunsClient, PythonRunEvent, PythonRunStatusResponse } from './python-runs.client';
 import { RunStatus, RunSummary } from './run.types';
@@ -36,11 +37,19 @@ export class RunsService {
   private readonly logger = new Logger(RunsService.name);
   private readonly runs = new Map<string, RunContext>();
 
-  constructor(private readonly pythonRunsClient: PythonRunsClient) {}
+  constructor(
+    private readonly pythonRunsClient: PythonRunsClient,
+    private readonly runConfigService: RunConfigService,
+  ) {}
 
   async startRun(dto: CreateRunDto): Promise<RunSummary> {
     const now = new Date();
-    const createResponse = await this.pythonRunsClient.createRun(dto);
+
+    // 템플릿 config 병합
+    const config = this.runConfigService.buildRunConfig(dto.ticker, dto.tradeDate);
+    const enrichedDto = { ...dto, config };
+
+    const createResponse = await this.pythonRunsClient.createRun(enrichedDto);
     const id = createResponse.id;
 
     let context = this.runs.get(id);
