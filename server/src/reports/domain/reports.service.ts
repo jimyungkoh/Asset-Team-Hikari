@@ -1,12 +1,15 @@
 // ============================================================
 // Modified: See CHANGELOG.md for complete modification history
-// Last Updated: 2025-11-01
+// Last Updated: 2025-11-02
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
 import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 
-import { ReportsRepository } from "../infrastructure/reports.repository";
+import {
+  ReportsRepository,
+  ReportMetadata,
+} from "../infrastructure/reports.repository";
 import { DynamoDbService } from "../../infrastructure/dynamodb/dynamodb.service";
 import { TickerArtifact } from "../../artifacts/infrastructure/artifacts.service";
 
@@ -65,7 +68,49 @@ export class ReportsService {
       throw new NotFoundException(`Report ${reportId} not found`);
     }
 
-    // 2. DynamoDB에서 콘텐츠 조회
+    return this.buildReportDetail(metadata);
+  }
+
+  /**
+   * 특정 ticker와 날짜에 해당하는 리포트 상세 목록을 반환합니다.
+   */
+  async listDetailsByTickerAndDate(
+    ticker: string,
+    runDate: string
+  ): Promise<ReportDetail[]> {
+    const metadataList = await this.reportsRepository.findByTickerAndDate(
+      ticker,
+      runDate
+    );
+
+    if (metadataList.length === 0) {
+      return [];
+    }
+
+    const details = await Promise.all(
+      metadataList.map(async (metadata) => {
+        try {
+          return await this.buildReportDetail(metadata);
+        } catch (error) {
+          if (error instanceof NotFoundException) {
+            this.logger.warn(
+              `Report content missing for ${metadata.ticker} ${metadata.runDate} (${metadata.id})`
+            );
+            return null;
+          }
+          throw error;
+        }
+      })
+    );
+
+    return details.filter(
+      (report): report is ReportDetail => report !== null
+    );
+  }
+
+  private async buildReportDetail(
+    metadata: ReportMetadata
+  ): Promise<ReportDetail> {
     const artifact = await this.dynamoDbService.getItem<TickerArtifact>({
       tableName: this.tableName,
       key: {
@@ -76,14 +121,13 @@ export class ReportsService {
 
     if (!artifact) {
       this.logger.warn(
-        `Report content not found in DynamoDB for report ${reportId}`
+        `Report content not found in DynamoDB for report ${metadata.id}`
       );
       throw new NotFoundException(
-        `Report content not found for report ${reportId}`
+        `Report content not found for report ${metadata.id}`
       );
     }
 
-    // 3. 병합하여 반환
     return {
       id: metadata.id,
       ticker: metadata.ticker,

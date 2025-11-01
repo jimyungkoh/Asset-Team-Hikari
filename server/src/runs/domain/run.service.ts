@@ -1,10 +1,10 @@
 // ============================================================
 // Modified: See CHANGELOG.md for complete modification history
-// Last Updated: 2025-11-01
+// Last Updated: 2025-11-02
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, ConflictException } from '@nestjs/common';
 import { MessageEvent } from '@nestjs/common/interfaces';
 import { Observable, ReplaySubject } from 'rxjs';
 
@@ -13,6 +13,7 @@ import { RunStatus, RunSummary } from '../run.types';
 import { RunRepository } from '../infrastructure/run.repository';
 import { RunConfigService } from '../config/run-config.service';
 import { ArtifactsService } from '../../artifacts/infrastructure/artifacts.service';
+import { ReportsRepository } from '../../reports/infrastructure/reports.repository';
 
 interface RunContext {
   id: string;
@@ -43,14 +44,48 @@ export class RunService {
     private readonly runRepository: RunRepository,
     private readonly runConfigService: RunConfigService,
     private readonly artifactsService: ArtifactsService,
+    private readonly reportsRepository: ReportsRepository,
   ) {}
 
   async startRun(dto: CreateRunDto): Promise<RunSummary> {
+    const normalizedTicker = dto.ticker.trim().toUpperCase();
+    const normalizedTradeDate = dto.tradeDate.trim();
+    const existingReports =
+      await this.reportsRepository.findByTickerAndDate(
+        normalizedTicker,
+        normalizedTradeDate,
+      );
+
+    const hasCompletedReport = existingReports.some(
+      (metadata) => metadata.status === 'success',
+    );
+
+    if (hasCompletedReport) {
+      this.logger.log(
+        `Skipping run for ${normalizedTicker} ${normalizedTradeDate} (reports already exist)`,
+      );
+      throw new ConflictException({
+        statusCode: 409,
+        error: 'Conflict',
+        message: `Reports already exist for ${normalizedTicker} on ${normalizedTradeDate}`,
+        ticker: normalizedTicker,
+        tradeDate: normalizedTradeDate,
+      });
+    }
+
     const now = new Date();
 
     // 템플릿 config 병합
-    const config = this.runConfigService.buildRunConfig(dto.ticker, dto.tradeDate);
-    const enrichedDto = { ...dto, config };
+    const config = this.runConfigService.buildRunConfig(
+      normalizedTicker,
+      normalizedTradeDate,
+    );
+    const enrichedDto = {
+      ...dto,
+      ticker: normalizedTicker,
+      tradeDate: normalizedTradeDate,
+      config,
+    };
 
     const createResponse = await this.runRepository.createRun(enrichedDto);
     const id = createResponse.id;
@@ -59,8 +94,8 @@ export class RunService {
     if (!context) {
       context = {
         id,
-        ticker: dto.ticker,
-        tradeDate: dto.tradeDate,
+        ticker: normalizedTicker,
+        tradeDate: normalizedTradeDate,
         status: this.mapRemoteStatus(createResponse.status),
         createdAt: now,
         updatedAt: now,
@@ -70,8 +105,8 @@ export class RunService {
       };
       this.runs.set(id, context);
     } else {
-      context.ticker = dto.ticker;
-      context.tradeDate = dto.tradeDate;
+      context.ticker = normalizedTicker;
+      context.tradeDate = normalizedTradeDate;
       context.status = this.mapRemoteStatus(createResponse.status);
       context.updatedAt = now;
       context.persisted = false;

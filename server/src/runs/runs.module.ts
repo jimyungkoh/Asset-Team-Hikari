@@ -1,6 +1,6 @@
 // ============================================================
 // Modified: See CHANGELOG.md for complete modification history
-// Last Updated: 2025-11-01
+// Last Updated: 2025-11-02
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
@@ -14,6 +14,7 @@ import { RunService } from './domain/run.service';
 import { RunRepository } from './infrastructure/run.repository';
 import { PythonRunsClient } from './python-runs.client';
 import { RunsController } from './presentation/runs.controller';
+import { ReportsRepository } from '../reports/infrastructure/reports.repository';
 
 @Module({
   imports: [ArtifactsModule],
@@ -25,6 +26,7 @@ import { RunsController } from './presentation/runs.controller';
     // Infrastructure
     RunRepository,
     PythonRunsClient,
+    ReportsRepository,
     
     // Config
     RunConfigService,

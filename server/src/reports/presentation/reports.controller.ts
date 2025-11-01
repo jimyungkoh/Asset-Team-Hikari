@@ -1,6 +1,6 @@
 // ============================================================
 // Modified: See CHANGELOG.md for complete modification history
-// Last Updated: 2025-11-01
+// Last Updated: 2025-11-02
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
@@ -13,7 +13,11 @@ import {
 } from "@nestjs/common";
 
 import { InternalAuthGuard } from "../../common/guards/internal-auth.guard";
-import { ReportsService, ReportListItem, ReportDetail } from "../domain/reports.service";
+import {
+  ReportsService,
+  ReportListItem,
+  ReportDetail,
+} from "../domain/reports.service";
 
 @Controller("reports")
 @UseGuards(InternalAuthGuard)
@@ -29,6 +33,22 @@ export class ReportsController {
     @Param("ticker") ticker: string,
   ): Promise<{ reports: ReportListItem[] }> {
     const reports = await this.reportsService.listByTicker(ticker);
+    return { reports };
+  }
+
+  /**
+   * GET /reports/tickers/:ticker/dates/:runDate
+   * 특정 ticker와 날짜에 해당하는 리포트 상세 목록을 반환합니다.
+   */
+  @Get("tickers/:ticker/dates/:runDate")
+  async listReportsByTickerAndDate(
+    @Param("ticker") ticker: string,
+    @Param("runDate") runDate: string,
+  ): Promise<{ reports: ReportDetail[] }> {
+    const reports = await this.reportsService.listDetailsByTickerAndDate(
+      ticker,
+      runDate,
+    );
     return { reports };
   }
 
