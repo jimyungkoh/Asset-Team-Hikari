@@ -57,11 +57,36 @@ export class ArtifactsService {
   }
 
   /**
+   * DynamoDB 테이블이 존재하는지 확인하고 없으면 생성합니다.
+   * 실패해도 예외를 던지지 않고 로그만 남깁니다 (best-effort).
+   */
+  private async ensureTableExists(): Promise<void> {
+    try {
+      await this.dynamoDbService.ensureTableExists({
+        tableName: this.tableName,
+        partitionKey: { name: "tickerDate", type: "S" },
+        sortKey: { name: "artifactKey", type: "S" },
+        billingMode: "PAY_PER_REQUEST",
+      });
+    } catch (error) {
+      // 테이블 생성 실패해도 보고서 저장은 계속 진행
+      // 실제 저장 시도 시 테이블이 없으면 그때 에러 발생 (정상 동작)
+      this.logger.warn(
+        `테이블 자동 생성 실패 (보고서 저장은 계속 진행): ${this.tableName}`,
+        error instanceof Error ? error.stack : undefined
+      );
+    }
+  }
+
+  /**
    * 아티팩트를 DynamoDB에 저장합니다.
    * @param dto 아티팩트 DTO
    * @returns 저장된 아티팩트 정보
    */
   async saveArtifact(dto: TickerArtifactDto): Promise<TickerArtifact> {
+    // 테이블이 없으면 생성
+    await this.ensureTableExists();
+
     const tickerDate = `${dto.ticker}#${dto.runDate}`;
     const now = new Date().toISOString();
 
@@ -103,6 +128,9 @@ export class ArtifactsService {
    * @param dto 런 요약 DTO
    */
   async saveRunSummary(dto: TickerRunSummaryDto): Promise<TickerRunSummary> {
+    // 테이블이 없으면 생성
+    await this.ensureTableExists();
+
     const tickerDate = `${dto.ticker}#${dto.runDate}`;
     const artifactKey = `summary#${dto.runId}`;
     const now = new Date().toISOString();

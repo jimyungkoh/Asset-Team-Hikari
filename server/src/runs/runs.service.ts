@@ -8,6 +8,7 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { MessageEvent } from '@nestjs/common/interfaces';
 import { Observable, ReplaySubject } from 'rxjs';
 
+import { ArtifactsService } from './artifacts.service';
 import { RunConfigService } from './config/run-config.service';
 import { CreateRunDto } from './dto/create-run.dto';
 import { PythonRunsClient, PythonRunEvent, PythonRunStatusResponse } from './python-runs.client';
@@ -27,6 +28,7 @@ interface RunContext {
     traceback?: string;
   };
   streamActive: boolean;
+  persisted: boolean;
   stopStream?: () => void;
 }
 
@@ -40,6 +42,7 @@ export class RunsService {
   constructor(
     private readonly pythonRunsClient: PythonRunsClient,
     private readonly runConfigService: RunConfigService,
+    private readonly artifactsService: ArtifactsService,
   ) {}
 
   async startRun(dto: CreateRunDto): Promise<RunSummary> {
@@ -63,6 +66,7 @@ export class RunsService {
         updatedAt: now,
         subject: new ReplaySubject<MessageEvent>(50),
         streamActive: false,
+        persisted: false,
       };
       this.runs.set(id, context);
     } else {
@@ -70,6 +74,7 @@ export class RunsService {
       context.tradeDate = dto.tradeDate;
       context.status = this.mapRemoteStatus(createResponse.status);
       context.updatedAt = now;
+      context.persisted = false;
     }
 
     this.emit(context, {
@@ -161,8 +166,9 @@ export class RunsService {
 
       if (TERMINAL_STATUSES.has(context.status)) {
         void this.hydrateFromRemote(context.id)
+          .then((latest) => this.persistRunArtifacts(latest))
           .catch((error) => {
-            this.logger.error(`Failed to hydrate completed run ${context.id}`, error);
+            this.logger.error(`Failed to hydrate completed run ${context.id}`, error as Error);
           })
           .finally(() => {
             this.complete(context);
@@ -259,8 +265,11 @@ export class RunsService {
         updatedAt: this.safeDate(remote.updated_at),
         subject: new ReplaySubject<MessageEvent>(50),
         streamActive: false,
+        persisted: false,
       };
       this.runs.set(remote.id, context);
+    } else if (typeof context.persisted === 'undefined') {
+      context.persisted = false;
     }
     return context;
   }
@@ -273,6 +282,159 @@ export class RunsService {
     context.updatedAt = this.safeDate(remote.updated_at);
     context.result = remote.result;
     context.error = remote.error ? { message: remote.error } : undefined;
+  }
+
+  async backfillRun(runId: string): Promise<void> {
+    const context = await this.hydrateFromRemote(runId);
+    await this.persistRunArtifacts(context);
+  }
+
+  private async persistRunArtifacts(context: RunContext): Promise<void> {
+    if (context.persisted) {
+      return;
+    }
+    context.persisted = true;
+
+    if (!context.tradeDate) {
+      this.logger.warn(`Run ${context.id} is missing trade date; skipping artifact persistence.`);
+      return;
+    }
+
+    const resultRecord = this.asRecord(context.result);
+    const durationSeconds = this.extractDurationSeconds(resultRecord);
+    const metadata = this.extractSummaryMetadata(resultRecord);
+
+    try {
+      await this.artifactsService.saveRunSummary({
+        ticker: context.ticker,
+        runDate: context.tradeDate,
+        runId: context.id,
+        status: context.status,
+        result: resultRecord,
+        error: context.error?.message,
+        durationSeconds,
+        metadata,
+      });
+    } catch (error) {
+      this.logger.error(
+        `Failed to persist run summary for ${context.ticker} ${context.tradeDate} (${context.id})`,
+        error as Error,
+      );
+    }
+
+    if (!resultRecord) {
+      return;
+    }
+
+    const artifacts = this.buildArtifactsFromResult(context, resultRecord);
+    for (const artifact of artifacts) {
+      try {
+        await this.artifactsService.saveArtifact(artifact);
+      } catch (error) {
+        this.logger.error(
+          `Failed to persist artifact ${artifact.artifactKey} for ${context.ticker} ${context.tradeDate}`,
+          error as Error,
+        );
+      }
+    }
+  }
+
+  private buildArtifactsFromResult(
+    context: RunContext,
+    result: Record<string, unknown>,
+  ): Parameters<ArtifactsService['saveArtifact']>[0][] {
+    const artifacts: Parameters<ArtifactsService['saveArtifact']>[0][] = [];
+    const runDate = context.tradeDate;
+    const ticker = context.ticker;
+
+    const addArtifact = (namespace: string, key: string, value: unknown): void => {
+      const content = this.toContentString(value);
+      if (!content) {
+        return;
+      }
+      artifacts.push({
+        ticker,
+        runDate,
+        artifactNamespace: namespace,
+        artifactKey: `${namespace}#${key}`,
+        content,
+        contentSize: Buffer.byteLength(content, 'utf8'),
+        metadata: {
+          runId: context.id,
+          status: context.status,
+        },
+      });
+    };
+
+    addArtifact('reports', 'decision', result['decision']);
+    addArtifact('reports', 'final_trade_decision', result['final_trade_decision']);
+    addArtifact('plans', 'investment_plan', result['investment_plan']);
+    addArtifact('plans', 'trader_investment_plan', result['trader_investment_plan']);
+
+    const reports = this.asRecord(result['reports']);
+    if (reports) {
+      for (const [section, value] of Object.entries(reports)) {
+        addArtifact('reports', section, value);
+      }
+    }
+
+    return artifacts;
+  }
+
+  private asRecord(value: unknown): Record<string, unknown> | undefined {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) {
+      return undefined;
+    }
+    return value as Record<string, unknown>;
+  }
+
+  private toContentString(value: unknown): string | null {
+    if (value === null || typeof value === 'undefined') {
+      return null;
+    }
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      return trimmed.length > 0 ? trimmed : null;
+    }
+    try {
+      return JSON.stringify(value, null, 2);
+    } catch {
+      return String(value);
+    }
+  }
+
+  private extractDurationSeconds(result: Record<string, unknown> | undefined): number | undefined {
+    if (!result) {
+      return undefined;
+    }
+    const value = result['duration_seconds'] ?? result['durationSeconds'];
+    if (typeof value === 'number') {
+      return value;
+    }
+    if (typeof value === 'string') {
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : undefined;
+    }
+    return undefined;
+  }
+
+  private extractSummaryMetadata(result: Record<string, unknown> | undefined): Record<string, unknown> | undefined {
+    if (!result) {
+      return undefined;
+    }
+    const metadata: Record<string, unknown> = {};
+    const fields: Array<[string, unknown]> = [
+      ['log_path', result['log_path']],
+      ['project_dir', result['project_dir']],
+      ['started_at', result['started_at']],
+      ['completed_at', result['completed_at']],
+    ];
+    for (const [key, value] of fields) {
+      if (typeof value === 'string' && value.trim()) {
+        metadata[key] = value;
+      }
+    }
+    return Object.keys(metadata).length > 0 ? metadata : undefined;
   }
 
   private mapRemoteStatus(status: string | undefined): RunStatus {
