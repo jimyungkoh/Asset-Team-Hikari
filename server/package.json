@@ -1,7 +1,7 @@
 {
   "_metadata": {
     "modified": "See CHANGELOG.md for complete modification history",
-    "lastUpdated": "2025-11-01",
+    "lastUpdated": "2025-11-02",
     "modifiedBy": "jimyungkoh<aqaqeqeq0511@gmail.com>"
   },
   "name": "tradingagents-server",
@@ -17,6 +17,7 @@
     "start": "node dist/main.js",
     "start:dev": "ts-node-dev --respawn --transpile-only src/main.ts",
     "backfill:run": "ts-node scripts/backfill-run.ts",
+    "report:compose": "ts-node scripts/create-composite-report.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
