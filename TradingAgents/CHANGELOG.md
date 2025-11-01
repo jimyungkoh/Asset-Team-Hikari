@@ -1,6 +1,6 @@
 <!-- ============================================================
 Modified: See CHANGELOG.md for complete modification history
-Last Updated: 2025-10-27
+Last Updated: 2025-11-01
 Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 ============================================================ -->
 
@@ -16,6 +16,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 <!-- Trading graph thinking mode support added 2025-10-19 -->
+
+### server/ (NestJS API) & web/ (Next.js Client)
+
+**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
+**Last Updated**: 2025-11-01
+
+#### [1.7] - 2025-11-01 - Module Architecture Refactoring
+
+**server/**:
+- **Removed**: server/src/runs/ 하위의 기존 구조 (artifacts.service.ts, reports.*.ts, runs.*.ts 삭제)
+- **Added**: server/src/runs/domain/ - `RunService` (비즈니스 로직), `RunConfigService` (설정 관리) 분리
+- **Added**: server/src/runs/infrastructure/ - `RunRepository` (데이터 접근), `PythonRunsClient` (외부 API 통신)
+- **Added**: server/src/runs/presentation/ - `RunsController` (HTTP 엔드포인트)
+- **Added**: server/src/artifacts/ - 독립 모듈로 분리 (ArtifactsModule, ArtifactsService, ArtifactsRepository)
+- **Added**: server/src/reports/ - 독립 모듈로 분리 (ReportsModule, ReportsService, ReportsRepository, ReportsController)
+- **Added**: server/src/tickers/ - 독립 모듈로 분리 (TickersModule, TickersService, TickersController)
+- **Added**: server/src/common/guards/ - 인증 가드 분리 (InternalAuthGuard)
+- **Changed**: server/src/app.module.ts - 새로운 모듈 구조 반영 (ArtifactsModule, ReportsModule, TickersModule 추가)
+- **Changed**: server/src/runs/runs.module.ts - 계층화 구조 (domain, infrastructure, presentation) 적용
+
+**web/**:
+- **Added**: web/lib/api-client.ts - 백엔드 API 통신 클라이언트 라이브러리
+- **Added**: web/lib/constants.ts - 애플리케이션 전역 상수 (API 엔드포인트, 기본값)
+- **Added**: web/lib/config/env.config.ts - 환경 변수 설정 관리
+- **Added**: web/lib/middleware/auth.middleware.ts - 인증 및 에러 처리 미들웨어
+- **Added**: web/lib/services/backend-api.service.ts - 백엔드 서비스 통합 클라이언트
+- **Added**: web/types/api.ts - API 응답 타입 정의
+- **Added**: web/types/env.d.ts - 환경 변수 타입 정의
+- **Changed**: web/auth.config.ts - NextAuth 설정 최신화
+- **Changed**: web/tsconfig.json - 경로 매핑 및 타입 체크 개선
+- **Changed**: web/app/api/runs/route.ts - 새로운 클라이언트 라이브러리 사용으로 개선
+- **Changed**: web/app/api/runs/[id]/route.ts - 개별 run 조회 API 개선
+
+**Impact**: 🔴 High - 주요 아키텍처 리팩토링 (계층화, 모듈 분리, 패키지 재구성)
 
 ### TradingAgents/ (Python Core)
 
@@ -104,7 +138,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### web/ (Next.js UI)
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
-**Last Updated**: 2025-10-31
+**Last Updated**: 2025-11-01
+
+#### [1.5] - 2025-11-01 - Next.js Best Practices Refactoring
+
+- **Added**: web/types/env.d.ts - 환경 변수 타입 정의로 타입 안정성 확보
+- **Added**: web/types/api.ts - API 응답 및 도메인 타입 정의 (Run, Report, ApiResponse 등)
+- **Added**: web/lib/constants.ts - API 설정, 라우트 경로, HTTP 상태 코드, 에러 메시지 중앙 관리
+- **Added**: web/lib/api-client.ts - 재사용 가능한 API 클라이언트 클래스 (향후 사용)
+- **Added**: web/lib/config/env.config.ts - 환경 설정 중앙 관리 및 검증
+- **Added**: web/lib/services/backend-api.service.ts - Backend API 통신 로직 서비스 레이어 분리
+- **Added**: web/lib/middleware/auth.middleware.ts - 인증 및 에러 핸들링 미들웨어 패턴 도입
+- **Changed**: web/tsconfig.json - Path aliases 추가 (@/components, @/lib, @/app, @/types)
+- **Changed**: web/tsconfig.json - moduleResolution을 'bundler'로 변경
+- **Changed**: web/app/api/runs/route.ts - 미들웨어 패턴 적용 및 서비스 레이어 사용
+- **Changed**: web/app/api/runs/[id]/route.ts - 미들웨어 패턴 적용 및 서비스 레이어 사용
+- **Changed**: web/auth.config.ts - 서비스 레이어 사용으로 코드 간소화 및 에러 핸들링 개선
+- **Refactored**: API 라우트 핸들러에서 중복 코드 제거 (DRY 원칙)
+- **Refactored**: 관심사 분리 (Separation of Concerns) - 인증, 에러 핸들링, 비즈니스 로직 분리
+
+**Impact**: 🟢 Low - 내부 구조 개선, 기존 기능 유지, 타입 안정성 강화
 
 #### [1.4] - 2025-10-31 - Ticker Reports Pages & Components
 
