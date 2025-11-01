@@ -38,6 +38,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
 **Last Updated**: 2025-11-01
 
+#### [1.6] - 2025-11-01 - DynamoDB Artifact Persistence & Run Hydration
+
+- **Added**: server/src/runs/artifacts.service.ts - `saveArtifact()` and `saveRunSummary()` methods for DynamoDB integration
+- **Added**: Automatic table creation via `ensureTableExists()` method with PAY_PER_REQUEST billing mode
+- **Added**: Safe database operations: `saveReportMetadataSafe()` for PostgreSQL metadata sync and `recordTickerRunSafe()` for ticker_runs tracking
+- **Added**: Artifact type interfaces: `TickerArtifact` and `TickerRunSummary` with full DynamoDB schema definitions
+- **Added**: server/src/runs/runs.service.ts - `persistRunArtifacts()` method for persisting run results post-completion
+- **Added**: `buildArtifactsFromResult()` method to extract artifacts from trading run results (decisions, plans, reports)
+- **Added**: `backfillRun()` method to enable artifact persistence for previously completed runs
+- **Added**: Helper methods: `toContentString()`, `extractDurationSeconds()`, `extractSummaryMetadata()` for artifact data extraction
+- **Changed**: server/src/runs/dto/create-run.dto.ts - Added optional `config?: Record<string, unknown>` field with validation
+- **Changed**: server/src/runs/dto/create-run.dto.ts - Updated imports to include `IsObject` and `IsOptional` validators
+- **Changed**: server/package.json - Updated `_metadata.lastUpdated` to 2025-11-01
+- **Added**: npm script `backfill:run` to execute backfill operations via ts-node
+- **Added**: ts-node to devDependencies (^10.9.2) for running TypeScript scripts
+
+**Impact**: 🟡 Medium - Introduces new artifact persistence layer with DynamoDB and PostgreSQL metadata sync
+
 #### [1.5] - 2025-11-01 - Schema Refactoring: ticker_runs → ticker
 
 - **Changed**: server/src/infrastructure/database/schema.ts - `tickerRuns` 테이블을 `ticker`로 리네임
