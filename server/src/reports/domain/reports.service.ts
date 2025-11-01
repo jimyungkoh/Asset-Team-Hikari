@@ -11,7 +11,7 @@ import {
   ReportMetadata,
 } from "../infrastructure/reports.repository";
 import { DynamoDbService } from "../../infrastructure/dynamodb/dynamodb.service";
-import { TickerArtifact } from "../../artifacts/infrastructure/artifacts.service";
+import { normalizeReportContent } from "../../common/utils/content-normalizer";
 
 export interface ReportListItem {
   id: number;
@@ -111,7 +111,11 @@ export class ReportsService {
   private async buildReportDetail(
     metadata: ReportMetadata
   ): Promise<ReportDetail> {
-    const artifact = await this.dynamoDbService.getItem<TickerArtifact>({
+    const artifact = await this.dynamoDbService.getItem<{
+      content?: string | null;
+      contentType?: string | null;
+      metadata?: Record<string, unknown>;
+    }>({
       tableName: this.tableName,
       key: {
         tickerDate: metadata.dynamoTickerDate,
@@ -136,8 +140,8 @@ export class ReportsService {
       status: metadata.status,
       createdAt: metadata.createdAt.toISOString(),
       updatedAt: metadata.updatedAt.toISOString(),
-      content: artifact.content,
-      contentType: artifact.contentType,
+      content: normalizeReportContent(artifact.content),
+      contentType: artifact.contentType ?? "text/markdown",
       metadata: artifact.metadata,
     };
   }

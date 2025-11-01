@@ -14,6 +14,8 @@ import { RunRepository } from '../infrastructure/run.repository';
 import { RunConfigService } from '../config/run-config.service';
 import { ArtifactsService } from '../../artifacts/infrastructure/artifacts.service';
 import { ReportsRepository } from '../../reports/infrastructure/reports.repository';
+import { ReportSummaryService } from '../../reports/domain/report-summary.service';
+import { stringifyStructuredContent } from '../../common/utils/content-normalizer';
 
 interface RunContext {
   id: string;
@@ -45,6 +47,7 @@ export class RunService {
     private readonly runConfigService: RunConfigService,
     private readonly artifactsService: ArtifactsService,
     private readonly reportsRepository: ReportsRepository,
+    private readonly reportSummaryService: ReportSummaryService,
   ) {}
 
   async startRun(dto: CreateRunDto): Promise<RunSummary> {
@@ -361,7 +364,7 @@ export class RunService {
       return;
     }
 
-    const artifacts = this.buildArtifactsFromResult(context, resultRecord);
+    const artifacts = await this.buildArtifactsFromResult(context, resultRecord);
     for (const artifact of artifacts) {
       try {
         await this.artifactsService.saveArtifact(artifact);
@@ -374,24 +377,26 @@ export class RunService {
     }
   }
 
-  private buildArtifactsFromResult(
+  private async buildArtifactsFromResult(
     context: RunContext,
     result: Record<string, unknown>,
-  ): Parameters<ArtifactsService['saveArtifact']>[0][] {
+  ): Promise<Parameters<ArtifactsService['saveArtifact']>[0][]> {
     const artifacts: Parameters<ArtifactsService['saveArtifact']>[0][] = [];
     const runDate = context.tradeDate;
     const ticker = context.ticker;
+    const reportsContent: Record<string, string> = {};
 
     const addArtifact = (namespace: string, key: string, value: unknown): void => {
       const content = this.toContentString(value);
       if (!content) {
         return;
       }
+      const artifactKey = `${namespace}#${key}`;
       artifacts.push({
         ticker,
         runDate,
         artifactNamespace: namespace,
-        artifactKey: `${namespace}#${key}`,
+        artifactKey,
         content,
         contentSize: Buffer.byteLength(content, 'utf8'),
         metadata: {
@@ -399,6 +404,10 @@ export class RunService {
           status: context.status,
         },
       });
+
+      if (namespace === 'reports') {
+        reportsContent[key] = content;
+      }
     };
 
     addArtifact('reports', 'decision', result['decision']);
@@ -411,6 +420,48 @@ export class RunService {
       for (const [section, value] of Object.entries(reports)) {
         addArtifact('reports', section, value);
       }
+    }
+
+    const summaryLanguage = this.reportSummaryService.getDefaultLanguage();
+    const decisionContent =
+      reportsContent['decision'] ?? this.toContentString(result['decision']) ?? null;
+    const finalDecisionContent =
+      reportsContent['final_trade_decision'] ??
+      this.toContentString(result['final_trade_decision']) ??
+      null;
+
+    const summary = await this.reportSummaryService.generateCompositeReport({
+      ticker,
+      runDate,
+      language: summaryLanguage,
+      decision: decisionContent,
+      finalDecision: finalDecisionContent,
+      sections: {
+        market: reportsContent['market'] ?? null,
+        sentiment: reportsContent['sentiment'] ?? null,
+        news: reportsContent['news'] ?? null,
+        fundamentals: reportsContent['fundamentals'] ?? null,
+        decision: decisionContent,
+        final_trade_decision: finalDecisionContent,
+      },
+    });
+
+    if (summary?.content) {
+      const language = summary.language || summaryLanguage;
+      const artifactKey = `reports#result#${language}`;
+      artifacts.push({
+        ticker,
+        runDate,
+        artifactNamespace: 'reports',
+        artifactKey,
+        content: summary.content,
+        contentSize: Buffer.byteLength(summary.content, 'utf8'),
+        metadata: {
+          runId: context.id,
+          status: context.status,
+          summaryLanguage: language,
+        },
+      });
     }
 
     return artifacts;
@@ -427,15 +478,12 @@ export class RunService {
     if (value === null || typeof value === 'undefined') {
       return null;
     }
-    if (typeof value === 'string') {
-      const trimmed = value.trim();
-      return trimmed.length > 0 ? trimmed : null;
-    }
-    try {
-      return JSON.stringify(value, null, 2);
-    } catch {
-      return String(value);
-    }
+    const stringified =
+      typeof value === 'string'
+        ? value
+        : stringifyStructuredContent(value);
+    const trimmed = stringified.trim();
+    return trimmed.length > 0 ? trimmed : null;
   }
 
   private extractDurationSeconds(result: Record<string, unknown> | undefined): number | undefined {
