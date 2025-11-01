@@ -1,14 +1,14 @@
 // ============================================================
 // Modified: See CHANGELOG.md for complete modification history
-// Last Updated: 2025-10-31
+// Last Updated: 2025-11-01
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
 import { Injectable, Logger } from "@nestjs/common";
 import { asc, desc, eq, and } from "drizzle-orm";
 
-import { DatabaseService } from "../infrastructure/database/database.service";
-import { reports } from "../infrastructure/database/schema";
+import { DatabaseService } from "../../infrastructure/database/database.service";
+import { reports } from "../../infrastructure/database/schema";
 
 export interface ReportMetadata {
   id: number;
@@ -150,4 +150,3 @@ export class ReportsRepository {
       .orderBy(asc(reports.reportType));
   }
 }
-

@@ -1,14 +1,14 @@
 // ============================================================
 // Modified: See CHANGELOG.md for complete modification history
-// Last Updated: 2025-10-31
+// Last Updated: 2025-11-01
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
 import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 
-import { ReportsRepository } from "./reports.repository";
-import { DynamoDbService } from "../infrastructure/dynamodb/dynamodb.service";
-import { TickerArtifact } from "./artifacts.service";
+import { ReportsRepository } from "../infrastructure/reports.repository";
+import { DynamoDbService } from "../../infrastructure/dynamodb/dynamodb.service";
+import { TickerArtifact } from "../../artifacts/infrastructure/artifacts.service";
 
 export interface ReportListItem {
   id: number;
@@ -98,4 +98,3 @@ export class ReportsService {
     };
   }
 }
-

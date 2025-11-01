@@ -8,11 +8,11 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { MessageEvent } from '@nestjs/common/interfaces';
 import { Observable, ReplaySubject } from 'rxjs';
 
-import { ArtifactsService } from './artifacts.service';
-import { RunConfigService } from './config/run-config.service';
-import { CreateRunDto } from './dto/create-run.dto';
-import { PythonRunsClient, PythonRunEvent, PythonRunStatusResponse } from './python-runs.client';
-import { RunStatus, RunSummary } from './run.types';
+import { CreateRunDto } from '../dto/create-run.dto';
+import { RunStatus, RunSummary } from '../run.types';
+import { RunRepository } from '../infrastructure/run.repository';
+import { RunConfigService } from '../config/run-config.service';
+import { ArtifactsService } from '../../artifacts/infrastructure/artifacts.service';
 
 interface RunContext {
   id: string;
@@ -35,12 +35,12 @@ interface RunContext {
 const TERMINAL_STATUSES = new Set<RunStatus>(['success', 'failed']);
 
 @Injectable()
-export class RunsService {
-  private readonly logger = new Logger(RunsService.name);
+export class RunService {
+  private readonly logger = new Logger(RunService.name);
   private readonly runs = new Map<string, RunContext>();
 
   constructor(
-    private readonly pythonRunsClient: PythonRunsClient,
+    private readonly runRepository: RunRepository,
     private readonly runConfigService: RunConfigService,
     private readonly artifactsService: ArtifactsService,
   ) {}
@@ -52,7 +52,7 @@ export class RunsService {
     const config = this.runConfigService.buildRunConfig(dto.ticker, dto.tradeDate);
     const enrichedDto = { ...dto, config };
 
-    const createResponse = await this.pythonRunsClient.createRun(enrichedDto);
+    const createResponse = await this.runRepository.createRun(enrichedDto);
     const id = createResponse.id;
 
     let context = this.runs.get(id);
@@ -125,14 +125,14 @@ export class RunsService {
     context.stopStream?.();
     context.streamActive = true;
 
-    context.stopStream = this.pythonRunsClient.streamRun(context.id, {
-      onEvent: (event) => this.handleRemoteEvent(context, event),
-      onError: (error) => this.handleRemoteError(context, error),
+    context.stopStream = this.runRepository.streamRun(context.id, {
+      onEvent: (event: any) => this.handleRemoteEvent(context, event),
+      onError: (error: Error) => this.handleRemoteError(context, error),
       onClose: () => this.handleRemoteClose(context),
     });
   }
 
-  private handleRemoteEvent(context: RunContext, event: PythonRunEvent): void {
+  private handleRemoteEvent(context: RunContext, event: any): void {
     const timestamp = event.timestamp ?? new Date().toISOString();
     const payload = event.payload ?? {};
 
@@ -230,9 +230,9 @@ export class RunsService {
   }
 
   private async hydrateFromRemote(id: string): Promise<RunContext> {
-    let remote: PythonRunStatusResponse;
+    let remote: any;
     try {
-      remote = await this.pythonRunsClient.getRun(id);
+      remote = await this.runRepository.getRun(id);
     } catch (error) {
       if (error instanceof Error && error.message.includes('status 404')) {
         throw new NotFoundException(`Run ${id} was not found on the Python service`);
@@ -253,7 +253,7 @@ export class RunsService {
     return context;
   }
 
-  private getOrCreateContext(remote: PythonRunStatusResponse): RunContext {
+  private getOrCreateContext(remote: any): RunContext {
     let context = this.runs.get(remote.id);
     if (!context) {
       context = {
@@ -274,7 +274,7 @@ export class RunsService {
     return context;
   }
 
-  private updateContextFromRemote(context: RunContext, remote: PythonRunStatusResponse): void {
+  private updateContextFromRemote(context: RunContext, remote: any): void {
     context.ticker = remote.ticker;
     context.tradeDate = remote.trade_date;
     context.status = this.mapRemoteStatus(remote.status);

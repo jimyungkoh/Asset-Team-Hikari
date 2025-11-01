@@ -1,47 +1,19 @@
 // ============================================================
 // Modified: See CHANGELOG.md for complete modification history
-// Last Updated: 2025-10-30
+// Last Updated: 2025-11-01
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
 import { Injectable, Logger } from "@nestjs/common";
 
-import { DynamoDbService } from "../infrastructure/dynamodb/dynamodb.service";
-import { DatabaseService } from "../infrastructure/database/database.service";
-import { TickerArtifactDto, TickerRunSummaryDto } from "./dto/ticker-artifact.dto";
-import { ReportsRepository } from "./reports.repository";
-
-export interface TickerArtifact extends Record<string, unknown> {
-  tickerDate: string; // PK: <TICKER>#<YYYY-MM-DD>
-  artifactKey: string; // SK: <artifactNamespace>#<identifier>
-  ticker: string; // GSI_TickerHistory PK
-  runDate: string; // GSI_RunDate PK
-  artifactNamespace: string;
-  content: string;
-  contentSize: number;
-  contentType?: string;
-  metadata?: Record<string, unknown>;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface TickerRunSummary extends Record<string, unknown> {
-  tickerDate: string; // PK: <TICKER>#<YYYY-MM-DD>
-  artifactKey: string; // SK: "summary#<runId>"
-  ticker: string; // GSI_TickerHistory PK
-  runDate: string; // GSI_RunDate PK
-  runId: string;
-  status: string;
-  result?: Record<string, unknown>;
-  error?: string;
-  durationSeconds?: number;
-  metadata?: Record<string, unknown>;
-  createdAt: string;
-  updatedAt: string;
-}
+import { DynamoDbService } from "../../infrastructure/dynamodb/dynamodb.service";
+import { DatabaseService } from "../../infrastructure/database/database.service";
+import { TickerArtifactDto, TickerRunSummaryDto } from "../dto/ticker-artifact.dto";
+import { ArtifactsServiceInterface, TickerArtifact, TickerRunSummary } from "../domain/artifacts.service.interface";
+import { ReportsRepository } from "../../reports/infrastructure/reports.repository";
 
 @Injectable()
-export class ArtifactsService {
+export class ArtifactsService implements ArtifactsServiceInterface {
   private readonly logger = new Logger(ArtifactsService.name);
   private readonly tableName: string;
 

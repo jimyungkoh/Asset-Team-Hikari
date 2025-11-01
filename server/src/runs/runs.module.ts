@@ -7,26 +7,32 @@
 import { Module } from '@nestjs/common';
 
 import { InternalAuthService } from '../common/internal-auth.service';
-import { ArtifactsService } from './artifacts.service';
+import { InternalAuthGuard } from '../common/guards/internal-auth.guard';
+import { ArtifactsModule } from '../artifacts/artifacts.module';
 import { RunConfigService } from './config/run-config.service';
+import { RunService } from './domain/run.service';
+import { RunRepository } from './infrastructure/run.repository';
 import { PythonRunsClient } from './python-runs.client';
-import { ReportsController } from './reports.controller';
-import { ReportsRepository } from './reports.repository';
-import { ReportsService } from './reports.service';
-import { RunsController } from './runs.controller';
-import { RunsService } from './runs.service';
+import { RunsController } from './presentation/runs.controller';
 
 @Module({
-  controllers: [RunsController, ReportsController],
+  imports: [ArtifactsModule],
+  controllers: [RunsController],
   providers: [
-    RunsService,
-    RunConfigService,
-    ArtifactsService,
-    InternalAuthService,
+    // Domain
+    RunService,
+    
+    // Infrastructure
+    RunRepository,
     PythonRunsClient,
-    ReportsRepository,
-    ReportsService,
+    
+    // Config
+    RunConfigService,
+    
+    // Auth
+    InternalAuthService,
+    InternalAuthGuard,
   ],
-  exports: [ArtifactsService],
+  exports: [RunService],
 })
 export class RunsModule {}
