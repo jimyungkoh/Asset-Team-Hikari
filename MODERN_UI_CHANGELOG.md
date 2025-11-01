@@ -1,8 +1,32 @@
 # 🎨 Modern Financial UI 재설계 변경 로그
 
-**날짜**: 2025-10-27  
-**작성자**: jimyungkoh<aqaqeqeq0511@gmail.com>  
-**버전**: 1.1.0  
+**날짜**: 2025-10-27
+**작성자**: jimyungkoh<aqaqeqeq0511@gmail.com>
+**버전**: 1.1.0
+
+## 📋 최근 업데이트 (2025-11-01)
+
+### 🎯 사용자 중심 UI 단순화
+
+투자 서비스 이용자 관점에서 기술적 세부사항을 제거하고 핵심 기능에 집중했습니다.
+
+**제거된 섹션**:
+- ❌ 실시간 지표 (Agent Flow, Avg Runtime, Data Readiness)
+- ❌ 분석 프로세스 (Analyzer Pod, Research Debate 등)
+- ❌ 설계 원칙 (Config Snapshot, DB Friendly, Self-Descriptive)
+- ❌ 분석 전 참고사항 (분석 강도, AI 서비스, 분석 기록, 실시간 확인)
+
+**유지된 섹션**:
+- ✅ 분석 설정 및 실행 (RunForm - 유일한 핵심 기능)
+
+**영향받은 파일**:
+- `web/app/page.tsx` (-202줄) - 모든 불필요한 섹션 제거
+- `web/lib/design-system.ts` (-60줄) - 미사용 상수 및 인터페이스 제거
+
+**결과**:
+- **극도로 단순화된 인터페이스** - 사용자는 폼 작성과 분석 실행에만 집중
+- **직관적인 UX** - 복잡한 기술 용어와 설명 완전 제거
+- **빠른 페이지 로드** - 불필요한 컴포넌트 완전 제거
 
 ## 📋 요약
 
@@ -212,7 +236,7 @@ After:
 Before:
   Section gap: 16px
   Card padding: 24px
-  
+
 After:
   Section gap: 32px
   Card padding: 32-40px
@@ -297,7 +321,189 @@ const LAYOUT = {
 
 ---
 
-**버전**: 1.1.0 - Modern UI Redesign  
-**상태**: ✅ 완료  
-**테스트**: ✅ 통과  
+**버전**: 1.1.0 - Modern UI Redesign
+**상태**: ✅ 완료
+**테스트**: ✅ 통과
 **배포 준비**: ✅ 완료
+
+
+---
+
+## 🎯 2025-11-01 업데이트: 투자자 친화적 용어 개선
+
+**작성자**: jimyungkoh<aqaqeqeq0511@gmail.com>
+**영향 수준**: 🟡 Medium
+
+### 변경 사항
+
+#### [Changed] 핵심 용어 투자자 친화적으로 개선
+- "Run" → "분석 실행/분석"
+- "Provider" → "AI 서비스"
+- "Model" → "분석 엔진"
+- "Quick/Deep Model" → "빠른 분석/심층 분석 엔진"
+- "Thinking Mode" → "사고 깊이"
+- "Research Depth" → "분석 강도"
+- "Rounds" → "검토 횟수"
+
+#### [Changed] 분석가 이름 한글화
+- `web/lib/run-config.ts` - ANALYST_OPTIONS
+  - "Market Analyst" → "시장 분석가"
+  - "Social Analyst" → "소셜 분석가"
+  - "News Analyst" → "뉴스 분석가"
+  - "Fundamentals Analyst" → "펀더멘털 분석가"
+
+#### [Changed] 분석 강도 레이블 개선
+- `web/lib/run-config.ts` - RESEARCH_DEPTH_OPTIONS
+  - "Shallow" → "빠른 분석"
+  - "Medium" → "표준 분석"
+  - "Deep" → "심층 분석"
+  - 설명에서 "토론 라운드" → "검토"
+
+#### [Changed] AI 서비스 설명 간소화
+- `web/lib/run-config.ts` - PROVIDER_OPTIONS
+  - "OpenAI Responses API" → "OpenAI"
+  - "OpenRouter (Responses API)" → "OpenRouter"
+  - "Local (Ollama-Compatible)" → "자체 서버"
+  - 기술 중심 설명 → 투자자 관점 설명
+
+#### [Changed] 모델 힌트 메시지 개선
+- `web/lib/run-config.ts` - 모든 ModelOption hint
+  - 기술 용어 최소화 (추론, 스프린트, 온프레미스 등)
+  - 투자자가 이해하기 쉬운 표현으로 변경
+
+#### [Changed] UI 텍스트 전면 개선
+- `web/components/runs/run-form.tsx`
+  - "LLM Provider" → "AI 서비스"
+  - "Quick Model" → "빠른 분석 엔진"
+  - "Deep Model" → "심층 분석 엔진"
+  - "Analysts" → "분석가 팀"
+  - "Research Depth" → "분석 강도"
+  - "Thinking Mode" → "사고 깊이"
+  - "Heavy" → "최대"
+  - "런 실행" → "분석 시작"
+  - 안내 메시지 간소화
+
+#### [Changed] 페이지 제목 및 설명 개선
+- `web/app/page.tsx`
+  - "런 구성 및 실행" → "분석 설정 및 실행"
+  - "실행 파이프라인" → "분석 프로세스"
+  - "실행 전 참고사항" → "분석 전 참고사항"
+  - 모든 팁 내용 투자자 친화적으로 변경
+
+### 이유
+
+1. **사용자 경험 개선**: CS 전문 용어는 일반 투자자에게 진입 장벽
+2. **직관성 향상**: 기술 구현보다 투자 분석 가치 강조
+3. **접근성 개선**: 전문 지식 없이도 이해 가능한 표현 사용
+4. **일관성 확보**: 동일 개념은 동일 용어로 통일
+
+### 개선 예시
+
+**Before (기술 중심)**:
+```
+LLM Provider를 선택하고 Quick Model과 Deep Model을 설정한 후
+Research Depth를 조정하여 런을 실행하세요.
+```
+
+**After (투자자 친화)**:
+```
+AI 서비스를 선택하고 빠른 분석 엔진과 심층 분석 엔진을 설정한 후
+분석 강도를 조정하여 분석을 시작하세요.
+```
+
+#### [Changed] 히어로 타이틀 개선
+- `web/components/design/page-shell.tsx`
+  - "다중 에이전트 금융 오케스트레이션" → "AI 분석가 팀이 함께하는 투자 리서치"
+  - 기술 용어 제거, 서비스 가치 명확화
+
+### 영향받은 파일
+
+- 🟡 `web/lib/run-config.ts` (용어 전면 개선)
+- 🟡 `web/components/runs/run-form.tsx` (UI 텍스트 개선)
+- 🟡 `web/app/page.tsx` (페이지 텍스트 개선)
+- 🟡 `web/components/design/page-shell.tsx` (히어로 타이틀 개선)
+- 🟢 `memo/2025-11-01/UX_TERMINOLOGY_IMPROVEMENT.md` (상세 문서)
+
+---
+
+## 🔄 2025-11-01 업데이트: 런 설정 단순화
+
+**작성자**: jimyungkoh<aqaqeqeq0511@gmail.com>
+**영향 수준**: 🟡 Medium
+
+### 변경 사항
+
+#### [Added] 런 설정 템플릿 시스템
+- `server/config/run-template.json` - 기본 런 설정 템플릿 추가
+  - LLM Provider: OpenRouter
+  - Quick Model: deepseek/deepseek-v3.2-exp
+  - Deep Model: deepseek/deepseek-r1-0528
+  - Analysts: market, social, news, fundamentals
+  - Research Depth: Deep (5 rounds)
+  - Thinking Mode: Heavy
+
+#### [Added] RunConfigService
+- `server/src/runs/config/run-config.service.ts` - 템플릿 로드 및 병합 서비스
+  - `loadTemplate()`: run-template.json 로드
+  - `buildRunConfig()`: 티커/날짜와 템플릿 병합
+  - `getTemplate()`: 현재 템플릿 조회
+
+#### [Changed] CreateRunDto 단순화
+- `server/src/runs/dto/create-run.dto.ts`
+  - `config` 필드 제거 (선택적 → 자동 생성)
+  - 티커와 거래일만 필수 입력
+
+#### [Changed] RunsService 템플릿 통합
+- `server/src/runs/runs.service.ts`
+  - RunConfigService 의존성 주입
+  - `startRun()`: 템플릿 config 자동 병합
+
+#### [Changed] RunsModule Provider 추가
+- `server/src/runs/runs.module.ts`
+  - RunConfigService를 providers에 추가
+
+#### [Changed] UI 대폭 단순화
+- `web/components/runs/run-form.tsx`
+  - 486줄 → 200줄 (약 60% 감소)
+  - 티커와 날짜만 입력받는 심플한 폼
+  - 기본 설정 정보를 읽기 전용으로 표시
+  - 복잡한 설정 UI 제거 (애널리스트 선택, 모델 선택, Thinking 설정 등)
+
+### 이유
+
+1. **사용자 경험 개선**: 매번 복잡한 설정을 하는 것은 번거로움
+2. **일관성 보장**: 모든 런이 동일한 기본 설정 사용
+3. **유지보수 용이**: 설정 변경 시 JSON 파일만 수정
+4. **Best Practice**: NestJS ConfigModule 패턴 준수
+
+### 마이그레이션 가이드
+
+기존 API 호출 방식:
+```json
+{
+  "ticker": "NVDA",
+  "tradeDate": "2025-11-01",
+  "config": { /* 복잡한 설정 */ }
+}
+```
+
+새로운 API 호출 방식:
+```json
+{
+  "ticker": "NVDA",
+  "tradeDate": "2025-11-01"
+}
+```
+
+설정 변경이 필요한 경우:
+- `server/config/run-template.json` 파일 수정
+- 서버 재시작 (템플릿은 시작 시 로드됨)
+
+### 영향받은 파일
+
+- 🟢 `server/config/run-template.json` (신규)
+- 🟢 `server/src/runs/config/run-config.service.ts` (신규)
+- 🟡 `server/src/runs/dto/create-run.dto.ts` (수정)
+- 🟡 `server/src/runs/runs.service.ts` (수정)
+- 🟡 `server/src/runs/runs.module.ts` (수정)
+- 🔴 `web/components/runs/run-form.tsx` (대폭 수정)
