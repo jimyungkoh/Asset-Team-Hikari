@@ -58,12 +58,8 @@ export function PageShell({
                 🚀 Asset Team Hikari
               </div>
               <h1 className={textStyles.heroTitle}>
-                다중 에이전트 금융 오케스트레이션
+                AI 분석 팀과 함께하는 투자 리서치
               </h1>
-              <p className={textStyles.heroSubtitle}>
-                TradingAgents CLI와 동일한 입력 체계를 웹에서도 제공합니다.
-                Apple의 디자인 철학과 모던 금융 UI를 결합했습니다.
-              </p>
             </div>
           </div>
 
