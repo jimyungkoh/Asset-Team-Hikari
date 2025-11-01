@@ -6,12 +6,14 @@
 
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import ReactMarkdown from "react-markdown";
 
 import type { ReportDetail } from "@/types/api";
 import { PageShell } from "@/components/design/page-shell";
 import { Section } from "@/components/design/section";
-import { DailyReportSections } from "@/components/reports/daily-report-sections";
-import { formatDate } from "@/lib/date-utils";
+import { StatusBadge } from "@/components/reports/status-badge";
+import { surfaceClass } from "@/lib/design-system";
+import { formatDate, formatDateTime } from "@/lib/date-utils";
 import { ROUTES } from "@/lib/constants";
 import { auth } from "@/lib/auth";
 import { getNestBase, getInternalHeaders } from "@/lib/api-helpers";
@@ -55,19 +57,62 @@ export default async function TickerDateDetailPage({
   }
 
   const { reports } = (await response.json()) as ReportsByDateResponse;
+  const compositeReport =
+    reports.find(
+      (report) =>
+        report.reportType === "reports#result#ko" ||
+        report.metadata?.artifactKey === "reports#result#ko"
+    ) ??
+    reports.find(
+      (report) =>
+        report.reportType === "result" &&
+        (report.metadata?.summaryLanguage === "ko" ||
+          report.metadata?.language === "ko")
+    );
 
   return (
     <PageShell authenticatedEmail={session.user?.email ?? null}>
       <Section
         title={`${normalizedTicker} - ${formatDate(runDate)}`}
-        description="분석 팀이 준비한 세부 리포트를 확인하세요."
+        description="자동 생성된 한국어 종합 리포트를 확인하세요."
         icon="📝"
       >
-        <DailyReportSections
-          ticker={normalizedTicker}
-          runDate={runDate}
-          reports={reports}
-        />
+        {compositeReport ? (
+          <article
+            className={`${surfaceClass(
+              "base"
+            )} space-y-6 p-8`}
+          >
+            <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                  {normalizedTicker}
+                </p>
+                <h2 className="text-2xl font-bold text-slate-900">
+                  {formatDate(runDate)} 종합 리포트 (KO)
+                </h2>
+                <p className="mt-2 text-xs text-slate-500">
+                  생성: {formatDateTime(compositeReport.createdAt)} · 업데이트:{" "}
+                  {formatDateTime(compositeReport.updatedAt)}
+                </p>
+              </div>
+              <StatusBadge status={compositeReport.status} />
+            </header>
+
+            <div className="prose prose-slate max-w-none">
+              <ReactMarkdown>{compositeReport.content}</ReactMarkdown>
+            </div>
+          </article>
+        ) : (
+          <div
+            className={`${surfaceClass(
+              "soft"
+            )} p-10 text-center text-slate-600`}
+          >
+            {formatDate(runDate)} 기준의 한국어 종합 리포트가 아직 준비되지
+            않았습니다.
+          </div>
+        )}
         <div className="mt-12">
           <Link
             href={ROUTES.TICKERS.DETAIL(normalizedTicker)}

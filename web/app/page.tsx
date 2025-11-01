@@ -18,7 +18,7 @@ export default async function HomePage(): Promise<JSX.Element> {
   }
 
   return (
-    <PageShell authenticatedEmail={session.user?.email ?? null}>
+    <PageShell authenticatedEmail={session.user?.email ?? null} showHero={true}>
       {/* Run Configuration Section */}
       <Section
         title="분석 설정 및 실행"
