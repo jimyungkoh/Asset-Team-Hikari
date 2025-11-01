@@ -6,12 +6,12 @@
 
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import ReactMarkdown from "react-markdown";
 
 import type { ReportDetail } from "@/types/api";
 import { PageShell } from "@/components/design/page-shell";
 import { Section } from "@/components/design/section";
 import { StatusBadge } from "@/components/reports/status-badge";
+import { MarkdownRenderer } from "@/components/markdown/markdown-renderer";
 import { surfaceClass } from "@/lib/design-system";
 import { formatDate, formatDateTime } from "@/lib/date-utils";
 import { ROUTES } from "@/lib/constants";
@@ -99,9 +99,7 @@ export default async function TickerDateDetailPage({
               <StatusBadge status={compositeReport.status} />
             </header>
 
-            <div className="prose prose-slate max-w-none">
-              <ReactMarkdown>{compositeReport.content}</ReactMarkdown>
-            </div>
+            <MarkdownRenderer content={compositeReport.content} />
           </article>
         ) : (
           <div
