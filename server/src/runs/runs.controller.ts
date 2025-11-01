@@ -27,6 +27,7 @@ export class RunsController {
     @Headers('x-internal-token') token: string | undefined,
     @Body() body: CreateRunDto,
   ): Promise<{ id: string }> {
+    console.log("[RunsController] createRun", body)
     this.authService.verify(token);
     const run = await this.runsService.startRun(body);
     return { id: run.id };
