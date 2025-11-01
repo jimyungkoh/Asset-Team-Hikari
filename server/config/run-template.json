@@ -1,0 +1,39 @@
+{
+  "_metadata": {
+    "modified": "See CHANGELOG.md for complete modification history",
+    "lastUpdated": "2025-11-01",
+    "modifiedBy": "jimyungkoh<aqaqeqeq0511@gmail.com>"
+  },
+  "llm_provider": "openrouter",
+  "backend_url": "https://openrouter.ai/api/v1",
+  "quick_think_llm": "deepseek/deepseek-v3.2-exp",
+  "deep_think_llm": "deepseek/deepseek-r1-0528",
+  "max_debate_rounds": 5,
+  "max_risk_discuss_rounds": 5,
+  "selected_analysts": [
+    "market",
+    "social",
+    "news",
+    "fundamentals"
+  ],
+  "metadata": {
+    "analysts": [
+      "market",
+      "social",
+      "news",
+      "fundamentals"
+    ],
+    "researchDepth": {
+      "id": "deep",
+      "label": "Deep",
+      "rounds": 5
+    },
+    "llmProvider": "OpenRouter (Responses API)",
+    "quickModel": "deepseek/deepseek-v3.2-exp",
+    "deepModel": "deepseek/deepseek-r1-0528"
+  },
+  "enable_thinking_mode": true,
+  "thinking_effort": "heavy",
+  "thinking_effort_quick": "heavy",
+  "thinking_effort_deep": "heavy"
+}
