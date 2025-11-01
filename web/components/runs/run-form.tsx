@@ -1,6 +1,6 @@
 // ============================================================
 // Modified: See CHANGELOG.md for complete modification history
-// Last Updated: 2025-11-01
+// Last Updated: 2025-11-02
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useState, useTransition } from "react";
 
 import { surfaceClass } from "../../lib/design-system";
+import { ROUTES } from "../../lib/constants";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
@@ -21,6 +22,13 @@ interface FormError {
 interface CreateRunResponse {
   id?: string;
   error?: string;
+  conflict?: boolean;
+  ticker?: string;
+  tradeDate?: string;
+}
+
+interface ReportsByDateResponse {
+  reports: Array<{ status: string }>;
 }
 
 const defaultTradeDate = () => new Date().toISOString().slice(0, 10);
@@ -53,6 +61,43 @@ export function RunForm(): JSX.Element {
     };
 
     startTransition(async () => {
+      const detailPath = ROUTES.TICKERS.DATE_DETAIL(
+        sanitizedTicker,
+        payload.tradeDate
+      );
+
+      const existingResponse = await fetch(
+        `/api/reports/tickers/${encodeURIComponent(
+          sanitizedTicker
+        )}/dates/${encodeURIComponent(payload.tradeDate)}`,
+        {
+          method: "GET",
+        }
+      );
+
+      if (existingResponse.ok) {
+        const data = (await existingResponse
+          .json()
+          .catch(() => ({}))) as ReportsByDateResponse;
+
+        const hasCompleted = Array.isArray(data.reports)
+          ? data.reports.some((report) => report.status === "success")
+          : false;
+
+        if (hasCompleted) {
+          router.push(detailPath);
+          return;
+        }
+      } else if (existingResponse.status !== 404) {
+        const data = (await existingResponse
+          .json()
+          .catch(() => ({}))) as { error?: string };
+        setError({
+          message: data.error ?? "기존 리포트를 확인하는 데 실패했습니다.",
+        });
+        return;
+      }
+
       const response = await fetch("/api/runs", {
         method: "POST",
         headers: {
@@ -60,17 +105,23 @@ export function RunForm(): JSX.Element {
         },
         body: JSON.stringify(payload),
       });
-
       const body = (await response
         .json()
         .catch(() => ({}))) as CreateRunResponse;
+
+      if (response.status === 409 || body.conflict) {
+        const conflictTicker = body.ticker ?? sanitizedTicker;
+        const conflictDate = body.tradeDate ?? payload.tradeDate;
+        router.push(ROUTES.TICKERS.DATE_DETAIL(conflictTicker, conflictDate));
+        return;
+      }
 
       if (!response.ok || !body.id) {
         setError({ message: body.error ?? "분석을 시작하지 못했습니다." });
         return;
       }
 
-      router.push(`/runs/${body.id}`);
+      router.push(detailPath);
     });
   }
 

@@ -1,6 +1,6 @@
 // ============================================================
 // Modified: See CHANGELOG.md for complete modification history
-// Last Updated: 2025-11-01
+// Last Updated: 2025-11-02
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
@@ -31,6 +31,10 @@ export const ROUTES = {
     DETAIL: (id: string) => `/reports/${id}`,
   },
   TICKERS: {
+    LIST: '/tickers',
+    DETAIL: (ticker: string) => `/tickers/${ticker}`,
+    DATE_DETAIL: (ticker: string, date: string) =>
+      `/tickers/${ticker}/dates/${date}`,
     REPORTS: (ticker: string) => `/tickers/${ticker}/reports`,
   },
 } as const;

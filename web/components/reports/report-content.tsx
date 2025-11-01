@@ -1,6 +1,6 @@
 // ============================================================
 // Modified: See CHANGELOG.md for complete modification history
-// Last Updated: 2025-10-31
+// Last Updated: 2025-11-02
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
@@ -10,6 +10,8 @@ import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import { formatDate, formatDateTime, formatReportType } from "../../lib/date-utils";
 import { surfaceClass } from "../../lib/design-system";
+import { ROUTES } from "../../lib/constants";
+import { StatusBadge } from "./status-badge";
 
 interface ReportDetail {
   id: number;
@@ -26,23 +28,6 @@ interface ReportDetail {
 
 interface ReportContentProps {
   report: ReportDetail;
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const statusClass =
-    status === "success"
-      ? "bg-green-100 text-green-800"
-      : status === "failed"
-      ? "bg-red-100 text-red-800"
-      : "bg-yellow-100 text-yellow-800";
-
-  return (
-    <span
-      className={`px-3 py-1 rounded-full text-xs font-medium ${statusClass}`}
-    >
-      {status === "success" ? "성공" : status === "failed" ? "실패" : "진행중"}
-    </span>
-  );
 }
 
 export function ReportContent({ report }: ReportContentProps) {
@@ -84,12 +69,11 @@ export function ReportContent({ report }: ReportContentProps) {
 
       {/* 뒤로 가기 버튼 */}
       <Link
-        href={`/tickers/${report.ticker}/reports`}
+        href={ROUTES.TICKERS.DATE_DETAIL(report.ticker, report.runDate)}
         className="inline-flex items-center text-blue-600 hover:text-blue-800"
       >
-        ← {report.ticker} 리포트 목록으로
+        ← {report.ticker} {formatDate(report.runDate)} 리포트로 돌아가기
       </Link>
     </div>
   );
 }
-

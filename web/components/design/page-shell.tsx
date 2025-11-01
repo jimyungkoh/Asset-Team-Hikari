@@ -1,11 +1,13 @@
 // ============================================================
 // Modified: See CHANGELOG.md for complete modification history
-// Last Updated: 2025-10-27
+// Last Updated: 2025-11-02
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
+import Link from "next/link";
 import type { PropsWithChildren } from "react";
 
+import { ROUTES } from "../../lib/constants";
 import { surfaceClass, textStyles } from "../../lib/design-system";
 
 interface PageShellProps extends PropsWithChildren {
@@ -16,6 +18,11 @@ export function PageShell({
   authenticatedEmail,
   children,
 }: PageShellProps): JSX.Element {
+  const navigationLinks: Array<{ href: string; label: string }> = [
+    { href: ROUTES.HOME, label: "새 분석" },
+    { href: ROUTES.TICKERS.LIST, label: "티커 목록" },
+  ];
+
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-white via-blue-50/50 to-cyan-50/50 text-slate-900">
       {/* Animated Background Elements */}
@@ -27,14 +34,30 @@ export function PageShell({
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-white/40 backdrop-blur-xl bg-white/30">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between gap-6 h-16">
             {/* Logo */}
-            <div className="flex items-center gap-2">
+            <Link
+              href={ROUTES.HOME}
+              className="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer"
+            >
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold">
                 ♡
               </div>
               <span className="text-lg font-bold text-slate-900">Hikari</span>
-            </div>
+            </Link>
+
+            {/* Navigation */}
+            <nav className="hidden md:flex items-center gap-1 text-sm font-medium text-slate-600">
+              {navigationLinks.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="rounded-full px-3 py-1.5 transition-colors hover:bg-white/60 hover:text-slate-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
 
             {/* Auth Info */}
             {authenticatedEmail && (
@@ -45,6 +68,21 @@ export function PageShell({
               </div>
             )}
           </div>
+
+          {/* Mobile Navigation */}
+          <nav className="md:hidden pb-3">
+            <div className="flex items-center gap-2 overflow-x-auto text-sm font-medium text-slate-600">
+              {navigationLinks.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="whitespace-nowrap rounded-full px-3 py-1.5 bg-white/60 hover:bg-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          </nav>
         </div>
       </header>
 

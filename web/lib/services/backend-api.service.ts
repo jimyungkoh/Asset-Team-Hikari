@@ -1,10 +1,29 @@
 // ============================================================
 // Modified: See CHANGELOG.md for complete modification history
-// Last Updated: 2025-11-01
+// Last Updated: 2025-11-02
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
-import type { Run, EmailVerificationResponse } from '@/types/api';
+import type {
+  Run,
+  EmailVerificationResponse,
+  ReportDetail,
+} from '@/types/api';
+
+// ============================================================
+// Error Type
+// ============================================================
+
+export class BackendApiError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number,
+    public readonly payload?: unknown,
+  ) {
+    super(message);
+    this.name = 'BackendApiError';
+  }
+}
 
 // ============================================================
 // Backend API Service
@@ -35,16 +54,28 @@ class BackendApiService {
   private async handleResponse<T>(response: Response): Promise<T> {
     if (!response.ok) {
       const errorText = await response.text();
-      let errorMessage: string;
-      
-      try {
-        const errorJson = JSON.parse(errorText);
-        errorMessage = errorJson.message || errorText;
-      } catch {
-        errorMessage = errorText;
+      let errorMessage = response.statusText || 'API Error';
+      let payload: unknown = undefined;
+
+      if (errorText) {
+        try {
+          payload = JSON.parse(errorText);
+          if (
+            payload &&
+            typeof payload === 'object' &&
+            'message' in payload &&
+            typeof (payload as Record<string, unknown>).message === 'string'
+          ) {
+            errorMessage = (payload as Record<string, string>).message;
+          } else {
+            errorMessage = errorText;
+          }
+        } catch {
+          errorMessage = errorText;
+        }
       }
 
-      throw new Error(`API Error (${response.status}): ${errorMessage}`);
+      throw new BackendApiError(errorMessage, response.status, payload);
     }
 
     return response.json();
@@ -103,6 +134,28 @@ class BackendApiService {
     });
 
     return this.handleResponse<EmailVerificationResponse>(response);
+  }
+
+  async getReportsByTickerAndDate(
+    ticker: string,
+    runDate: string,
+  ): Promise<ReportDetail[]> {
+    this.validateConfig();
+
+    const response = await fetch(
+      `${this.config.baseUrl}/reports/tickers/${encodeURIComponent(
+        ticker,
+      )}/dates/${encodeURIComponent(runDate)}`,
+      {
+        headers: this.getHeaders(),
+        cache: 'no-store',
+      },
+    );
+
+    const { reports } = await this.handleResponse<{ reports: ReportDetail[] }>(
+      response,
+    );
+    return reports;
   }
 }
 

@@ -1,6 +1,6 @@
 // ============================================================
 // Modified: See CHANGELOG.md for complete modification history
-// Last Updated: 2025-11-01
+// Last Updated: 2025-11-02
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
@@ -57,13 +57,20 @@ export interface RunStreamEvent {
 // Report Related Types
 // ============================================================
 
-export interface Report {
-  id: string;
-  runId: string;
+export interface ReportListItem {
+  id: number;
   ticker: string;
-  tradeDate: string;
-  content: string;
+  runDate: string;
+  reportType: string;
+  status: string;
   createdAt: string;
+  updatedAt: string;
+}
+
+export interface ReportDetail extends ReportListItem {
+  content: string;
+  contentType?: string;
+  metadata?: Record<string, unknown>;
 }
 
 // ============================================================

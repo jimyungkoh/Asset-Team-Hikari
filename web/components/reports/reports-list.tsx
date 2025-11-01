@@ -1,6 +1,6 @@
 // ============================================================
 // Modified: See CHANGELOG.md for complete modification history
-// Last Updated: 2025-10-31
+// Last Updated: 2025-11-02
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
@@ -9,6 +9,7 @@
 import Link from "next/link";
 import { formatDate, formatReportType } from "../../lib/date-utils";
 import { surfaceClass } from "../../lib/design-system";
+import { StatusBadge } from "./status-badge";
 
 interface ReportListItem {
   id: number;
@@ -23,23 +24,6 @@ interface ReportListItem {
 interface ReportsListProps {
   ticker: string;
   reports: ReportListItem[];
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const statusClass =
-    status === "success"
-      ? "bg-green-100 text-green-800"
-      : status === "failed"
-      ? "bg-red-100 text-red-800"
-      : "bg-yellow-100 text-yellow-800";
-
-  return (
-    <span
-      className={`px-3 py-1 rounded-full text-xs font-medium ${statusClass}`}
-    >
-      {status === "success" ? "성공" : status === "failed" ? "실패" : "진행중"}
-    </span>
-  );
 }
 
 export function ReportsList({ ticker, reports }: ReportsListProps) {
@@ -77,4 +61,3 @@ export function ReportsList({ ticker, reports }: ReportsListProps) {
     </div>
   );
 }
-
