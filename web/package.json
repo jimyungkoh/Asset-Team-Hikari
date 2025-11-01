@@ -1,7 +1,7 @@
 {
   "_metadata": {
     "modified": "See CHANGELOG.md for complete modification history",
-    "lastUpdated": "2025-10-27",
+    "lastUpdated": "2025-11-02",
     "modifiedBy": "jimyungkoh<aqaqeqeq0511@gmail.com>"
   },
   "name": "tradingagents-web",
@@ -28,6 +28,7 @@
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.0",
     "tailwind-merge": "^2.4.0",
     "tailwindcss": "^4.1.16",
     "zod": "^3.23.8"
