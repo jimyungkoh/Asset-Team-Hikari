@@ -67,22 +67,22 @@ export interface RunRequestPayload {
 export const ANALYST_OPTIONS: AnalystOption[] = [
   {
     id: 'market',
-    name: 'Market Analyst',
+    name: '시장 분석가',
     description: '시장 구조와 가격 움직임을 점검합니다.',
   },
   {
     id: 'social',
-    name: 'Social Analyst',
-    description: '소셜 미디어 데이터로 정서를 파악합니다.',
+    name: '소셜 분석가',
+    description: '소셜 미디어 데이터로 투자 심리를 파악합니다.',
   },
   {
     id: 'news',
-    name: 'News Analyst',
+    name: '뉴스 분석가',
     description: '뉴스 헤드라인과 리포트를 모니터링합니다.',
   },
   {
     id: 'fundamentals',
-    name: 'Fundamentals Analyst',
+    name: '펀더멘털 분석가',
     description: '재무제표 기반의 내재 가치 평가를 수행합니다.',
   },
 ];
@@ -90,51 +90,51 @@ export const ANALYST_OPTIONS: AnalystOption[] = [
 export const RESEARCH_DEPTH_OPTIONS: ResearchDepthOption[] = [
   {
     id: 'shallow',
-    label: 'Shallow',
+    label: '빠른 분석',
     rounds: 1,
-    summary: '빠른 스캔과 1회의 토론 라운드로 가볍게 훑어봅니다.',
+    summary: '빠른 스캔과 1회의 검토로 가볍게 훑어봅니다.',
   },
   {
     id: 'medium',
-    label: 'Medium',
+    label: '표준 분석',
     rounds: 3,
-    summary: '표준 시나리오로 3회 내외의 토론과 검증을 수행합니다.',
+    summary: '표준 시나리오로 3회 내외의 검토와 검증을 수행합니다.',
   },
   {
     id: 'deep',
-    label: 'Deep',
+    label: '심층 분석',
     rounds: 5,
-    summary: '심층 리서치로 최대 5회 토론을 통해 리스크를 정교하게 분석합니다.',
+    summary: '심층 리서치로 최대 5회 검토를 통해 리스크를 정교하게 분석합니다.',
   },
 ];
 
 const OPENAI_QUICK: ModelOption[] = [
-  { value: 'gpt-4o-mini', label: 'GPT-4o mini', hint: '저지연 스프린트 분석' },
-  { value: 'gpt-4.1-mini', label: 'GPT-4.1 mini', hint: '텍스트/도표 혼합 대응' },
-  { value: 'o4-mini', label: 'o4 mini', hint: 'o 시리즈 경량 추론' },
+  { value: 'gpt-4o-mini', label: 'GPT-4o mini', hint: '빠른 초기 분석' },
+  { value: 'gpt-4.1-mini', label: 'GPT-4.1 mini', hint: '차트와 텍스트 통합 분석' },
+  { value: 'o4-mini', label: 'o4 mini', hint: '경량 추론 엔진' },
 ];
 
 const OPENAI_DEEP: ModelOption[] = [
-  { value: 'o4-mini', label: 'o4 mini', hint: '합리적인 비용의 심층 추론' },
-  { value: 'gpt-4o', label: 'GPT-4o', hint: '정밀 완성도 높은 리서치' },
-  { value: 'o3', label: 'o3', hint: '고급 모델, 장기 추론' },
+  { value: 'o4-mini', label: 'o4 mini', hint: '합리적인 비용의 심층 분석' },
+  { value: 'gpt-4o', label: 'GPT-4o', hint: '정밀하고 완성도 높은 리서치' },
+  { value: 'o3', label: 'o3', hint: '최고급 장기 분석' },
 ];
 
 const OPENROUTER_QUICK: ModelOption[] = [
   {
     value: 'x-ai/grok-4-fast',
     label: 'xAI: Grok-4 Fast',
-    hint: '초고속 응답, 초기 스크리닝',
+    hint: '초고속 응답, 초기 검토',
   },
   {
     value: 'deepseek/deepseek-v3.1-terminus',
     label: 'DeepSeek: DeepSeek-V3.1-Terminus',
-    hint: '고정밀 토론, 빠른 결론 도출',
+    hint: '고정밀 검토, 빠른 결론 도출',
   },
   {
     value: 'deepseek/deepseek-v3.2-exp',
     label: 'DeepSeek: DeepSeek-V3.2-Exp',
-    hint: '기본 빠른 분석, DeepSeek 실험형',
+    hint: '기본 빠른 분석 (실험 버전)',
   },
 ];
 
@@ -142,46 +142,46 @@ const OPENROUTER_DEEP: ModelOption[] = [
   {
     value: 'deepseek/deepseek-v3.1-terminus',
     label: 'DeepSeek: DeepSeek-V3.1-Terminus',
-    hint: '토론 안정성, 리스크 점검 특화',
+    hint: '안정적 검토, 리스크 점검 특화',
   },
   {
     value: 'deepseek/deepseek-r1-0528',
     label: 'DeepSeek: DeepSeek-R1-0528',
-    hint: '기본 심층 분석, 장기 추론 강화',
+    hint: '기본 심층 분석, 장기 검토 강화',
   },
   {
     value: 'deepseek/deepseek-v3.2-exp',
     label: 'DeepSeek: DeepSeek-V3.2-Exp',
-    hint: '실험형 장기 추론, 고난도 시나리오',
+    hint: '실험형 장기 분석, 복잡한 시나리오',
   },
 ];
 
 const LOCAL_QUICK: ModelOption[] = [
-  { value: 'llama3.1', label: 'Llama 3.1 (8B)', hint: '온프레미스 기본 설정' },
+  { value: 'llama3.1', label: 'Llama 3.1 (8B)', hint: '자체 서버 기본 설정' },
   { value: 'qwen2.5:7b', label: 'Qwen 2.5 (7B)', hint: '저비용 대안' },
-  { value: 'mistral:7b-instruct', label: 'Mistral 7B Instruct', hint: '커스텀 튜닝 친화' },
+  { value: 'mistral:7b-instruct', label: 'Mistral 7B Instruct', hint: '맞춤 설정 가능' },
 ];
 
 const LOCAL_DEEP: ModelOption[] = [
-  { value: 'llama3.1:70b', label: 'Llama 3.1 (70B)', hint: '심층 분석용 대규모 모델' },
-  { value: 'mixtral:8x7b', label: 'Mixtral 8x7B', hint: 'MOE 구조, 고속 추론' },
-  { value: 'qwen2.5:14b', label: 'Qwen 2.5 (14B)', hint: '다국어/코드 최적화' },
+  { value: 'llama3.1:70b', label: 'Llama 3.1 (70B)', hint: '심층 분석용 대용량 엔진' },
+  { value: 'mixtral:8x7b', label: 'Mixtral 8x7B', hint: '고속 분석 특화' },
+  { value: 'qwen2.5:14b', label: 'Qwen 2.5 (14B)', hint: '다국어 최적화' },
 ];
 
 export const PROVIDER_OPTIONS: ProviderOption[] = [
   {
     id: 'openai',
-    display: 'OpenAI Responses API',
+    display: 'OpenAI',
     backendUrl: 'https://api.openai.com/v1',
-    description: '표준 금융 리서치 워크로드에 최적화된 OpenAI Responses API 구성입니다.',
+    description: '금융 리서치에 최적화된 OpenAI AI 서비스입니다.',
     quickModels: OPENAI_QUICK,
     deepModels: OPENAI_DEEP,
   },
   {
     id: 'openrouter',
-    display: 'OpenRouter (Responses API)',
+    display: 'OpenRouter',
     backendUrl: 'https://openrouter.ai/api/v1',
-    description: '멀티 벤더 모델을 사용할 수 있는 OpenRouter 설정입니다.',
+    description: '다양한 AI 엔진을 선택할 수 있는 통합 서비스입니다.',
     quickModels: OPENROUTER_QUICK,
     deepModels: OPENROUTER_DEEP,
     defaultQuickModel: 'deepseek/deepseek-v3.2-exp',
@@ -195,9 +195,9 @@ export const PROVIDER_OPTIONS: ProviderOption[] = [
   },
   {
     id: 'local',
-    display: 'Local (Ollama-Compatible)',
+    display: '자체 서버',
     backendUrl: 'http://localhost:11434/v1',
-    description: '사내 인프라 또는 POC용 로컬 런타임에 연결합니다.',
+    description: '사내 인프라 또는 테스트용 자체 서버에 연결합니다.',
     quickModels: LOCAL_QUICK,
     deepModels: LOCAL_DEEP,
   },

@@ -64,6 +64,34 @@ const SECTION_LABELS: Record<string, string> = {
   final_trade_decision: "포트폴리오 결론",
 };
 
+const timeFormatter = new Intl.DateTimeFormat("ko-KR", {
+  hour: "numeric",
+  minute: "2-digit",
+  second: "2-digit",
+  hour12: true,
+  timeZone: "Asia/Seoul",
+});
+
+function formatTimestamp(
+  value: string | number | Date | null | undefined
+): string {
+  if (value === null || typeof value === "undefined") {
+    return "—";
+  }
+  let candidate: Date;
+  if (value instanceof Date) {
+    candidate = value;
+  } else if (typeof value === "number") {
+    candidate = new Date(value);
+  } else {
+    candidate = new Date(value);
+  }
+  if (Number.isNaN(candidate.getTime())) {
+    return "—";
+  }
+  return timeFormatter.format(candidate);
+}
+
 function asObject(
   value: JsonValue | undefined | null
 ): Record<string, JsonValue> | null {
@@ -289,9 +317,7 @@ export function RunStream({ run }: RunStreamProps): JSX.Element {
         <div className="space-y-2">
           <div className="flex justify-between text-xs text-slate-600">
             <span>진행도: {progress}%</span>
-            <span>
-              마지막 업데이트: {new Date(updatedAt).toLocaleTimeString()}
-            </span>
+            <span>마지막 업데이트: {formatTimestamp(updatedAt)}</span>
           </div>
           <Progress value={progress} className="h-2 rounded-full" />
         </div>
@@ -332,10 +358,11 @@ export function RunStream({ run }: RunStreamProps): JSX.Element {
                       {String(typedEvent.event ?? "message")}
                     </span>
                     <span className="text-xs text-slate-500">
-                      {typedEvent.timestamp &&
-                      typeof typedEvent.timestamp === "string"
-                        ? new Date(typedEvent.timestamp).toLocaleTimeString()
-                        : new Date().toLocaleTimeString()}
+                      {formatTimestamp(
+                        typedEvent.timestamp && typeof typedEvent.timestamp === "string"
+                          ? typedEvent.timestamp
+                          : Date.now()
+                      )}
                     </span>
                   </div>
                   {messageDetails &&
