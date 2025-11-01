@@ -7,7 +7,7 @@
 "use client";
 
 import Link from "next/link";
-import ReactMarkdown from "react-markdown";
+import { MarkdownRenderer } from "../markdown/markdown-renderer";
 import { formatDate, formatDateTime, formatReportType } from "../../lib/date-utils";
 import { surfaceClass } from "../../lib/design-system";
 import { ROUTES } from "../../lib/constants";
@@ -62,9 +62,7 @@ export function ReportContent({ report }: ReportContentProps) {
         <h3 className="text-xl font-bold mb-4">
           {formatReportType(report.reportType)}
         </h3>
-        <div className="prose prose-slate max-w-none">
-          <ReactMarkdown>{report.content}</ReactMarkdown>
-        </div>
+        <MarkdownRenderer content={report.content} />
       </div>
 
       {/* 뒤로 가기 버튼 */}
