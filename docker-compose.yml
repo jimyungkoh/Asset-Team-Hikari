@@ -1,30 +1,60 @@
 # ============================================================
 # Modified: See CHANGELOG.md for complete modification history
-# Last Updated: 2025-10-25
+# Last Updated: 2025-11-02
 # Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 # ============================================================
 
 services:
-  trading-agents: &trading-agents-service
+  trading-agents:
     build:
       context: ./TradingAgents
-    image: tradingagents:local
+      dockerfile: Dockerfile
+    image: tradingagents:production
     container_name: trading-agents
-    ports:
-      - "8000:8000"
     env_file:
       - ./TradingAgents/.env
     environment:
-      INTERNAL_API_TOKEN: ${INTERNAL_API_TOKEN:-changeme-internal-token}
-      SKIP_TOKEN_AUTH: ${SKIP_TOKEN_AUTH:-true}
+      SKIP_TOKEN_AUTH: ${SKIP_TOKEN_AUTH:-false}
     volumes:
       - ./TradingAgents/assets:/app/assets:ro
       - ./TradingAgents/results:/app/results
+    expose:
+      - "8000"
+    restart: unless-stopped
     command: uvicorn tradingagents.api.app:app --host 0.0.0.0 --port 8000
 
-  trading-agents-dev:
-    <<: *trading-agents-service
-    container_name: trading-agents-dev
-    command: uvicorn tradingagents.api.app:app --host 0.0.0.0 --port 8000 --reload
-    profiles:
-      - dev
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    image: tradingagents-server:production
+    container_name: tradingagents-server
+    depends_on:
+      - trading-agents
+    env_file:
+      - ./server/.env
+    environment:
+      NODE_ENV: production
+      PYTHON_SERVICE_URL: http://trading-agents:8000
+      SKIP_TOKEN_AUTH: ${SKIP_TOKEN_AUTH:-false}
+    expose:
+      - "3001"
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+    image: tradingagents-web:production
+    container_name: tradingagents-web
+    depends_on:
+      - server
+    env_file:
+      - ./web/.env
+    environment:
+      NODE_ENV: production
+      NEST_API_BASE: http://server:3001
+      SKIP_TOKEN_AUTH: ${SKIP_TOKEN_AUTH:-false}
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
