@@ -426,6 +426,86 @@ AI 서비스를 선택하고 빠른 분석 엔진과 심층 분석 엔진을 설
 
 ---
 
+## 🎨 2025-11-02 업데이트: 웹 페이지 레이아웃 및 네비게이션 개선
+
+**작성자**: jimyungkoh<aqaqeqeq0511@gmail.com>
+**영향 수준**: 🟡 Medium
+
+### 변경 사항
+
+#### [Changed] 레이아웃 헤더/네비게이션 완전 재구성
+- `web/app/layout.tsx` (+103줄)
+  - RootLayout을 async 함수로 변경하여 인증 정보 접근
+  - 애니메이션 배경 그래디언트 (Blue/Cyan) 추가
+  - Glassmorphism 헤더 디자인 (backdrop-blur-xl)
+  - 로고 + 브랜드명 표시 (♡ Hikari)
+  - 데스크톱 네비게이션 (새 분석, 티커 목록)
+  - 모바일 반응형 네비게이션
+  - 인증된 사용자 이메일 표시
+  - 푸터 추가 (저작권, 링크)
+
+#### [Changed] 홈페이지 UI 개선
+- `web/app/page.tsx` (+20줄)
+  - Fade-in 애니메이션 추가
+  - 히어로 타이틀 개선 ("AI 분석 팀과 함께하는 투자 리서치")
+  - 분석 설정 섹션 명확화
+
+#### [Changed] 리포트 상세 페이지
+- `web/app/reports/[id]/page.tsx` (17줄 수정)
+  - 헤더 업데이트 (Last Updated: 2025-10-31)
+  - 타입 안정성 개선
+
+#### [Changed] 런 상세 페이지
+- `web/app/runs/[id]/page.tsx` (17줄 수정)
+  - 헤더 유지보수
+  - 기존 기능 그대로 유지
+
+#### [Changed] 티커 상세 페이지들
+- `web/app/tickers/page.tsx` (+77줄)
+  - 티커 리스트 카드 UI 개선
+  - 호버 효과 (translate + shadow)
+  - Focus-visible 접근성 개선
+  - 반응형 그리드 레이아웃
+  
+- `web/app/tickers/[ticker]/page.tsx` (+117줄)
+  - 날짜별 그룹화된 리포트 표시
+  - 상태별 배지 (완료/실패/진행중)
+  - 리포트 타입 태그 표시
+  - 향상된 카드 디자인
+  
+- `web/app/tickers/[ticker]/dates/[date]/page.tsx` (+95줄)
+  - 상세 리포트 콘텐츠 표시
+  - 마크다운 렌더링
+  - 생성/업데이트 시간 표시
+  - 날짜 목록으로 돌아가기 링크
+
+### 이유
+
+1. **사용성 개선**: 명확한 네비게이션과 브래드크럼을 통한 직관적 이동
+2. **시각적 일관성**: 모든 페이지에 Glassmorphism 디자인 적용
+3. **브랜드 강화**: 로고 및 브랜드 아이덴티티 명확화
+4. **모바일 최적화**: 모든 해상도에서 완벽한 반응형 레이아웃
+5. **인증 정보 표시**: 현재 로그인한 사용자 이메일 표시
+
+### 영향받은 파일
+
+- 🟡 `web/app/layout.tsx` (103줄 추가)
+- 🟡 `web/app/page.tsx` (20줄 수정)
+- 🟡 `web/app/reports/[id]/page.tsx` (헤더 업데이트)
+- 🟡 `web/app/runs/[id]/page.tsx` (헤더 업데이트)
+- 🟡 `web/app/tickers/page.tsx` (77줄 수정)
+- 🟡 `web/app/tickers/[ticker]/page.tsx` (117줄 수정)
+- 🟡 `web/app/tickers/[ticker]/dates/[date]/page.tsx` (95줄 수정)
+
+### 총 변경량
+
+- 파일 수: 7개
+- 추가된 줄: 276줄
+- 제거된 줄: 176줄
+- Net Change: +100줄
+
+---
+
 ## 🔄 2025-11-01 업데이트: 런 설정 단순화
 
 **작성자**: jimyungkoh<aqaqeqeq0511@gmail.com>

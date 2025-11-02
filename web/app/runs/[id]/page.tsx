@@ -7,7 +7,6 @@
 import { notFound } from "next/navigation";
 
 import { RunStream } from "../../../components/runs/run-stream";
-import { PageShell } from "../../../components/design/page-shell";
 import { Section } from "../../../components/design/section";
 import { auth } from "../../../lib/auth";
 
@@ -65,14 +64,12 @@ export default async function RunDetailPage({
   const run = (await response.json()) as RunSummary;
 
   return (
-    <PageShell authenticatedEmail={session.user?.email ?? null}>
-      <Section
-        title={`런 ${run.id}`}
-        description="실시간 스트리밍 로그와 최종 리포트를 확인하세요."
-        variant="soft"
-      >
-        <RunStream run={run} />
-      </Section>
-    </PageShell>
+    <Section
+      title={`런 ${run.id}`}
+      description="실시간 스트리밍 로그와 최종 리포트를 확인하세요."
+      variant="soft"
+    >
+      <RunStream run={run} />
+    </Section>
   );
 }

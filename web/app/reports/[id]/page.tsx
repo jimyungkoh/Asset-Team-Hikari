@@ -6,7 +6,6 @@
 
 import { notFound } from "next/navigation";
 
-import { PageShell } from "../../../components/design/page-shell";
 import { Section } from "../../../components/design/section";
 import { ReportContent } from "../../../components/reports/report-content";
 import { auth } from "../../../lib/auth";
@@ -54,15 +53,13 @@ export default async function ReportDetailPage({
   const report = (await response.json()) as ReportDetail;
 
   return (
-    <PageShell authenticatedEmail={session.user?.email ?? null}>
-      <Section
-        title={`${report.ticker} - ${formatReportType(report.reportType)}`}
-        description={`${formatDate(report.runDate)} 분석 결과`}
-        variant="soft"
-      >
-        <ReportContent report={report} />
-      </Section>
-    </PageShell>
+    <Section
+      title={`${report.ticker} - ${formatReportType(report.reportType)}`}
+      description={`${formatDate(report.runDate)} 분석 결과`}
+      variant="soft"
+    >
+      <ReportContent report={report} />
+    </Section>
   );
 }
 

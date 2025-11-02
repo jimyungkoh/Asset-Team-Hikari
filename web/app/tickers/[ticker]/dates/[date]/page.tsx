@@ -8,7 +8,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import type { ReportDetail } from "@/types/api";
-import { PageShell } from "@/components/design/page-shell";
 import { Section } from "@/components/design/section";
 import { StatusBadge } from "@/components/reports/status-badge";
 import { MarkdownRenderer } from "@/components/markdown/markdown-renderer";
@@ -71,55 +70,53 @@ export default async function TickerDateDetailPage({
     );
 
   return (
-    <PageShell authenticatedEmail={session.user?.email ?? null}>
-      <Section
-        title={`${normalizedTicker} - ${formatDate(runDate)}`}
-        description="자동 생성된 한국어 종합 리포트를 확인하세요."
-        icon="📝"
-      >
-        {compositeReport ? (
-          <article
-            className={`${surfaceClass(
-              "base"
-            )} space-y-6 p-8`}
-          >
-            <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                  {normalizedTicker}
-                </p>
-                <h2 className="text-2xl font-bold text-slate-900">
-                  {formatDate(runDate)} 종합 리포트 (KO)
-                </h2>
-                <p className="mt-2 text-xs text-slate-500">
-                  생성: {formatDateTime(compositeReport.createdAt)} · 업데이트:{" "}
-                  {formatDateTime(compositeReport.updatedAt)}
-                </p>
-              </div>
-              <StatusBadge status={compositeReport.status} />
-            </header>
+    <Section
+      title={`${normalizedTicker} - ${formatDate(runDate)}`}
+      description="자동 생성된 한국어 종합 리포트를 확인하세요."
+      icon="📝"
+    >
+      {compositeReport ? (
+        <article
+          className={`${surfaceClass(
+            "base"
+          )} space-y-6 p-8`}
+        >
+          <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                {normalizedTicker}
+              </p>
+              <h2 className="text-2xl font-bold text-slate-900">
+                {formatDate(runDate)} 종합 리포트 (KO)
+              </h2>
+              <p className="mt-2 text-xs text-slate-500">
+                생성: {formatDateTime(compositeReport.createdAt)} · 업데이트:{" "}
+                {formatDateTime(compositeReport.updatedAt)}
+              </p>
+            </div>
+            <StatusBadge status={compositeReport.status} />
+          </header>
 
-            <MarkdownRenderer content={compositeReport.content} />
-          </article>
-        ) : (
-          <div
-            className={`${surfaceClass(
-              "soft"
-            )} p-10 text-center text-slate-600`}
-          >
-            {formatDate(runDate)} 기준의 한국어 종합 리포트가 아직 준비되지
-            않았습니다.
-          </div>
-        )}
-        <div className="mt-12">
-          <Link
-            href={ROUTES.TICKERS.DETAIL(normalizedTicker)}
-            className="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800"
-          >
-            ← 날짜 목록으로 돌아가기
-          </Link>
+          <MarkdownRenderer content={compositeReport.content} />
+        </article>
+      ) : (
+        <div
+          className={`${surfaceClass(
+            "soft"
+          )} p-10 text-center text-slate-600`}
+        >
+          {formatDate(runDate)} 기준의 한국어 종합 리포트가 아직 준비되지
+          않았습니다.
         </div>
-      </Section>
-    </PageShell>
+      )}
+      <div className="mt-12">
+        <Link
+          href={ROUTES.TICKERS.DETAIL(normalizedTicker)}
+          className="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800"
+        >
+          ← 날짜 목록으로 돌아가기
+        </Link>
+      </div>
+    </Section>
   );
 }

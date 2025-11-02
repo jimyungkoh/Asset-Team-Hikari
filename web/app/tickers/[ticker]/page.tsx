@@ -8,7 +8,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import type { ReportListItem } from "@/types/api";
-import { PageShell } from "@/components/design/page-shell";
 import { Section } from "@/components/design/section";
 import { surfaceClass } from "@/lib/design-system";
 import { formatDate, formatReportType } from "@/lib/date-utils";
@@ -126,67 +125,65 @@ export default async function TickerDetailPage({
   const grouped = groupReportsByDate(reports);
 
   return (
-    <PageShell authenticatedEmail={session.user?.email ?? null}>
-      <Section
-        title={`${normalizedTicker} 분석 기록`}
-        description="날짜를 선택해 해당 일자의 상세 리포트를 확인하세요."
-        icon="🗂️"
-      >
-        {grouped.length === 0 ? (
-          <div
-            className={`${surfaceClass(
-              "soft"
-            )} rounded-2xl p-10 text-center text-slate-600`}
-          >
-            아직 {normalizedTicker}에 대한 분석 리포트가 없습니다. 새로운 분석을
-            시작하면 이곳에서 날짜별로 확인할 수 있습니다.
-          </div>
-        ) : (
-          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-            {grouped.map((group) => (
-              <Link
-                key={group.runDate}
-                href={ROUTES.TICKERS.DATE_DETAIL(
-                  normalizedTicker,
-                  group.runDate
-                )}
-                className={`${surfaceClass(
-                  "base"
-                )} rounded-2xl p-6 flex flex-col gap-4 transition-transform hover:-translate-y-1 hover:shadow-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500`}
-              >
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-slate-900">
-                    {formatDate(group.runDate)}
-                  </h3>
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-medium ${statusBadgeClass(
-                      group.status
-                    )}`}
-                  >
-                    {renderStatusLabel(group.status)}
-                  </span>
-                </div>
-                <p className="text-sm text-slate-600 leading-relaxed">
-                  {group.total}개의 리포트가 준비되었습니다.
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {group.reports.map((report) => (
-                    <span
-                      key={report.id}
-                      className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-600"
-                    >
-                      {formatReportType(report.reportType)}
-                    </span>
-                  ))}
-                </div>
-                <span className="mt-auto inline-flex items-center gap-2 text-sm font-medium text-blue-600">
-                  상세 리포트 보기 →
+    <Section
+      title={`${normalizedTicker} 분석 기록`}
+      description="날짜를 선택해 해당 일자의 상세 리포트를 확인하세요."
+      icon="🗂️"
+    >
+      {grouped.length === 0 ? (
+        <div
+          className={`${surfaceClass(
+            "soft"
+          )} rounded-2xl p-10 text-center text-slate-600`}
+        >
+          아직 {normalizedTicker}에 대한 분석 리포트가 없습니다. 새로운 분석을
+          시작하면 이곳에서 날짜별로 확인할 수 있습니다.
+        </div>
+      ) : (
+        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+          {grouped.map((group) => (
+            <Link
+              key={group.runDate}
+              href={ROUTES.TICKERS.DATE_DETAIL(
+                normalizedTicker,
+                group.runDate
+              )}
+              className={`${surfaceClass(
+                "base"
+              )} rounded-2xl p-6 flex flex-col gap-4 transition-transform hover:-translate-y-1 hover:shadow-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500`}
+            >
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-slate-900">
+                  {formatDate(group.runDate)}
+                </h3>
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-medium ${statusBadgeClass(
+                    group.status
+                  )}`}
+                >
+                  {renderStatusLabel(group.status)}
                 </span>
-              </Link>
-            ))}
-          </div>
-        )}
-      </Section>
-    </PageShell>
+              </div>
+              <p className="text-sm text-slate-600 leading-relaxed">
+                {group.total}개의 리포트가 준비되었습니다.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {group.reports.map((report) => (
+                  <span
+                    key={report.id}
+                    className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-600"
+                  >
+                    {formatReportType(report.reportType)}
+                  </span>
+                ))}
+              </div>
+              <span className="mt-auto inline-flex items-center gap-2 text-sm font-medium text-blue-600">
+                상세 리포트 보기 →
+              </span>
+            </Link>
+          ))}
+        </div>
+      )}
+    </Section>
   );
 }
