@@ -25,10 +25,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### [1.0] - 2025-11-02 - Compose 분리 및 컨테이너 환경정리
 
 - **Changed**: `docker-compose.yml` - 프로덕션 스택을 `web`, `server`, `trading-agents` 3개 서비스로 재구성하고 외부 포트는 웹만 노출하도록 제한
-- **Added**: `docker-compose.yml` - `traefik` 리버스 프록시 서비스를 추가해 80/443 단일 엔드포인트로 라우팅하고 HTTP 요청을 HTTPS로 리다이렉션하도록 구성
+- **Added**: `docker-compose.yml` - `traefik` 리버스 프록시 서비스를 추가해 80/443 단일 엔드포인트로 라우팅하고 HTTP 요청을 HTTPS로 리다이렉션, Cloudflare DNS-01 챌린지를 통한 자동 인증서 발급을 지원
 - **Added**: `docker-compose.dev.yml` - `trading-agents-dev` 전용 개발 설정을 별도 컴포즈 파일로 분리
 - **Added**: `server/Dockerfile`, `web/Dockerfile` - pnpm 기반 멀티 스테이지 빌드로 NestJS/Next.js 프로덕션 이미지를 제공
 - **Added**: `web/.env.example` - 컨테이너 환경에서 필요한 변수 명세를 신규 추가
+- **Added**: `traefik/.env.example` - DNS형 챌린지용 Cloudflare API 토큰과 ACME 이메일 명세를 제공
 - **Updated**: `TradingAgents/.env.example`, `server/.env.example`, `web/.env.local.example` - 내부 토큰 공유 및 docker-compose 호스트명 가이드를 반영
 
 **Impact**: 🟡 Medium - 도커 환경 재정비로 배포/로컬 구성 분리가 명확해지며, 서비스 간 공유 토큰 관리가 용이해짐
