@@ -590,6 +590,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### .gitignore
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
+**Last Updated**: 2025-11-02
+
+#### [1.3] - 2025-11-02 - Ignore ACME certificate files
+
+- **Added**: `**/acme` pattern to ignore Traefik ACME certificate storage directory
+- **Note**: Prevents sensitive certificate files from being tracked in version control
+
+**Impact**: 🟢 Low
+
+**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
 **Last Updated**: 2025-10-24
 
 #### [1.2] - 2025-10-24 - Node Build Artifacts
