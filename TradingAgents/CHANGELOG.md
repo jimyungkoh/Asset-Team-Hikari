@@ -208,7 +208,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### web/ (Next.js UI)
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
-**Last Updated**: 2025-11-01
+**Last Updated**: 2025-11-02
+
+#### [1.6] - 2025-11-02 - API Route Handler Type Compatibility
+
+- **Fixed**: `web/app/api/runs/[id]/route.ts`, `web/app/api/runs/[id]/stream/route.ts`, `web/app/api/reports/tickers/[ticker]/dates/[date]/route.ts` - Updated route handler signatures to align with middleware composition and Next.js 15 typing, preventing build-time type errors.
+
+**Impact**: 🟢 Low - 타입 호환성 보완, 기능 변화 없음
 
 #### [1.5] - 2025-11-01 - Next.js Best Practices Refactoring
 
