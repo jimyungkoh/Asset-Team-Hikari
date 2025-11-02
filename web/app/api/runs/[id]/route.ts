@@ -1,6 +1,6 @@
 // ============================================================
 // Modified: See CHANGELOG.md for complete modification history
-// Last Updated: 2025-11-01
+// Last Updated: 2025-11-02
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
@@ -15,9 +15,19 @@ import { withAuth, withErrorHandler, composeMiddleware } from '@/lib/middleware/
 
 const handler = async (
   _: Request,
-  { params }: { params: Promise<{ id: string }> }
+  context?: unknown,
 ): Promise<Response> => {
-  const { id } = await params;
+  const params =
+    (context as { params?: { id?: string } })?.params ?? {};
+  const id = (params.id ?? '').trim();
+
+  if (!id) {
+    return NextResponse.json(
+      { error: 'Run ID is required.' },
+      { status: 400 },
+    );
+  }
+
   const run = await backendApiService.getRun(id);
   return NextResponse.json(run);
 };
