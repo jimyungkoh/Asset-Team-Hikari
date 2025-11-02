@@ -83,6 +83,7 @@ services:
       - ./web/.env
     environment:
       NODE_ENV: production
+      NEXTAUTH_URL: https://sandboxlab.cloud
       NEST_API_BASE: http://server:3001
       SKIP_TOKEN_AUTH: ${SKIP_TOKEN_AUTH:-false}
     restart: unless-stopped

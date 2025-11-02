@@ -65,6 +65,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Traefik reverse proxy added for unified HTTPS routing with Cloudflare DNS-01 challenge support
 - Multi-stage builds implemented for NestJS and Next.js services
 - Development docker-compose.dev.yml added for isolated trading-agents development
+- Updated: `docker-compose.yml` - set `NEXTAUTH_URL` to `https://sandboxlab.cloud` to ensure correct NextAuth callback origin behind Traefik
 
 ### Modern UI Redesign (2025-10-27)
 
