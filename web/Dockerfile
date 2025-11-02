@@ -14,12 +14,17 @@ ENV NODE_ENV=production
 
 FROM base AS deps
 
-COPY web/pnpm-lock.yaml ./pnpm-lock.yaml
-COPY web/package.json ./package.json
+WORKDIR /app
+COPY pnpm-lock.yaml ./pnpm-lock.yaml
+COPY pnpm-workspace.yaml ./pnpm-workspace.yaml
+COPY web/package.json ./web/package.json
 
+WORKDIR /app/web
 RUN pnpm install --frozen-lockfile
 
 FROM deps AS build
+
+WORKDIR /app/web
 
 ENV NEXTAUTH_URL=http://localhost:3000 \
     NEXTAUTH_SECRET=placeholder-secret \
@@ -41,6 +46,8 @@ RUN pnpm run build
 
 FROM deps AS prod-deps
 
+WORKDIR /app/web
+ENV CI=true
 RUN pnpm prune --prod
 
 FROM node:20-alpine AS runner

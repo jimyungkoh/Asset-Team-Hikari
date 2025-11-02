@@ -14,12 +14,17 @@ ENV NODE_ENV=production
 
 FROM base AS deps
 
-COPY server/pnpm-lock.yaml ./pnpm-lock.yaml
-COPY server/package.json ./package.json
+WORKDIR /app
+COPY pnpm-lock.yaml ./pnpm-lock.yaml
+COPY pnpm-workspace.yaml ./pnpm-workspace.yaml
+COPY server/package.json ./server/package.json
 
+WORKDIR /app/server
 RUN pnpm install --frozen-lockfile
 
 FROM deps AS build
+
+WORKDIR /app/server
 
 COPY server/tsconfig.json ./tsconfig.json
 COPY server/tsconfig.build.json ./tsconfig.build.json
@@ -33,6 +38,8 @@ RUN pnpm run build
 
 FROM deps AS prod-deps
 
+WORKDIR /app/server
+ENV CI=true
 RUN pnpm prune --prod
 
 FROM node:20-alpine AS runner
