@@ -28,3 +28,5 @@ TradingAgents/__pycache__/
 /memo
 **/AGENTS.md
 **/*.csv
+
+**/acme

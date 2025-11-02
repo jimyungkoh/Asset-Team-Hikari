@@ -34,14 +34,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 **Impact**: 🟡 Medium - 도커 환경 재정비로 배포/로컬 구성 분리가 명확해지며, 서비스 간 공유 토큰 관리가 용이해짐
 
-#### [1.1] - 2025-11-02 - Fix pnpm lockfile mismatch in docker builds
-
-- **Fixed**: `web/Dockerfile`, `server/Dockerfile` - 워크스페이스 모드로 동작하도록 수정하여 루트의 `pnpm-lock.yaml`과 `pnpm-workspace.yaml`을 사용하도록 변경
-- **Fixed**: `web/Dockerfile`, `server/Dockerfile` - `pnpm prune --prod` 실행 시 TTY 오류를 방지하기 위해 `CI=true` 환경 변수 추가
-- **Removed**: `web/pnpm-lock.yaml`, `server/pnpm-lock.yaml` - 워크스페이스 루트의 단일 lockfile을 사용하므로 개별 서비스 lockfile 제거
-
-**Impact**: 🟡 Medium - Docker 빌드 시 pnpm lockfile 불일치 오류 해결, 워크스페이스 모드로 일관된 의존성 관리
-
 ### server/ (NestJS API) & web/ (Next.js Client)
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
@@ -590,6 +582,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 ### .gitignore
+
+**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
+**Last Updated**: 2025-11-02
+
+#### [1.3] - 2025-11-02 - Ignore ACME certificate files
+
+- **Added**: `**/acme` pattern to ignore Traefik ACME certificate storage directory
+- **Note**: Prevents sensitive certificate files from being tracked in version control
+
+**Impact**: 🟢 Low
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
 **Last Updated**: 2025-10-24
