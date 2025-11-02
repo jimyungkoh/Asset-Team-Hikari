@@ -22,6 +22,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
 **Last Updated**: 2025-11-02
 
+#### [1.9] - 2025-11-02 - Web UI Polish & Script Maintenance
+
+**web/**:
+- **Changed**: `web/app/layout.tsx` - Updated file header (Last Updated: 2025-11-02)
+- **Changed**: `web/app/tickers/page.tsx` - Updated file header (Last Updated: 2025-11-02)
+- **Changed**: `web/app/tickers/[ticker]/page.tsx` - Fixed focus-visible className by removing duplicate `focus-visible:outline` property for cleaner CSS output
+- **Changed**: `web/app/tickers/[ticker]/dates/[date]/page.tsx` - Updated file header (Last Updated: 2025-11-02)
+
+**server/**:
+- **Changed**: `server/scripts/backfill-run.ts` - Commented out entire script to temporarily disable backfill functionality pending review
+
+**Impact**: 🟢 Low - Minor UI refinement and script maintenance, no functional changes
+
 #### [1.8] - 2025-11-02 - Report Date Filtering and Ticker Navigation
 
 **server/**:

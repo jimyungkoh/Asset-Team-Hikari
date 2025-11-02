@@ -144,7 +144,7 @@ export default async function TickerDetailPage({
               href={ROUTES.TICKERS.DATE_DETAIL(normalizedTicker, group.runDate)}
               className={`${surfaceClass(
                 "base"
-              )} rounded-2xl p-6 flex flex-col gap-4 transition-transform hover:-translate-y-1 hover:shadow-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500`}
+              )} rounded-2xl p-6 flex flex-col gap-4 transition-transform hover:-translate-y-1 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500`}
             >
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-slate-900">
