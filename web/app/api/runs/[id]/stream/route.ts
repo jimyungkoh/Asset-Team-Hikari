@@ -15,9 +15,10 @@ function getNestBase(): string {
 
 export async function GET(
   request: Request,
-  context: { params: { id?: string } }
+  context: any
 ): Promise<Response> {
-  const id = context.params.id?.trim();
+  const params = await context.params;
+  const id = (params.id ?? "").trim();
   if (!id) {
     return NextResponse.json({ error: "Run ID is required" }, { status: 400 });
   }

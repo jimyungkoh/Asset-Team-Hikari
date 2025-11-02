@@ -1,6 +1,6 @@
 // ============================================================
 // Modified: See CHANGELOG.md for complete modification history
-// Last Updated: 2025-10-27
+// Last Updated: 2025-11-02
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
@@ -40,6 +40,14 @@ const LAYOUT = {
 } as const;
 
 export type SurfaceVariant = keyof typeof SURFACES;
+
+export interface FinanceMetric {
+  label: string;
+  value: string | number;
+  detail: string;
+  icon?: string;
+  trend?: "up" | "down" | "stable";
+}
 
 export function surfaceClass(variant: SurfaceVariant): string {
   return SURFACES[variant];

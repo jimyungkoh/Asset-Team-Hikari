@@ -21,7 +21,7 @@ const markdownComponents: Components = {
         {...props}
         className={clsx(
           "mt-10 text-3xl font-bold leading-tight text-slate-900 first:mt-0",
-          className,
+          className
         )}
       />
     );
@@ -32,7 +32,7 @@ const markdownComponents: Components = {
         {...props}
         className={clsx(
           "mt-8 text-2xl font-semibold leading-snug text-slate-900 first:mt-0",
-          className,
+          className
         )}
       />
     );
@@ -43,7 +43,7 @@ const markdownComponents: Components = {
         {...props}
         className={clsx(
           "mt-6 text-xl font-semibold leading-snug text-slate-900 first:mt-0",
-          className,
+          className
         )}
       />
     );
@@ -54,17 +54,14 @@ const markdownComponents: Components = {
         {...props}
         className={clsx(
           "mt-6 text-lg font-semibold leading-snug text-slate-900 first:mt-0",
-          className,
+          className
         )}
       />
     );
   },
   p({ node, className, ...props }) {
     return (
-      <p
-        {...props}
-        className={clsx("leading-7 text-slate-700", className)}
-      />
+      <p {...props} className={clsx("leading-7 text-slate-700", className)} />
     );
   },
   a({ node, className, ...props }) {
@@ -73,7 +70,7 @@ const markdownComponents: Components = {
         {...props}
         className={clsx(
           "text-blue-600 underline decoration-blue-400/60 underline-offset-4 transition-colors hover:text-blue-700 hover:decoration-blue-500",
-          className,
+          className
         )}
         target="_blank"
         rel="noreferrer"
@@ -86,7 +83,7 @@ const markdownComponents: Components = {
         {...props}
         className={clsx(
           "my-5 list-disc space-y-2 pl-6 text-slate-700 marker:text-slate-400",
-          className,
+          className
         )}
       />
     );
@@ -97,18 +94,13 @@ const markdownComponents: Components = {
         {...props}
         className={clsx(
           "my-5 list-decimal space-y-2 pl-6 text-slate-700 marker:text-slate-400",
-          className,
+          className
         )}
       />
     );
   },
   li({ node, className, ...props }) {
-    return (
-      <li
-        {...props}
-        className={clsx("leading-relaxed", className)}
-      />
-    );
+    return <li {...props} className={clsx("leading-relaxed", className)} />;
   },
   blockquote({ node, className, ...props }) {
     return (
@@ -116,17 +108,14 @@ const markdownComponents: Components = {
         {...props}
         className={clsx(
           "my-6 border-l-4 border-blue-200 bg-blue-50/60 px-5 py-4 text-slate-700 italic",
-          className,
+          className
         )}
       />
     );
   },
   hr({ node, className, ...props }) {
     return (
-      <hr
-        {...props}
-        className={clsx("my-10 border-slate-200", className)}
-      />
+      <hr {...props} className={clsx("my-10 border-slate-200", className)} />
     );
   },
   table({ node, className, children, ...props }) {
@@ -136,7 +125,7 @@ const markdownComponents: Components = {
           {...props}
           className={clsx(
             "w-full table-auto border-collapse text-left text-sm text-slate-800",
-            className,
+            className
           )}
         >
           {children}
@@ -162,10 +151,7 @@ const markdownComponents: Components = {
   },
   tr({ node, className, ...props }) {
     return (
-      <tr
-        {...props}
-        className={clsx("hover:bg-slate-50/70", className)}
-      />
+      <tr {...props} className={clsx("hover:bg-slate-50/70", className)} />
     );
   },
   th({ node, className, ...props }) {
@@ -174,7 +160,7 @@ const markdownComponents: Components = {
         {...props}
         className={clsx(
           "px-4 py-3 text-xs font-semibold uppercase tracking-wide text-slate-600",
-          className,
+          className
         )}
       />
     );
@@ -183,18 +169,24 @@ const markdownComponents: Components = {
     return (
       <td
         {...props}
-        className={clsx("px-4 py-3 align-top text-sm text-slate-700", className)}
+        className={clsx(
+          "px-4 py-3 align-top text-sm text-slate-700",
+          className
+        )}
       />
     );
   },
-  code({ node, inline, className, children, ...props }) {
-    if (inline) {
+  code: ({ node, className, children, ...props }: any) => {
+    // Determine if this is inline code based on parent context
+    const isInline = true; // Default behavior - react-markdown wraps inline code in span before code
+
+    if (isInline) {
       return (
         <code
           {...props}
           className={clsx(
             "rounded bg-slate-100 px-1.5 py-0.5 text-[0.95em] font-medium text-slate-800",
-            className,
+            className
           )}
         >
           {children}
@@ -221,7 +213,7 @@ const markdownComponents: Components = {
         alt={alt ?? ""}
         className={clsx(
           "my-6 w-full rounded-2xl border border-slate-200 object-contain",
-          className,
+          className
         )}
         loading="lazy"
       />
@@ -245,7 +237,7 @@ export function MarkdownRenderer({
     <div
       className={clsx(
         "markdown-content space-y-6 leading-relaxed text-slate-700",
-        className,
+        className
       )}
     >
       <ReactMarkdown

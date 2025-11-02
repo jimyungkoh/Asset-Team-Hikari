@@ -4,8 +4,8 @@
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
-import { API_CONFIG, ERROR_MESSAGES, HTTP_STATUS } from './constants';
-import type { ApiError, ApiResponse } from '../types/api';
+import type { ApiError, ApiResponse } from "../types/api";
+import { API_CONFIG, ERROR_MESSAGES, HTTP_STATUS } from "./constants";
 
 // ============================================================
 // API Client Configuration
@@ -38,7 +38,7 @@ class ApiClient {
         ...fetchConfig,
         signal: controller.signal,
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           ...fetchConfig.headers,
         },
       });
@@ -46,19 +46,21 @@ class ApiClient {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        return this.handleErrorResponse(response);
+        return this.handleErrorResponse<T>(response);
       }
 
       const data = await response.json();
       return { success: true, data };
     } catch (error) {
       clearTimeout(timeoutId);
-      return this.handleError(error);
+      return this.handleError<T>(error);
     }
   }
 
-  private async handleErrorResponse(response: Response): Promise<ApiResponse> {
-    let errorMessage = ERROR_MESSAGES.INTERNAL_SERVER_ERROR;
+  private async handleErrorResponse<T>(
+    response: Response
+  ): Promise<ApiResponse<T>> {
+    let errorMessage: string = ERROR_MESSAGES.INTERNAL_SERVER_ERROR;
 
     switch (response.status) {
       case HTTP_STATUS.BAD_REQUEST:
@@ -90,9 +92,9 @@ class ApiClient {
     return { success: false, error };
   }
 
-  private handleError(error: unknown): ApiResponse {
+  private handleError<T>(error: unknown): ApiResponse<T> {
     const apiError: ApiError = {
-      code: 'NETWORK_ERROR',
+      code: "NETWORK_ERROR",
       message: ERROR_MESSAGES.NETWORK_ERROR,
     };
 
@@ -104,8 +106,11 @@ class ApiClient {
     return { success: false, error: apiError };
   }
 
-  async get<T>(endpoint: string, config?: RequestConfig): Promise<ApiResponse<T>> {
-    return this.request<T>(endpoint, { ...config, method: 'GET' });
+  async get<T>(
+    endpoint: string,
+    config?: RequestConfig
+  ): Promise<ApiResponse<T>> {
+    return this.request<T>(endpoint, { ...config, method: "GET" });
   }
 
   async post<T>(
@@ -115,7 +120,7 @@ class ApiClient {
   ): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
       ...config,
-      method: 'POST',
+      method: "POST",
       body: body ? JSON.stringify(body) : undefined,
     });
   }
@@ -127,13 +132,16 @@ class ApiClient {
   ): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
       ...config,
-      method: 'PUT',
+      method: "PUT",
       body: body ? JSON.stringify(body) : undefined,
     });
   }
 
-  async delete<T>(endpoint: string, config?: RequestConfig): Promise<ApiResponse<T>> {
-    return this.request<T>(endpoint, { ...config, method: 'DELETE' });
+  async delete<T>(
+    endpoint: string,
+    config?: RequestConfig
+  ): Promise<ApiResponse<T>> {
+    return this.request<T>(endpoint, { ...config, method: "DELETE" });
   }
 }
 

@@ -15,11 +15,10 @@ import { withAuth, withErrorHandler, composeMiddleware } from '@/lib/middleware/
 
 const handler = async (
   _: Request,
-  context?: unknown,
+  context: any,
 ): Promise<Response> => {
-  const params =
-    (context as { params?: { id?: string } })?.params ?? {};
-  const id = (params.id ?? '').trim();
+  const params = await context.params;
+  const id = (params.id ?? "").trim();
 
   if (!id) {
     return NextResponse.json(

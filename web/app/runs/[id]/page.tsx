@@ -1,6 +1,6 @@
 // ============================================================
 // Modified: See CHANGELOG.md for complete modification history
-// Last Updated: 2025-10-27
+// Last Updated: 2025-11-02
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
@@ -10,6 +10,14 @@ import { RunStream } from "../../../components/runs/run-stream";
 import { Section } from "../../../components/design/section";
 import { auth } from "../../../lib/auth";
 
+type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | { [key: string]: JsonValue };
+
 interface RunSummary {
   id: string;
   status: "pending" | "running" | "success" | "failed";
@@ -17,7 +25,7 @@ interface RunSummary {
   updatedAt: string;
   ticker: string;
   tradeDate: string;
-  result?: unknown;
+  result?: JsonValue;
   error?: {
     message: string;
     traceback?: string;

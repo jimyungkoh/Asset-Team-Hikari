@@ -1,12 +1,12 @@
 // ============================================================
 // Modified: See CHANGELOG.md for complete modification history
-// Last Updated: 2025-10-27
+// Last Updated: 2025-11-02
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
-import { defineConfig } from "tailwindcss";
+import type { Config } from "tailwindcss";
 
-export default defineConfig({
+const config: Config = {
   darkMode: "class",
   content: [
     "./pages/**/*.{ts,tsx}",
@@ -69,4 +69,6 @@ export default defineConfig({
     },
   },
   plugins: [],
-});
+};
+
+export default config;

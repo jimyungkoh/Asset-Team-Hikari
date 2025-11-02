@@ -18,12 +18,11 @@ import {
 
 const handler = async (
   _request: Request,
-  context?: unknown,
+  context: any,
 ): Promise<Response> => {
-  const params =
-    (context as { params?: { ticker?: string; date?: string } })?.params ?? {};
-  const normalizedTicker = (params.ticker ?? '').trim().toUpperCase();
-  const runDate = (params.date ?? '').trim();
+  const params = await context.params;
+  const normalizedTicker = (params.ticker ?? "").trim().toUpperCase();
+  const runDate = (params.date ?? "").trim();
 
   if (!normalizedTicker || !runDate) {
     return NextResponse.json(

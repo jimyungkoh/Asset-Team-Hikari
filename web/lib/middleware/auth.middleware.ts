@@ -1,6 +1,6 @@
 // ============================================================
 // Modified: See CHANGELOG.md for complete modification history
-// Last Updated: 2025-11-01
+// Last Updated: 2025-11-02
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
@@ -15,9 +15,9 @@ import { HTTP_STATUS, ERROR_MESSAGES } from '@/lib/constants';
 // ============================================================
 
 export function withAuth(
-  handler: (request: Request, context?: unknown) => Promise<Response>
+  handler: (request: Request, context: any) => Promise<Response>
 ) {
-  return async (request: Request, context?: unknown): Promise<Response> => {
+  return async (request: Request, context: any): Promise<Response> => {
     const session = await getServerSession(authConfig);
 
     if (!session) {
@@ -36,9 +36,9 @@ export function withAuth(
 // ============================================================
 
 export function withErrorHandler(
-  handler: (request: Request, context?: unknown) => Promise<Response>
+  handler: (request: Request, context: any) => Promise<Response>
 ) {
-  return async (request: Request, context?: unknown): Promise<Response> => {
+  return async (request: Request, context: any): Promise<Response> => {
     try {
       return await handler(request, context);
     } catch (error) {
@@ -62,11 +62,11 @@ export function withErrorHandler(
 export function composeMiddleware(
   ...middlewares: Array<
     (
-      handler: (request: Request, context?: unknown) => Promise<Response>
-    ) => (request: Request, context?: unknown) => Promise<Response>
+      handler: (request: Request, context: any) => Promise<Response>
+    ) => (request: Request, context: any) => Promise<Response>
   >
 ) {
-  return (handler: (request: Request, context?: unknown) => Promise<Response>) => {
+  return (handler: (request: Request, context: any) => Promise<Response>) => {
     return middlewares.reduceRight((acc, middleware) => middleware(acc), handler);
   };
 }

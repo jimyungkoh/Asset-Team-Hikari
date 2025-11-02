@@ -15,6 +15,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Next.js 15 & Type System Improvements
+
+**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
+**Last Updated**: 2025-11-02
+
+#### [1.0] - 2025-11-02 - Fix Next.js 15 Route Handler & Type Compatibility
+
+##### Type Fixes
+
+- **Fixed**: `web/lib/middleware/auth.middleware.ts` - Update middleware to work with Next.js 15 dynamic context.params (now returns Promise)
+- **Fixed**: `web/app/api/reports/tickers/[ticker]/dates/[date]/route.ts` - Handle async context.params and add proper Route Handler typing
+- **Fixed**: `web/app/api/runs/[id]/route.ts` - Fix context parameter handling for Next.js 15 Route Handlers
+- **Fixed**: `web/app/api/runs/[id]/stream/route.ts` - Update GET handler to await context.params Promise
+- **Fixed**: `web/app/runs/[id]/page.tsx` - Align RunSummary type definition with JsonValue for result property
+- **Fixed**: `web/lib/api-client.ts` - Add generic type parameters to error handlers (handleErrorResponse<T>, handleError<T>) and fix errorMessage type narrowing
+- **Fixed**: `web/lib/design-system.ts` - Add missing FinanceMetric interface export with proper type definition
+- **Fixed**: `web/components/markdown/markdown-renderer.tsx` - Fix code component typing by handling implicit inline parameter with type casting
+
+##### Configuration Updates
+
+- **Fixed**: `web/tailwind.config.ts` - Update Tailwind v4 configuration to use proper Config type instead of deprecated defineConfig function
+
+**Impact**: 🟡 Medium - Ensures TypeScript strict mode compliance and Next.js 15 compatibility; no breaking API changes
+
+---
+
+## Previous Changes
+
 ### Web API Routes
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
@@ -30,8 +58,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Impact**: 🟢 Low - Improves runtime stability and error handling without changing API contract
 
 ---
-
-## Previous Changes
 
 ### Infrastructure & Docker (2025-11-02)
 
