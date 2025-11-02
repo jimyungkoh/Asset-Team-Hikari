@@ -14,6 +14,7 @@ import { RunRepository } from '../infrastructure/run.repository';
 import { RunConfigService } from '../config/run-config.service';
 import { ArtifactsService } from '../../artifacts/infrastructure/artifacts.service';
 import { ReportsRepository } from '../../reports/infrastructure/reports.repository';
+import { ReportsService } from '../../reports/domain/reports.service';
 import { ReportSummaryService } from '../../reports/domain/report-summary.service';
 import { stringifyStructuredContent } from '../../common/utils/content-normalizer';
 
@@ -47,21 +48,77 @@ export class RunService {
     private readonly runConfigService: RunConfigService,
     private readonly artifactsService: ArtifactsService,
     private readonly reportsRepository: ReportsRepository,
+    private readonly reportsService: ReportsService,
     private readonly reportSummaryService: ReportSummaryService,
   ) {}
 
   async startRun(dto: CreateRunDto): Promise<RunSummary> {
     const normalizedTicker = dto.ticker.trim().toUpperCase();
     const normalizedTradeDate = dto.tradeDate.trim();
+
+    const inFlight = [...this.runs.values()].find(
+      (context) =>
+        context.ticker === normalizedTicker &&
+        context.tradeDate === normalizedTradeDate &&
+        !TERMINAL_STATUSES.has(context.status),
+    );
+
+    if (inFlight) {
+      this.logger.log(
+        `Skipping run for ${normalizedTicker} ${normalizedTradeDate} (run ${inFlight.id} in progress)`,
+      );
+      throw new ConflictException({
+        statusCode: 409,
+        error: 'Conflict',
+        message: `Run already in progress for ${normalizedTicker} on ${normalizedTradeDate}`,
+        ticker: normalizedTicker,
+        tradeDate: normalizedTradeDate,
+      });
+    }
+
     const existingReports =
       await this.reportsRepository.findByTickerAndDate(
         normalizedTicker,
         normalizedTradeDate,
       );
 
-    const hasCompletedReport = existingReports.some(
+    const successfulMetadata = existingReports.filter(
       (metadata) => metadata.status === 'success',
     );
+    let hasCompletedReport = false;
+
+    if (successfulMetadata.length > 0) {
+      try {
+        const detailedReports =
+          await this.reportsService.listDetailsByTickerAndDate(
+            normalizedTicker,
+            normalizedTradeDate,
+          );
+
+        hasCompletedReport = detailedReports.some((report) => {
+          if (report.status !== 'success') {
+            return false;
+          }
+
+          const content =
+            typeof report.content === 'string' ? report.content.trim() : '';
+          return content.length > 0;
+        });
+
+        if (!hasCompletedReport) {
+          this.logger.warn(
+            `Report metadata exists without accessible content for ${normalizedTicker} ${normalizedTradeDate}; rerun will be allowed.`,
+          );
+        }
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : String(error);
+        this.logger.warn(
+          `Failed to verify existing reports for ${normalizedTicker} ${normalizedTradeDate}: ${message}`,
+        );
+        hasCompletedReport = true;
+      }
+    }
 
     if (hasCompletedReport) {
       this.logger.log(
