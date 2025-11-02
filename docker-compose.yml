@@ -5,6 +5,21 @@
 # ============================================================
 
 services:
+  traefik:
+    image: traefik:v3.1
+    container_name: traefik
+    command:
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: unless-stopped
+    networks:
+      - proxy
+
   trading-agents:
     build:
       context: ./TradingAgents
@@ -22,6 +37,8 @@ services:
       - "8000"
     restart: unless-stopped
     command: uvicorn tradingagents.api.app:app --host 0.0.0.0 --port 8000
+    networks:
+      - default
 
   server:
     build:
@@ -40,6 +57,8 @@ services:
     expose:
       - "3001"
     restart: unless-stopped
+    networks:
+      - default
 
   web:
     build:
@@ -55,6 +74,16 @@ services:
       NODE_ENV: production
       NEST_API_BASE: http://server:3001
       SKIP_TOKEN_AUTH: ${SKIP_TOKEN_AUTH:-false}
-    ports:
-      - "3000:3000"
     restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.web.entrypoints=web
+      - traefik.http.routers.web.rule=HostRegexp(`{host:.+}`)
+      - traefik.http.services.web.loadbalancer.server.port=3000
+    networks:
+      - default
+      - proxy
+
+networks:
+  proxy:
+    driver: bridge
