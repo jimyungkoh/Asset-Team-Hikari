@@ -7,13 +7,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import type { ReportListItem } from "@/types/api";
 import { Section } from "@/components/design/section";
-import { surfaceClass } from "@/lib/design-system";
-import { formatDate, formatReportType } from "@/lib/date-utils";
-import { ROUTES } from "@/lib/constants";
+import { getInternalHeaders, getNestBase } from "@/lib/api-helpers";
 import { auth } from "@/lib/auth";
-import { getNestBase, getInternalHeaders } from "@/lib/api-helpers";
+import { ROUTES } from "@/lib/constants";
+import { formatDate } from "@/lib/date-utils";
+import { surfaceClass } from "@/lib/design-system";
+import type { ReportListItem } from "@/types/api";
 
 interface ReportsResponse {
   reports: ReportListItem[];
@@ -60,10 +60,7 @@ function groupReportsByDate(reports: ReportListItem[]): DateGroup[] {
       }
       if (reportStatus === "success") {
         existing.status = "success";
-      } else if (
-        existing.status !== "success" &&
-        reportStatus === "failed"
-      ) {
+      } else if (existing.status !== "success" && reportStatus === "failed") {
         existing.status = "failed";
       }
     }
@@ -144,10 +141,7 @@ export default async function TickerDetailPage({
           {grouped.map((group) => (
             <Link
               key={group.runDate}
-              href={ROUTES.TICKERS.DATE_DETAIL(
-                normalizedTicker,
-                group.runDate
-              )}
+              href={ROUTES.TICKERS.DATE_DETAIL(normalizedTicker, group.runDate)}
               className={`${surfaceClass(
                 "base"
               )} rounded-2xl p-6 flex flex-col gap-4 transition-transform hover:-translate-y-1 hover:shadow-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500`}
@@ -165,18 +159,8 @@ export default async function TickerDetailPage({
                 </span>
               </div>
               <p className="text-sm text-slate-600 leading-relaxed">
-                {group.total}개의 리포트가 준비되었습니다.
+                리포트가 준비되었습니다.
               </p>
-              <div className="flex flex-wrap gap-2">
-                {group.reports.map((report) => (
-                  <span
-                    key={report.id}
-                    className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-600"
-                  >
-                    {formatReportType(report.reportType)}
-                  </span>
-                ))}
-              </div>
               <span className="mt-auto inline-flex items-center gap-2 text-sm font-medium text-blue-600">
                 상세 리포트 보기 →
               </span>

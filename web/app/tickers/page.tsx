@@ -8,10 +8,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Section } from "../../components/design/section";
-import { surfaceClass } from "../../lib/design-system";
-import { ROUTES } from "../../lib/constants";
+import { getInternalHeaders, getNestBase } from "../../lib/api-helpers";
 import { auth } from "../../lib/auth";
-import { getNestBase, getInternalHeaders } from "../../lib/api-helpers";
+import { ROUTES } from "../../lib/constants";
+import { surfaceClass } from "../../lib/design-system";
 
 interface TickerListResponse {
   tickers: string[];

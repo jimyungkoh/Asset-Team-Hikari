@@ -4,27 +4,31 @@
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
-import type { Metadata } from 'next';
-import Link from 'next/link';
-import { ReactNode } from 'react';
+import type { Metadata } from "next";
+import Link from "next/link";
+import { ReactNode } from "react";
 
-import './globals.css';
-import { SessionProviders } from '../components/providers/session-provider';
-import { ROUTES } from '../lib/constants';
-import { auth } from '../lib/auth';
+import { SessionProviders } from "../components/providers/session-provider";
+import { auth } from "../lib/auth";
+import { ROUTES } from "../lib/constants";
+import "./globals.css";
 
 export const metadata: Metadata = {
-  title: 'Asset Team Hikari Console',
-  description: 'Control panel for orchestrating TradingAgents runs',
+  title: "Asset Team Hikari Console",
+  description: "Control panel for orchestrating TradingAgents runs",
 };
 
-export default async function RootLayout({ children }: { children: ReactNode }): Promise<JSX.Element> {
+export default async function RootLayout({
+  children,
+}: {
+  children: ReactNode;
+}): Promise<JSX.Element> {
   const session = await auth();
   const authenticatedEmail = session?.user?.email ?? null;
 
   const navigationLinks: Array<{ href: string; label: string }> = [
-    { href: ROUTES.HOME, label: '새 분석' },
-    { href: ROUTES.TICKERS.LIST, label: '티커 목록' },
+    { href: ROUTES.HOME, label: "새 분석" },
+    { href: ROUTES.TICKERS.LIST, label: "티커 목록" },
   ];
 
   return (
@@ -50,7 +54,9 @@ export default async function RootLayout({ children }: { children: ReactNode }):
                     <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold">
                       ♡
                     </div>
-                    <span className="text-lg font-bold text-slate-900">Hikari</span>
+                    <span className="text-lg font-bold text-slate-900">
+                      Hikari
+                    </span>
                   </Link>
 
                   {/* Navigation */}
@@ -70,7 +76,9 @@ export default async function RootLayout({ children }: { children: ReactNode }):
                   {authenticatedEmail && (
                     <div className="flex items-center gap-3">
                       <div className="px-3 py-1.5 rounded-full bg-slate-100/50 backdrop-blur border border-slate-200/30 text-xs text-slate-600">
-                        <span className="font-medium">{authenticatedEmail}</span>
+                        <span className="font-medium">
+                          {authenticatedEmail}
+                        </span>
                       </div>
                     </div>
                   )}
@@ -108,13 +116,22 @@ export default async function RootLayout({ children }: { children: ReactNode }):
                     © 2025 Asset Team Hikari. 모든 권리 보유.
                   </p>
                   <div className="flex items-center gap-6 text-sm text-slate-600">
-                    <a href="#" className="hover:text-slate-900 transition-colors">
+                    <a
+                      href="#"
+                      className="hover:text-slate-900 transition-colors"
+                    >
                       문서
                     </a>
-                    <a href="#" className="hover:text-slate-900 transition-colors">
+                    <a
+                      href="#"
+                      className="hover:text-slate-900 transition-colors"
+                    >
                       GitHub
                     </a>
-                    <a href="#" className="hover:text-slate-900 transition-colors">
+                    <a
+                      href="#"
+                      className="hover:text-slate-900 transition-colors"
+                    >
                       지원
                     </a>
                   </div>

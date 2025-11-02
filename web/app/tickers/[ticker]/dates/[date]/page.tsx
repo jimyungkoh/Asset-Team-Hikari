@@ -7,15 +7,15 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import type { ReportDetail } from "@/types/api";
 import { Section } from "@/components/design/section";
-import { StatusBadge } from "@/components/reports/status-badge";
 import { MarkdownRenderer } from "@/components/markdown/markdown-renderer";
-import { surfaceClass } from "@/lib/design-system";
-import { formatDate, formatDateTime } from "@/lib/date-utils";
-import { ROUTES } from "@/lib/constants";
+import { StatusBadge } from "@/components/reports/status-badge";
+import { getInternalHeaders, getNestBase } from "@/lib/api-helpers";
 import { auth } from "@/lib/auth";
-import { getNestBase, getInternalHeaders } from "@/lib/api-helpers";
+import { ROUTES } from "@/lib/constants";
+import { formatDate, formatDateTime } from "@/lib/date-utils";
+import { surfaceClass } from "@/lib/design-system";
+import type { ReportDetail } from "@/types/api";
 
 interface ReportsByDateResponse {
   reports: ReportDetail[];
@@ -76,11 +76,7 @@ export default async function TickerDateDetailPage({
       icon="📝"
     >
       {compositeReport ? (
-        <article
-          className={`${surfaceClass(
-            "base"
-          )} space-y-6 p-8`}
-        >
+        <article className={`${surfaceClass("base")} space-y-6 p-8`}>
           <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
@@ -101,9 +97,7 @@ export default async function TickerDateDetailPage({
         </article>
       ) : (
         <div
-          className={`${surfaceClass(
-            "soft"
-          )} p-10 text-center text-slate-600`}
+          className={`${surfaceClass("soft")} p-10 text-center text-slate-600`}
         >
           {formatDate(runDate)} 기준의 한국어 종합 리포트가 아직 준비되지
           않았습니다.
