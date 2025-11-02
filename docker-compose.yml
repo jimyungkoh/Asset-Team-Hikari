@@ -8,6 +8,8 @@ services:
   traefik:
     image: traefik:v3.1
     container_name: traefik
+    env_file:
+      - ./traefik/.env
     command:
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
@@ -16,6 +18,9 @@ services:
       - --entrypoints.web.http.redirections.entryPoint.to=websecure
       - --entrypoints.web.http.redirections.entryPoint.scheme=https
       - --entrypoints.web.http.redirections.entryPoint.permanent=true
+      - --certificatesresolvers.le.acme.storage=/etc/traefik/acme/acme.json
+      - --certificatesresolvers.le.acme.dnschallenge.provider=cloudflare
+      - --certificatesresolvers.le.acme.dnschallenge.delaybeforecheck=0
     ports:
       - "80:80"
       - "443:443"
