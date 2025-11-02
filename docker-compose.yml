@@ -12,10 +12,16 @@ services:
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
       - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --entrypoints.web.http.redirections.entryPoint.to=websecure
+      - --entrypoints.web.http.redirections.entryPoint.scheme=https
+      - --entrypoints.web.http.redirections.entryPoint.permanent=true
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/acme:/etc/traefik/acme
     restart: unless-stopped
     networks:
       - proxy
@@ -77,8 +83,10 @@ services:
     restart: unless-stopped
     labels:
       - traefik.enable=true
-      - traefik.http.routers.web.entrypoints=web
-      - traefik.http.routers.web.rule=HostRegexp(`{host:.+}`)
+      - traefik.http.routers.websecure.entrypoints=websecure
+      - traefik.http.routers.websecure.rule=HostRegexp(`{host:.+}`)
+      - traefik.http.routers.websecure.tls=true
+      - traefik.http.routers.websecure.service=web
       - traefik.http.services.web.loadbalancer.server.port=3000
     networks:
       - default
