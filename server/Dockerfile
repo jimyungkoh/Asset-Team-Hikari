@@ -38,9 +38,9 @@ RUN pnpm run build
 
 FROM deps AS prod-deps
 
-WORKDIR /app/server
+WORKDIR /app
 ENV CI=true
-RUN pnpm prune --prod
+RUN pnpm install --prod --frozen-lockfile --filter tradingagents-server
 
 FROM node:20-alpine AS runner
 
@@ -50,13 +50,13 @@ RUN corepack enable
 WORKDIR /app/server
 ENV NODE_ENV=production
 
+COPY --from=prod-deps /app/node_modules ../node_modules
 COPY --from=prod-deps /app/server/node_modules ./node_modules
 COPY --from=build /app/server/dist ./dist
 COPY --from=build /app/server/config ./config
 COPY --from=build /app/server/migrations ./migrations
 COPY server/package.json ./package.json
 COPY server/drizzle.config.ts ./drizzle.config.ts
-
 EXPOSE 3001
 
 CMD ["node", "dist/main.js"]

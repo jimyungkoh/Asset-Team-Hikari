@@ -46,9 +46,9 @@ RUN pnpm run build
 
 FROM deps AS prod-deps
 
-WORKDIR /app/web
+WORKDIR /app
 ENV CI=true
-RUN pnpm prune --prod
+RUN pnpm install --prod --frozen-lockfile --filter tradingagents-web
 
 FROM node:20-alpine AS runner
 
@@ -59,10 +59,10 @@ WORKDIR /app/web
 ENV NODE_ENV=production
 ENV PORT=3000
 
+COPY --from=prod-deps /app/node_modules ../node_modules
 COPY --from=prod-deps /app/web/node_modules ./node_modules
 COPY --from=build /app/web/.next ./.next
 COPY web/package.json ./package.json
-
 EXPOSE 3000
 
 CMD ["pnpm", "start"]
