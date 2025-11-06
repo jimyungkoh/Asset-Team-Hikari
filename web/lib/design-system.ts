@@ -26,6 +26,7 @@ const TEXT = {
   metricDetail: "text-sm text-slate-500",
   cardTitle: "text-lg font-bold text-slate-900",
   cardDescription: "text-sm text-slate-600",
+  kbd: "px-2 py-1 bg-slate-100 border border-slate-300 rounded text-xs font-mono text-slate-700",
 } as const;
 
 const LAYOUT = {

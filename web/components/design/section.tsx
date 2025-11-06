@@ -1,6 +1,6 @@
 // ============================================================
 // Modified: See CHANGELOG.md for complete modification history
-// Last Updated: 2025-10-27
+// Last Updated: 2025-11-06
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
@@ -50,7 +50,7 @@ export function Section({
       </div>
 
       {/* Content */}
-      <div className={surface + " p-8 md:p-10 transition-all hover:shadow-lg"}>
+      <div className="md:rounded-2xl md:bg-white/80 md:backdrop-blur-xl md:border md:border-white/20 md:shadow-[0_8px_32px_rgba(0,0,0,0.08)] md:p-10 md:transition-all md:hover:shadow-lg">
         {children}
       </div>
     </section>
