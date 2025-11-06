@@ -1,6 +1,6 @@
 /* ============================================================
  * Modified: See CHANGELOG.md for complete modification history
- * Last Updated: 2025-10-27
+ * Last Updated: 2025-11-06
  * Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
  * ============================================================
  */
@@ -220,6 +220,10 @@
 
   .btn-ghost {
     @apply inline-flex items-center justify-center rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-900 hover:bg-slate-100/50 transition-colors;
+  }
+  /* Button cursor pointer default */
+  button {
+    @apply cursor-pointer;
   }
 
   /* Badge */

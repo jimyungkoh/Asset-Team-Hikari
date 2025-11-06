@@ -1,6 +1,6 @@
 // ============================================================
 // Modified: See CHANGELOG.md for complete modification history
-// Last Updated: 2025-11-02
+// Last Updated: 2025-11-06
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
@@ -20,7 +20,7 @@ export default async function HomePage(): Promise<JSX.Element> {
   return (
     <>
       {/* Hero Section */}
-      <div className="mb-20 animate-fade-in">
+      <div className="mb-12 animate-fade-in">
         <div className="space-y-6 max-w-3xl">
           <div className={surfaceClass("pill") + " w-fit"}>
             🚀 Asset Team Hikari
@@ -31,14 +31,14 @@ export default async function HomePage(): Promise<JSX.Element> {
         </div>
       </div>
 
-      {/* Run Configuration Section */}
-      <Section
-        title="분석 설정 및 실행"
-        description="분석할 자산과 기준일을 입력하고 즉시 실행합니다."
-        icon="⚙️"
-      >
-        <RunForm />
-      </Section>
+      {/* Asset Analysis Form */}
+      <div className="animate-fade-in">
+        <div className="max-w-3xl mx-auto">
+          <div className={surfaceClass("soft") + " p-8"}>
+            <RunForm />
+          </div>
+        </div>
+      </div>
     </>
   );
 }

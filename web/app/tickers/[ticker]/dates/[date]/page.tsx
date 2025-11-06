@@ -1,6 +1,6 @@
 // ============================================================
 // Modified: See CHANGELOG.md for complete modification history
-// Last Updated: 2025-11-02
+// Last Updated: 2025-11-06
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
@@ -76,28 +76,12 @@ export default async function TickerDateDetailPage({
       icon="📝"
     >
       {compositeReport ? (
-        <article className={`${surfaceClass("base")} space-y-6 p-8`}>
-          <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                {normalizedTicker}
-              </p>
-              <h2 className="text-2xl font-bold text-slate-900">
-                {formatDate(runDate)} 종합 리포트 (KO)
-              </h2>
-              <p className="mt-2 text-xs text-slate-500">
-                생성: {formatDateTime(compositeReport.createdAt)} · 업데이트:{" "}
-                {formatDateTime(compositeReport.updatedAt)}
-              </p>
-            </div>
-            <StatusBadge status={compositeReport.status} />
-          </header>
-
+        <article className={`${surfaceClass("base")} space-y-6 p-6 md:p-8 rounded-2xl`}>
           <MarkdownRenderer content={compositeReport.content} />
         </article>
       ) : (
         <div
-          className={`${surfaceClass("soft")} p-10 text-center text-slate-600`}
+          className={`${surfaceClass("soft")} p-6 md:p-10 text-center text-slate-600 rounded-xl`}
         >
           {formatDate(runDate)} 기준의 한국어 종합 리포트가 아직 준비되지
           않았습니다.
