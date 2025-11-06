@@ -1,6 +1,6 @@
 // ============================================================
 // Modified: See CHANGELOG.md for complete modification history
-// Last Updated: 2025-11-02
+// Last Updated: 2025-11-06
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
@@ -126,151 +126,76 @@ export function RunForm(): JSX.Element {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-8">
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <div className="flex flex-col gap-6">
-          <div className={surfaceClass("base") + " space-y-6 p-6 sm:p-8"}>
-            <header className="space-y-2">
-              <h2 className="text-lg font-semibold text-slate-900">
-                자산과 기준일
-              </h2>
-              <p className="text-sm text-slate-500">
-                분석하고 싶은 티커와 기준일을 입력하세요. 나머지 설정은 자동으로 적용됩니다.
-              </p>
-            </header>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="flex flex-col gap-2">
-                <Label
-                  htmlFor="ticker"
-                  className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500"
-                >
-                  Ticker
-                </Label>
-                <Input
-                  id="ticker"
-                  placeholder="예: NVDA"
-                  value={ticker}
-                  onChange={(event) => setTicker(event.target.value)}
-                  disabled={isPending}
-                  required
-                  className="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm shadow-[0_2px_8px_rgba(15,23,42,0.04)] focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label
-                  htmlFor="tradeDate"
-                  className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500"
-                >
-                  Trade Date
-                </Label>
-                <Input
-                  id="tradeDate"
-                  type="date"
-                  value={tradeDate}
-                  onChange={(event) => setTradeDate(event.target.value)}
-                  disabled={isPending}
-                  required
-                  className="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm shadow-[0_2px_8px_rgba(15,23,42,0.04)] focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-                />
-              </div>
-            </div>
+    <div className="w-full max-w-4xl mx-auto">
+      <form onSubmit={handleSubmit} className="space-y-8">
+        {/* Asset and Date Selection */}
+        <div className="grid gap-6 lg:gap-8 grid-cols-1 lg:grid-cols-2">
+          <div className="space-y-3">
+            <Label
+              htmlFor="ticker"
+              className="text-base font-semibold text-slate-700"
+            >
+              티커
+            </Label>
+            <Input
+              id="ticker"
+              placeholder="예: NVDA"
+              value={ticker}
+              onChange={(event) => setTicker(event.target.value)}
+              disabled={isPending}
+              required
+              className="w-full h-14 text-lg px-4 py-3"
+            />
           </div>
-
-          <div className={surfaceClass("base") + " space-y-4 p-6 sm:p-8"}>
-            <header className="space-y-2">
-              <h2 className="text-lg font-semibold text-slate-900">
-                📋 기본 설정 (자동 적용)
-              </h2>
-              <p className="text-sm text-slate-500">
-                아래 설정이 자동으로 적용됩니다. 변경이 필요한 경우 <code className="text-xs bg-slate-100 px-1.5 py-0.5 rounded">server/config/run-template.json</code>을 수정하세요.
-              </p>
-            </header>
-            <dl className="space-y-3 text-sm">
-              <div className="flex justify-between gap-2 py-2 border-b border-slate-100">
-                <dt className="text-slate-500">AI 서비스</dt>
-                <dd className="font-medium text-slate-900">OpenRouter</dd>
-              </div>
-              <div className="flex justify-between gap-2 py-2 border-b border-slate-100">
-                <dt className="text-slate-500">빠른 분석 엔진</dt>
-                <dd className="font-mono text-xs text-slate-700">deepseek/deepseek-v3.2-exp</dd>
-              </div>
-              <div className="flex justify-between gap-2 py-2 border-b border-slate-100">
-                <dt className="text-slate-500">심층 분석 엔진</dt>
-                <dd className="font-mono text-xs text-slate-700">deepseek/deepseek-r1-0528</dd>
-              </div>
-              <div className="flex justify-between gap-2 py-2 border-b border-slate-100">
-                <dt className="text-slate-500">분석가 팀</dt>
-                <dd className="text-right text-slate-700">시장, 소셜, 뉴스, 펀더멘털</dd>
-              </div>
-              <div className="flex justify-between gap-2 py-2 border-b border-slate-100">
-                <dt className="text-slate-500">분석 강도</dt>
-                <dd className="text-slate-700">심층 분석 (5회 검토)</dd>
-              </div>
-              <div className="flex justify-between gap-2 py-2">
-                <dt className="text-slate-500">사고 깊이</dt>
-                <dd className="text-slate-700">최대</dd>
-              </div>
-            </dl>
+          <div className="space-y-3">
+            <Label
+              htmlFor="tradeDate"
+              className="text-base font-semibold text-slate-700"
+            >
+              기준일
+            </Label>
+            <Input
+              id="tradeDate"
+              type="date"
+              value={tradeDate}
+              onChange={(event) => setTradeDate(event.target.value)}
+              disabled={isPending}
+              required
+              className="w-full h-14 text-lg px-4 py-3"
+            />
           </div>
         </div>
 
-        <aside className="flex flex-col gap-6">
-          <div className={surfaceClass("glass") + " space-y-4 p-6"}>
-            <h3 className="text-sm font-semibold text-slate-900">구성 요약</h3>
-            <dl className="space-y-3 text-sm text-slate-600">
-              <div className="flex justify-between gap-2">
-                <dt className="text-slate-500">티커</dt>
-                <dd className="font-medium text-slate-900">
-                  {ticker ? ticker.toUpperCase() : "입력 필요"}
-                </dd>
-              </div>
-              <div className="flex justify-between gap-2">
-                <dt className="text-slate-500">거래일</dt>
-                <dd className="font-medium text-slate-900">
-                  {tradeDate || "선택 필요"}
-                </dd>
-              </div>
-            </dl>
+        {/* Error Display */}
+        {error ? (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-lg">
+            <p className="text-base font-medium">
+              {error.message}
+            </p>
           </div>
+        ) : null}
 
-          <div className={surfaceClass("glass") + " space-y-4 p-6"}>
-            <h3 className="text-sm font-semibold text-slate-900">💡 참고</h3>
-            <ul className="space-y-2 text-xs text-slate-600">
-              <li className="flex gap-2">
-                <span className="text-blue-500">•</span>
-                <span>모든 설정은 <code className="bg-slate-100 px-1 py-0.5 rounded">run-template.json</code>에서 관리됩니다</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="text-blue-500">•</span>
-                <span>실행 후 실시간 로그를 확인할 수 있습니다</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="text-blue-500">•</span>
-                <span>완료 시 상세 리포트가 생성됩니다</span>
-              </li>
-            </ul>
-          </div>
-        </aside>
-      </div>
-
-      {error ? (
-        <p className="text-sm font-medium text-red-500 animate-slide-up">
-          {error.message}
-        </p>
-      ) : null}
-
-      <div className="flex flex-col items-end gap-3 border-t border-white/30 pt-6 sm:flex-row sm:justify-between">
-        <p className="text-xs text-slate-500">
-          분석을 시작하면 실시간 진행 상황과 최종 리포트를 확인할 수 있습니다.
-        </p>
-        <Button
-          type="submit"
-          disabled={isPending}
-          className="rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg hover:shadow-xl hover:from-blue-600 hover:to-blue-700 transition-all disabled:opacity-50"
-        >
-          {isPending ? "분석 준비 중…" : "🚀 분석 시작"}
-        </Button>
-      </div>
-    </form>
+        {/* Submit Button */}
+        <div className="flex justify-center pt-4">
+          <Button
+            type="submit"
+            disabled={isPending}
+            className="w-full lg:w-auto px-12 py-4 text-lg h-14 text-base font-semibold"
+          >
+            {isPending ? (
+              <span className="flex items-center justify-center gap-3">
+                <div className="w-5 h-5 border-3 border-blue-500 border-t-transparent animate-spin rounded-full"></div>
+                <span>분석 준비 중...</span>
+              </span>
+            ) : (
+              <span className="flex items-center gap-2">
+                <span className="text-xl">🚀</span>
+                <span>분석 시작</span>
+              </span>
+            )}
+          </Button>
+        </div>
+      </form>
+    </div>
   );
 }
