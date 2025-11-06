@@ -208,7 +208,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### web/ (Next.js UI)
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
-**Last Updated**: 2025-11-02
+**Last Updated**: 2025-11-06
+
+#### [1.9] - 2025-11-06 - Mobile Content Area Optimization
+
+- **Changed**: `web/components/design/section.tsx` - Removed Section wrapper styling on mobile (padding, background, shadow) to maximize content area. Desktop styling preserved with `md:` prefix.
+- **Changed**: `web/app/tickers/[ticker]/dates/[date]/page.tsx` - Reduced mobile padding from 32px to 16px for article and empty state containers
+- **Changed**: `web/app/layout.tsx` - Reduced main container horizontal padding on mobile from 16px to 12px
+- **Note**: Mobile devices now have minimal padding layers, maximizing markdown content readability while maintaining desktop visual hierarchy.
+
+**Impact**: 🟢 Low - Improved mobile content area, desktop layout unchanged
+
+#### [1.8] - 2025-11-06 - Mobile Input Auto-Zoom Prevention
+
+- **Changed**: `web/components/ui/input.tsx` - Changed font size from `text-sm` (14px) to `text-base` (16px) to prevent iOS Safari auto-zoom on focus
+- **Changed**: `web/components/ui/textarea.tsx` - Changed font size from `text-sm` (14px) to `text-base` (16px) to prevent iOS Safari auto-zoom on focus
+- **Note**: iOS Safari automatically zooms in when focusing on input elements with font-size < 16px. This change maintains accessibility while preventing unwanted zoom behavior.
+
+**Impact**: 🟢 Low - Improved mobile UX, no functional changes
+
+#### [1.7] - 2025-11-06 - Mobile Header Layout Fix
+
+- **Fixed**: `web/app/layout.tsx` - Removed duplicate background gradient and min-h-screen wrapper that caused header positioning issues on mobile devices. Simplified layout structure by removing redundant wrapper div and moving background elements to body level.
+- **Changed**: `web/app/layout.tsx` - Updated file header (Last Updated: 2025-11-06)
+- **Note**: Resolves mobile Safari/Chrome viewport height calculation issues where sticky header would float in the middle of the screen during scroll.
+
+**Impact**: 🟢 Low - Layout structure simplification, improved mobile UX
 
 #### [1.6] - 2025-11-02 - API Route Handler Type Compatibility
 
