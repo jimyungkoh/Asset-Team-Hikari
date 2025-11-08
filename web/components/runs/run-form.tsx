@@ -33,7 +33,7 @@ interface ReportsByDateResponse {
 
 const defaultTradeDate = () => new Date().toISOString().slice(0, 10);
 
-export function RunForm(): JSX.Element {
+export function RunForm() {
   const router = useRouter();
   const [ticker, setTicker] = useState("");
   const [tradeDate, setTradeDate] = useState(defaultTradeDate());

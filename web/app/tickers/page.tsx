@@ -17,7 +17,7 @@ interface TickerListResponse {
   tickers: string[];
 }
 
-export default async function TickersPage(): Promise<JSX.Element> {
+export default async function TickersPage() {
   const session = await auth();
   if (!session) {
     notFound();
@@ -44,27 +44,29 @@ export default async function TickersPage(): Promise<JSX.Element> {
         <div
           className={`${surfaceClass(
             "soft"
-          )} rounded-2xl p-10 text-center text-slate-600`}
+          )} rounded-2xl p-6 sm:p-10 text-center text-slate-600`}
         >
-          아직 저장된 티커가 없습니다. 홈에서 새로운 분석을 시작해보세요.
+          <p className="text-sm sm:text-base">
+            아직 저장된 티커가 없습니다. 홈에서 새로운 분석을 시작해보세요.
+          </p>
         </div>
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {tickers.map((ticker) => (
             <Link
               key={ticker}
               href={ROUTES.TICKERS.DETAIL(ticker)}
               className={`${surfaceClass(
                 "base"
-              )} rounded-2xl p-6 flex flex-col gap-3 transition-transform hover:-translate-y-1 hover:shadow-xl`}
+              )} rounded-2xl p-4 sm:p-6 flex flex-col gap-3 transition-transform hover:-translate-y-1 hover:shadow-xl active:scale-95 touch-manipulation`}
             >
               <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
                 Ticker
               </span>
-              <span className="text-2xl font-bold text-slate-900">
+              <span className="text-xl sm:text-2xl font-bold text-slate-900 break-all">
                 {ticker}
               </span>
-              <span className="text-sm text-slate-600">
+              <span className="text-xs sm:text-sm text-slate-600 line-clamp-2">
                 최근 분석 기록과 일자별 리포트를 확인하세요.
               </span>
             </Link>

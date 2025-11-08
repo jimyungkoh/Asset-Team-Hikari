@@ -11,7 +11,7 @@ import { RunForm } from "../components/runs/run-form";
 import { auth } from "../lib/auth";
 import { surfaceClass, textStyles } from "../lib/design-system";
 
-export default async function HomePage(): Promise<JSX.Element> {
+export default async function HomePage() {
   const session = await auth();
   if (!session) {
     redirect("/api/auth/signin");
@@ -20,9 +20,9 @@ export default async function HomePage(): Promise<JSX.Element> {
   return (
     <>
       {/* Hero Section */}
-      <div className="mb-12 animate-fade-in">
-        <div className="space-y-6 max-w-3xl">
-          <div className={surfaceClass("pill") + " w-fit"}>
+      <div className="mb-8 sm:mb-12 animate-fade-in">
+        <div className="space-y-4 sm:space-y-6 max-w-3xl">
+          <div className={surfaceClass("pill") + " w-fit text-xs sm:text-sm"}>
             🚀 Asset Team Hikari
           </div>
           <h1 className={textStyles.heroTitle}>
@@ -34,7 +34,7 @@ export default async function HomePage(): Promise<JSX.Element> {
       {/* Asset Analysis Form */}
       <div className="animate-fade-in">
         <div className="max-w-3xl mx-auto">
-          <div className={surfaceClass("soft") + " p-8"}>
+          <div className={surfaceClass("soft") + " p-6 sm:p-8"}>
             <RunForm />
           </div>
         </div>

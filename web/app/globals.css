@@ -259,6 +259,78 @@
   .financial-table tbody tr:hover {
     @apply bg-white/30 transition-colors;
   }
+
+  /* Financial Data Visualization Classes */
+  .metric-card-profit {
+    @apply border-l-4 border-green-500 bg-gradient-to-r from-green-50/50 to-transparent;
+  }
+
+  .metric-card-loss {
+    @apply border-l-4 border-red-500 bg-gradient-to-r from-red-50/50 to-transparent;
+  }
+
+  .metric-card-neutral {
+    @apply border-l-4 border-amber-500 bg-gradient-to-r from-amber-50/50 to-transparent;
+  }
+
+  .chart-container {
+    @apply relative w-full h-64 bg-white/40 backdrop-blur-sm rounded-2xl border border-white/30 p-4;
+  }
+
+  .sparkline-positive {
+    @apply stroke-green-500 fill-green-500/20;
+  }
+
+  .sparkline-negative {
+    @apply stroke-red-500 fill-red-500/20;
+  }
+
+  .sparkline-neutral {
+    @apply stroke-amber-500 fill-amber-500/20;
+  }
+
+  .trend-indicator-up {
+    @apply text-green-600 bg-green-100 rounded-full p-1;
+  }
+
+  .trend-indicator-down {
+    @apply text-red-600 bg-red-100 rounded-full p-1;
+  }
+
+  .trend-indicator-stable {
+    @apply text-amber-600 bg-amber-100 rounded-full p-1;
+  }
+
+  /* Financial Value Display with Icons */
+  .financial-value-with-icon {
+    @apply flex items-center gap-2 font-semibold;
+  }
+
+  .financial-value-profit {
+    @apply text-green-600;
+  }
+
+  .financial-value-loss {
+    @apply text-red-600;
+  }
+
+  .financial-value-neutral {
+    @apply text-amber-600;
+  }
+
+  /* Skeleton Loading Styles */
+  .skeleton-shimmer {
+    @apply bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 bg-[length:200%_100%] animate-pulse;
+  }
+
+  /* Loading States */
+  .loading-overlay {
+    @apply absolute inset-0 bg-white/60 backdrop-blur-sm flex items-center justify-center rounded-2xl;
+  }
+
+  .loading-spinner {
+    @apply animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600;
+  }
 }
 
 @layer utilities {
@@ -274,6 +346,16 @@
 
   .scrollbar-thin::-webkit-scrollbar-thumb {
     @apply bg-slate-300 rounded-full hover:bg-slate-400;
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
   }
 
   /* Animations */
@@ -363,4 +445,25 @@
 
 .dark .card-flat {
   @apply bg-slate-900/80 backdrop-blur-xl;
+}
+
+/* Dark mode financial data visualization */
+.dark .metric-card-profit {
+  @apply border-l-green-400 bg-gradient-to-r from-green-900/20 to-transparent;
+}
+
+.dark .metric-card-loss {
+  @apply border-l-red-400 bg-gradient-to-r from-red-900/20 to-transparent;
+}
+
+.dark .metric-card-neutral {
+  @apply border-l-amber-400 bg-gradient-to-r from-amber-900/20 to-transparent;
+}
+
+.dark .chart-container {
+  @apply bg-slate-900/40 backdrop-blur-sm border-slate-700/50;
+}
+
+.dark .loading-overlay {
+  @apply bg-slate-900/60 backdrop-blur-sm;
 }

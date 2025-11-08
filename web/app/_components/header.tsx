@@ -21,18 +21,18 @@ export function Header({ navigationLinks }: HeaderProps) {
   return (
     <header className="sticky top-0 z-50 border-b border-white/40 backdrop-blur-xl bg-white/30">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between gap-6 h-16">
+        <div className="flex items-center justify-between gap-3 sm:gap-6 h-14 sm:h-16">
           {/* Left Section - Logo and Navigation */}
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-3 sm:gap-6">
             {/* Logo */}
             <Link
               href={ROUTES.HOME}
               className="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer"
             >
-              <div className="w-8 h-8 rounded-lg bg-linear-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold">
+              <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold text-xs sm:text-sm">
                 ♡
               </div>
-              <span className="text-lg font-bold text-slate-900">
+              <span className="text-base sm:text-lg font-bold text-slate-900">
                 Hikari
               </span>
             </Link>
@@ -52,17 +52,19 @@ export function Header({ navigationLinks }: HeaderProps) {
           </div>
 
           {/* Right Section - Auth Dropdown */}
-          <AuthDropdown />
+          <div className="flex items-center">
+            <AuthDropdown />
+          </div>
         </div>
 
         {/* Mobile Navigation */}
         <nav className="md:hidden pb-3">
-          <div className="flex items-center gap-2 overflow-x-auto text-sm font-medium text-slate-600">
+          <div className="flex items-center gap-2 overflow-x-auto text-sm font-medium text-slate-600 scrollbar-hide">
             {navigationLinks.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="whitespace-nowrap rounded-full px-3 py-1.5 bg-white/60 hover:bg-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+                className="whitespace-nowrap rounded-full px-3 py-1.5 bg-white/60 hover:bg-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 min-w-fit touch-manipulation"
               >
                 {item.label}
               </Link>
