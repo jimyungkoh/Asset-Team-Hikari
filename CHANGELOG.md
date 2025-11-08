@@ -15,24 +15,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### CI/CD Improvements
+### CI/CD & Deployment Infrastructure
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
 **Last Updated**: 2025-11-08
 
-#### [4.1] - 2025-11-08 - Ensure latest code is fetched before deployment
+#### [4.1] - 2025-11-08 - Optimize infrastructure services management in deployment script
 
-##### CI/CD Pipeline
+##### Deployment Scripts
 
-- **Changed**: `.github/workflows/deploy.yml` - Add git fetch, checkout, and reset commands to ensure deployment uses latest code from remote repository
-- **Changed**: `.github/workflows/deploy.yml` - Explicitly fetch and reset to origin/main before running deployment script
+- **Changed**: `scripts/deploy/remote_deploy.sh` - Change INFRA_SERVICES default from "traefik redis" to "redis" only
+- **Changed**: `scripts/deploy/remote_deploy.sh` - Add conditional check to only start infrastructure services when INFRA_SERVICES is not empty
+- **Changed**: `scripts/deploy/remote_deploy.sh` - Add comment explaining that traefik should be started separately as it only needs to run once
 
-**Impact**: 🟢 Low - Ensures deployments always use the latest committed code from the repository
+**Impact**: 🟢 Low - Improves deployment flexibility by allowing traefik to be managed separately
 
 **Benefits**:
-- Prevents deployment of stale code from local repository state
-- Ensures consistency between GitHub Actions checkout and remote server deployment
-- Reduces risk of deploying outdated code
+- Traefik can be started once and reused across deployments
+- More flexible infrastructure service management
+- Prevents unnecessary traefik restarts during application deployments
+
+**Migration Notes**:
+- Traefik should be started separately before first deployment
+- INFRA_SERVICES environment variable can be set to include traefik if needed: `INFRA_SERVICES="traefik redis"`
 
 ---
 

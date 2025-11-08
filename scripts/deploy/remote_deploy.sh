@@ -18,7 +18,8 @@ COMPOSE_FILE_REL=${COMPOSE_FILE_REL:-docker-compose.yml}
 COMPOSE_FILE="$REPO_ROOT/$COMPOSE_FILE_REL"
 STACK_PREFIX=${STACK_PREFIX:-asset-team-hikari}
 APP_SERVICES=${APP_SERVICES:-"trading-agents server web"}
-INFRA_SERVICES=${INFRA_SERVICES:-"traefik redis"}
+# infra는 한 번만 띄우면 되므로 기본값은 redis만 관리하고 traefik은 필요할 때만 지정
+INFRA_SERVICES=${INFRA_SERVICES:-"redis"}
 ACTIVE_STACK_FILE=${ACTIVE_STACK_FILE:-"$REPO_ROOT/.deploy/active_stack"}
 DEPLOY_BRANCH=${DEPLOY_BRANCH:-origin/main}
 SKIP_GIT_PULL=${SKIP_GIT_PULL:-false}
@@ -50,7 +51,9 @@ ensure_network "asset-team-hikari_proxy"
 ensure_network "asset-team-hikari_infra"
 ensure_volume "asset-team-hikari_redis_data"
 
-COMPOSE_PROJECT_NAME="${STACK_PREFIX}-infra" docker compose -f "$COMPOSE_FILE" up -d $INFRA_SERVICES
+if [ -n "$INFRA_SERVICES" ]; then
+  COMPOSE_PROJECT_NAME="${STACK_PREFIX}-infra" docker compose -f "$COMPOSE_FILE" up -d $INFRA_SERVICES
+fi
 
 if [ -f "$ACTIVE_STACK_FILE" ]; then
   ACTIVE_STACK=$(cat "$ACTIVE_STACK_FILE" | tr -d '\n' )
