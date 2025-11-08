@@ -43,6 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Impact**: 🟡 Medium - Resolves build errors and improves code maintainability
 
 **Modified Files**:
+
 - `web/app/layout.tsx` - Fix function declaration syntax
 - `web/app/reports/[id]/page.tsx` - Fix function declaration syntax
 - `web/app/runs/[id]/page.tsx` - Fix function declaration syntax
@@ -91,12 +92,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Impact**: 🟢 Low - Improves deployment reliability by ensuring env files exist on remote host
 
 **Benefits**:
+
 - Env file preparation happens directly on the deployment target
 - More reliable than preparing files in CI and transferring them
 - Handles missing .env files gracefully during deployment
 - Better separation of concerns between CI and deployment scripts
 
 **Migration Notes**:
+
 - No action required - env files are now automatically created during deployment
 - Existing .env files are preserved (not overwritten)
 
