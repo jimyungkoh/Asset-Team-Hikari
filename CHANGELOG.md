@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Added**: `.github/workflows/deploy.yml` - GitHub Actions workflow for automated deployment to Oracle Compute
 - **Added**: `.github/workflows/deploy.yml` - Automated docker-compose validation before deployment
 - **Added**: `.github/workflows/deploy.yml` - SSH-based deployment using appleboy/ssh-action
+- **Changed**: `.github/workflows/deploy.yml` - Add environment variable placeholder preparation step (copies .env.example to .env for server, web, TradingAgents)
 
 ##### Deployment Scripts
 

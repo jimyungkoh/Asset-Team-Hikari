@@ -19,6 +19,19 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v4
 
+      - name: Prepare env placeholders
+        run: |
+          set -euo pipefail
+          for dir in server web TradingAgents; do
+            example="$dir/.env.example"
+            target="$dir/.env"
+            if [ -f "$example" ]; then
+              cp "$example" "$target"
+            else
+              : > "$target"
+            fi
+          done
+
       - name: Validate compose descriptors
         run: docker compose -f docker-compose.yml config -q
 
