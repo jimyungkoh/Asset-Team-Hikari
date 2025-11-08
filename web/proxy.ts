@@ -1,10 +1,10 @@
 // ============================================================
 // Modified: See CHANGELOG.md for complete modification history
-// Last Updated: 2025-10-24
+// Last Updated: 2025-11-08
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
-import { withAuth } from 'next-auth/middleware';
+import { withAuth } from "next-auth/middleware";
 
 export default withAuth({
   callbacks: {
@@ -13,5 +13,5 @@ export default withAuth({
 });
 
 export const config = {
-  matcher: ['/', '/runs/:path*'],
+  matcher: ["/", "/runs/:path*"],
 };

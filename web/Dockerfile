@@ -37,7 +37,7 @@ COPY web/postcss.config.js ./postcss.config.js
 COPY web/tailwind.config.ts ./tailwind.config.ts
 COPY web/tsconfig.json ./tsconfig.json
 COPY web/auth.config.ts ./auth.config.ts
-COPY web/middleware.ts ./middleware.ts
+COPY web/proxy.ts ./proxy.ts
 COPY web/app ./app
 COPY web/components ./components
 COPY web/lib ./lib

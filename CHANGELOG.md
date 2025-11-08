@@ -1,6 +1,6 @@
 <!-- ============================================================
 Modified: See CHANGELOG.md for complete modification history
-Last Updated: 2025-11-02
+Last Updated: 2025-11-08
 Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 ============================================================ -->
 
@@ -14,6 +14,58 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 ## [Unreleased]
+
+### Next.js 16 Migration
+
+**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
+**Last Updated**: 2025-11-08
+
+#### [2.0] - 2025-11-08 - Upgrade to Next.js 16 and React 19
+
+##### Package Updates
+
+- **Changed**: `web/package.json` - Upgrade Next.js from 15.1.8 to ^16.0.1
+- **Changed**: `web/package.json` - Upgrade React and React DOM from 18.3.1 to ^19.2.0
+- **Changed**: `web/package.json` - Upgrade @types/react from ^18.3.8 to ^19.2.2
+- **Changed**: `web/package.json` - Upgrade @types/react-dom from ^18.3.0 to ^19.2.2
+- **Changed**: `web/package.json` - Upgrade eslint-config-next from 15.1.8 to ^16.0.1
+
+##### Code Updates
+
+- **Changed**: `web/app/api/runs/[id]/route.ts` - Update route handler context type from `any` to proper `{ params: Promise<{ id: string }> }` type for Next.js 16
+- **Changed**: `web/app/api/runs/[id]/stream/route.ts` - Update route handler context type from `any` to proper `{ params: Promise<{ id: string }> }` type for Next.js 16
+- **Changed**: `web/app/api/reports/tickers/[ticker]/dates/[date]/route.ts` - Update route handler context type from `any` to proper `{ params: Promise<{ ticker: string; date: string }> }` type for Next.js 16
+- **Changed**: `web/lib/middleware/auth.middleware.ts` - Add generic type parameters to middleware functions (`withAuth`, `withErrorHandler`, `composeMiddleware`) for proper TypeScript typing with Next.js 16 route handlers
+
+##### Configuration Updates
+
+- **Removed**: `web/next.config.js` - Removed serverActions configuration (not supported in Next.js 16)
+- **Changed**: `web/next.config.js` - Added turbopack.root configuration to silence workspace root warning
+- **Changed**: `web/middleware.ts` → `web/proxy.ts` - Rename middleware file to proxy per Next.js 16 convention
+- **Changed**: `web/tsconfig.json` - Updated by Next.js 16: jsx set to react-jsx, added .next/dev/types/\*_/_.ts to include
+- **Changed**: `web/Dockerfile` - Updated COPY command to use proxy.ts instead of middleware.ts
+- **Removed**: `web/package-lock.json` - Removed npm lockfile (using pnpm)
+- **Note**: serverActions.bodySizeLimit configuration removed in Next.js 16 (use route-level handling if needed)
+- **Note**: Next.js 16 deprecated "middleware" file convention in favor of "proxy" for clarity
+
+**Impact**: 🔴 High - Major version upgrade with breaking changes; requires dependency updates and testing
+
+**Breaking Changes**:
+
+- React 19 introduces new features and deprecations
+- serverActions configuration moved from experimental to stable
+- Async Request APIs are now fully enforced (already implemented in v15)
+- Route handler context types must be properly typed (updated in this migration)
+
+**Migration Notes**:
+
+- All dynamic route params were already using async/await pattern (Next.js 15 compatibility)
+- Route handlers updated with proper TypeScript types for Next.js 16 compatibility
+- Middleware functions updated with generic types for better type safety
+- Run `pnpm install` to update dependencies (completed)
+- Test all features thoroughly, especially authentication and streaming endpoints
+
+---
 
 ### Next.js 15 & Type System Improvements
 

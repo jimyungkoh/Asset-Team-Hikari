@@ -4,20 +4,20 @@
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
-import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
+import { getServerSession } from "next-auth";
+import { NextResponse } from "next/server";
 
-import { authConfig } from '@/auth.config';
-import { HTTP_STATUS, ERROR_MESSAGES } from '@/lib/constants';
+import { authConfig } from "@/auth.config";
+import { ERROR_MESSAGES, HTTP_STATUS } from "@/lib/constants";
 
 // ============================================================
 // Auth Middleware
 // ============================================================
 
-export function withAuth(
-  handler: (request: Request, context: any) => Promise<Response>
-) {
-  return async (request: Request, context: any): Promise<Response> => {
+export function withAuth<
+  T extends { params: Promise<Record<string, string | string[] | undefined>> }
+>(handler: (request: Request, context: T) => Promise<Response>) {
+  return async (request: Request, context: T): Promise<Response> => {
     const session = await getServerSession(authConfig);
 
     if (!session) {
@@ -35,17 +35,19 @@ export function withAuth(
 // Error Handler Middleware
 // ============================================================
 
-export function withErrorHandler(
-  handler: (request: Request, context: any) => Promise<Response>
-) {
-  return async (request: Request, context: any): Promise<Response> => {
+export function withErrorHandler<
+  T extends { params: Promise<Record<string, string | string[] | undefined>> }
+>(handler: (request: Request, context: T) => Promise<Response>) {
+  return async (request: Request, context: T): Promise<Response> => {
     try {
       return await handler(request, context);
     } catch (error) {
-      console.error('[API Error]', error);
+      console.error("[API Error]", error);
 
       const message =
-        error instanceof Error ? error.message : ERROR_MESSAGES.INTERNAL_SERVER_ERROR;
+        error instanceof Error
+          ? error.message
+          : ERROR_MESSAGES.INTERNAL_SERVER_ERROR;
 
       return NextResponse.json(
         { error: message },
@@ -59,14 +61,19 @@ export function withErrorHandler(
 // Compose Middleware
 // ============================================================
 
-export function composeMiddleware(
+export function composeMiddleware<
+  T extends { params: Promise<Record<string, string | string[] | undefined>> }
+>(
   ...middlewares: Array<
     (
-      handler: (request: Request, context: any) => Promise<Response>
-    ) => (request: Request, context: any) => Promise<Response>
+      handler: (request: Request, context: T) => Promise<Response>
+    ) => (request: Request, context: T) => Promise<Response>
   >
 ) {
-  return (handler: (request: Request, context: any) => Promise<Response>) => {
-    return middlewares.reduceRight((acc, middleware) => middleware(acc), handler);
+  return (handler: (request: Request, context: T) => Promise<Response>) => {
+    return middlewares.reduceRight(
+      (acc, middleware) => middleware(acc),
+      handler
+    );
   };
 }

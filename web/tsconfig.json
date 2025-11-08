@@ -1,7 +1,7 @@
 {
   "_metadata": {
     "modified": "See CHANGELOG.md for complete modification history",
-    "lastUpdated": "2025-10-24",
+    "lastUpdated": "2025-11-08",
     "modifiedBy": "jimyungkoh<aqaqeqeq0511@gmail.com>"
   },
   "compilerOptions": {
@@ -18,7 +18,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "incremental": true,
     "paths": {
       "@/*": ["./*"],
@@ -33,6 +33,12 @@
       }
     ]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
   "exclude": ["node_modules"]
 }

@@ -7,18 +7,18 @@
 import { NextResponse } from "next/server";
 
 import {
-  backendApiService,
-  BackendApiError,
-} from "@/lib/services/backend-api.service";
-import {
+  composeMiddleware,
   withAuth,
   withErrorHandler,
-  composeMiddleware,
 } from "@/lib/middleware/auth.middleware";
+import {
+  BackendApiError,
+  backendApiService,
+} from "@/lib/services/backend-api.service";
 
 const handler = async (
   _request: Request,
-  context: any,
+  context: { params: Promise<{ ticker: string; date: string }> }
 ): Promise<Response> => {
   const params = await context.params;
   const normalizedTicker = (params.ticker ?? "").trim().toUpperCase();
@@ -27,21 +27,21 @@ const handler = async (
   if (!normalizedTicker || !runDate) {
     return NextResponse.json(
       { error: "ticker와 date 파라미터는 필수입니다." },
-      { status: 400 },
+      { status: 400 }
     );
   }
 
   try {
     const reports = await backendApiService.getReportsByTickerAndDate(
       normalizedTicker,
-      runDate,
+      runDate
     );
     return NextResponse.json({ reports });
   } catch (error) {
     if (error instanceof BackendApiError) {
       return NextResponse.json(
         { error: error.message },
-        { status: error.status },
+        { status: error.status }
       );
     }
     throw error;

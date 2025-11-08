@@ -4,10 +4,14 @@
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 
-import { backendApiService } from '@/lib/services/backend-api.service';
-import { withAuth, withErrorHandler, composeMiddleware } from '@/lib/middleware/auth.middleware';
+import {
+  composeMiddleware,
+  withAuth,
+  withErrorHandler,
+} from "@/lib/middleware/auth.middleware";
+import { backendApiService } from "@/lib/services/backend-api.service";
 
 // ============================================================
 // GET /api/runs/[id] - Run 상세 조회
@@ -15,16 +19,13 @@ import { withAuth, withErrorHandler, composeMiddleware } from '@/lib/middleware/
 
 const handler = async (
   _: Request,
-  context: any,
+  context: { params: Promise<{ id: string }> }
 ): Promise<Response> => {
   const params = await context.params;
   const id = (params.id ?? "").trim();
 
   if (!id) {
-    return NextResponse.json(
-      { error: 'Run ID is required.' },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: "Run ID is required." }, { status: 400 });
   }
 
   const run = await backendApiService.getRun(id);

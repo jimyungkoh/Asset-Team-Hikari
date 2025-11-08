@@ -15,7 +15,7 @@ function getNestBase(): string {
 
 export async function GET(
   request: Request,
-  context: any
+  context: { params: Promise<{ id: string }> }
 ): Promise<Response> {
   const params = await context.params;
   const id = (params.id ?? "").trim();
