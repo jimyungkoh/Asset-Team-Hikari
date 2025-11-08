@@ -20,6 +20,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
 **Last Updated**: 2025-11-08
 
+#### [4.2] - 2025-11-08 - Move env file preparation to remote deploy script
+
+##### GitHub Actions Workflow
+
+- **Removed**: `.github/workflows/deploy.yml` - Remove "Prepare env placeholders" step from GitHub Actions workflow
+- **Changed**: `.github/workflows/deploy.yml` - Update deployment path from `~/services/prod/asset-team-hikari` to `/home/ubuntu/services/prod/asset-team-hikari` for absolute path consistency
+
+##### Deployment Scripts
+
+- **Added**: `scripts/deploy/remote_deploy.sh` - Add `ensure_env_file()` function to handle .env file creation on remote host
+- **Changed**: `scripts/deploy/remote_deploy.sh` - Move env file preparation logic from GitHub Actions to remote deploy script
+- **Changed**: `scripts/deploy/remote_deploy.sh` - Ensure .env files are created before deployment starts (only if missing)
+
+**Impact**: 🟢 Low - Improves deployment reliability by ensuring env files exist on remote host
+
+**Benefits**:
+- Env file preparation happens directly on the deployment target
+- More reliable than preparing files in CI and transferring them
+- Handles missing .env files gracefully during deployment
+- Better separation of concerns between CI and deployment scripts
+
+**Migration Notes**:
+- No action required - env files are now automatically created during deployment
+- Existing .env files are preserved (not overwritten)
+
+---
+
 #### [4.1] - 2025-11-08 - Optimize infrastructure services management in deployment script
 
 ##### Deployment Scripts

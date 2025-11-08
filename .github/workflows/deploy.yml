@@ -19,19 +19,6 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v4
 
-      - name: Prepare env placeholders
-        run: |
-          set -euo pipefail
-          for dir in server web TradingAgents traefik; do
-            example="$dir/.env.example"
-            target="$dir/.env"
-            if [ -f "$example" ]; then
-              cp "$example" "$target"
-            else
-              : > "$target"
-            fi
-          done
-
       - name: Validate compose descriptors
         run: docker compose -f docker-compose.yml config -q
 
@@ -46,7 +33,7 @@ jobs:
           command_timeout: 30m
           script: |
             set -euo pipefail
-            cd ~/services/prod/asset-team-hikari
+            cd /home/ubuntu/services/prod/asset-team-hikari
             git fetch origin
             git checkout main
             git reset --hard origin/main
