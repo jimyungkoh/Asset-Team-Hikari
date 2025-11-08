@@ -1,6 +1,6 @@
 # ============================================================
 # Modified: See CHANGELOG.md for complete modification history
-# Last Updated: 2025-11-02
+# Last Updated: 2025-11-08
 # Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 # ============================================================
 
@@ -59,11 +59,13 @@ services:
     container_name: tradingagents-server
     depends_on:
       - trading-agents
+      - redis
     env_file:
       - ./server/.env
     environment:
       NODE_ENV: production
       PYTHON_SERVICE_URL: http://trading-agents:8000
+      REDIS_URL: redis://redis:6379
       SKIP_TOKEN_AUTH: ${SKIP_TOKEN_AUTH:-false}
     expose:
       - "3001"
@@ -101,6 +103,20 @@ services:
       - default
       - proxy
 
+  redis:
+    image: redis:7.2-alpine
+    container_name: tradingagents-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - default
+
 networks:
   proxy:
     driver: bridge
+
+volumes:
+  redis_data:

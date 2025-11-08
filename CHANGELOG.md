@@ -15,6 +15,57 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Redis Integration & Distributed Locking
+
+**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
+**Last Updated**: 2025-11-08
+
+#### [3.0] - 2025-11-08 - Add Redis service and distributed locking for run concurrency control
+
+##### Infrastructure Updates
+
+- **Added**: `server/src/infrastructure/redis/redis.service.ts` - New RedisService with connection management and distributed lock support
+- **Changed**: `server/src/infrastructure/infrastructure.module.ts` - Add RedisService to global providers and exports
+- **Changed**: `server/src/runs/runs.module.ts` - Import InfrastructureModule to access RedisService
+
+##### Run Service Updates
+
+- **Changed**: `server/src/runs/domain/run.service.ts` - Replace in-memory duplicate run detection with Redis-based distributed locking
+- **Changed**: `server/src/runs/domain/run.service.ts` - Add RedisService dependency injection
+- **Changed**: `server/src/runs/domain/run.service.ts` - Implement lock acquisition/release for ticker+tradeDate combinations (20min TTL)
+- **Changed**: `server/src/runs/domain/run.service.ts` - Update conflict detection logic to use Redis locks instead of in-memory Map
+
+##### Docker Configuration
+
+- **Changed**: `docker-compose.yml` - Add Redis service (redis:7.2-alpine) for production environment
+- **Changed**: `docker-compose.yml` - Add REDIS_URL environment variable to server service
+- **Changed**: `docker-compose.yml` - Add redis_data volume for persistence
+- **Changed**: `docker-compose.dev.yml` - Add Redis service (redis:7.2-alpine) for development environment
+- **Changed**: `docker-compose.dev.yml` - Add redis_dev_data volume
+- **Changed**: `docker-compose.dev.yml` - Add pull_policy: build to trading-agents service
+
+##### Configuration Updates
+
+- **Changed**: `server/.env.example` - Add REDIS_URL configuration with example value
+- **Changed**: `server/.env.example` - Reorganize and improve documentation for environment variables
+- **Changed**: `server/package.json` - Add ioredis dependency (^5.3.2)
+
+**Impact**: 🟡 Medium - Improves concurrency control across multiple server instances; requires Redis infrastructure
+
+**Benefits**:
+- Prevents duplicate runs across multiple server instances
+- Distributed locking ensures only one run per ticker+tradeDate combination
+- Automatic lock expiration (20 minutes) prevents deadlocks
+- Better scalability for multi-instance deployments
+
+**Migration Notes**:
+- Redis must be running before starting the server
+- Set REDIS_URL environment variable (default: redis://localhost:6379)
+- For Docker deployments, Redis is automatically configured
+- Existing in-memory duplicate detection replaced with Redis-based solution
+
+---
+
 ### Next.js 16 Migration
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>

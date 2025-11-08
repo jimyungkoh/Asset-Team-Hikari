@@ -1,7 +1,7 @@
 {
   "_metadata": {
     "modified": "See CHANGELOG.md for complete modification history",
-    "lastUpdated": "2025-11-02",
+    "lastUpdated": "2025-11-06",
     "modifiedBy": "jimyungkoh<aqaqeqeq0511@gmail.com>"
   },
   "name": "tradingagents-server",
@@ -37,6 +37,7 @@
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.44.7",
     "pg": "^8.13.1",
+    "ioredis": "^5.3.2",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
     "uuid": "^9.0.1"

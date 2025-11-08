@@ -1,22 +1,28 @@
 // ============================================================
 // Modified: See CHANGELOG.md for complete modification history
-// Last Updated: 2025-11-02
+// Last Updated: 2025-11-06
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
-import { Injectable, Logger, NotFoundException, ConflictException } from '@nestjs/common';
-import { MessageEvent } from '@nestjs/common/interfaces';
-import { Observable, ReplaySubject } from 'rxjs';
+import {
+  ConflictException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from "@nestjs/common";
+import { MessageEvent } from "@nestjs/common/interfaces";
+import { Observable, ReplaySubject } from "rxjs";
 
-import { CreateRunDto } from '../dto/create-run.dto';
-import { RunStatus, RunSummary } from '../run.types';
-import { RunRepository } from '../infrastructure/run.repository';
-import { RunConfigService } from '../config/run-config.service';
-import { ArtifactsService } from '../../artifacts/infrastructure/artifacts.service';
-import { ReportsRepository } from '../../reports/infrastructure/reports.repository';
-import { ReportsService } from '../../reports/domain/reports.service';
-import { ReportSummaryService } from '../../reports/domain/report-summary.service';
-import { stringifyStructuredContent } from '../../common/utils/content-normalizer';
+import { ArtifactsService } from "../../artifacts/infrastructure/artifacts.service";
+import { stringifyStructuredContent } from "../../common/utils/content-normalizer";
+import { RedisService } from "../../infrastructure/redis/redis.service";
+import { ReportSummaryService } from "../../reports/domain/report-summary.service";
+import { ReportsService } from "../../reports/domain/reports.service";
+import { ReportsRepository } from "../../reports/infrastructure/reports.repository";
+import { RunConfigService } from "../config/run-config.service";
+import { CreateRunDto } from "../dto/create-run.dto";
+import { RunRepository } from "../infrastructure/run.repository";
+import { RunStatus, RunSummary } from "../run.types";
 
 interface RunContext {
   id: string;
@@ -36,54 +42,55 @@ interface RunContext {
   stopStream?: () => void;
 }
 
-const TERMINAL_STATUSES = new Set<RunStatus>(['success', 'failed']);
+const TERMINAL_STATUSES = new Set<RunStatus>(["success", "failed"]);
 
 @Injectable()
 export class RunService {
   private readonly logger = new Logger(RunService.name);
   private readonly runs = new Map<string, RunContext>();
 
+  private readonly LOCK_TTL_SECONDS = 1_200; // 20분
+
   constructor(
     private readonly runRepository: RunRepository,
+    private readonly redisService: RedisService,
     private readonly runConfigService: RunConfigService,
     private readonly artifactsService: ArtifactsService,
     private readonly reportsRepository: ReportsRepository,
     private readonly reportsService: ReportsService,
-    private readonly reportSummaryService: ReportSummaryService,
+    private readonly reportSummaryService: ReportSummaryService
   ) {}
 
   async startRun(dto: CreateRunDto): Promise<RunSummary> {
     const normalizedTicker = dto.ticker.trim().toUpperCase();
     const normalizedTradeDate = dto.tradeDate.trim();
 
-    const inFlight = [...this.runs.values()].find(
-      (context) =>
-        context.ticker === normalizedTicker &&
-        context.tradeDate === normalizedTradeDate &&
-        !TERMINAL_STATUSES.has(context.status),
+    const lockKey = `run:lock:${normalizedTicker}:${normalizedTradeDate}`;
+    const lockAcquired = await this.redisService.acquireLock(
+      lockKey,
+      this.LOCK_TTL_SECONDS
     );
 
-    if (inFlight) {
+    if (!lockAcquired) {
       this.logger.log(
-        `Skipping run for ${normalizedTicker} ${normalizedTradeDate} (run ${inFlight.id} in progress)`,
+        `Skipping run for ${normalizedTicker} ${normalizedTradeDate} (run already in progress)`
       );
       throw new ConflictException({
         statusCode: 409,
-        error: 'Conflict',
+        error: "Conflict",
         message: `Run already in progress for ${normalizedTicker} on ${normalizedTradeDate}`,
         ticker: normalizedTicker,
         tradeDate: normalizedTradeDate,
       });
     }
 
-    const existingReports =
-      await this.reportsRepository.findByTickerAndDate(
-        normalizedTicker,
-        normalizedTradeDate,
-      );
+    const existingReports = await this.reportsRepository.findByTickerAndDate(
+      normalizedTicker,
+      normalizedTradeDate
+    );
 
     const successfulMetadata = existingReports.filter(
-      (metadata) => metadata.status === 'success',
+      (metadata) => metadata.status === "success"
     );
     let hasCompletedReport = false;
 
@@ -92,29 +99,28 @@ export class RunService {
         const detailedReports =
           await this.reportsService.listDetailsByTickerAndDate(
             normalizedTicker,
-            normalizedTradeDate,
+            normalizedTradeDate
           );
 
         hasCompletedReport = detailedReports.some((report) => {
-          if (report.status !== 'success') {
+          if (report.status !== "success") {
             return false;
           }
 
           const content =
-            typeof report.content === 'string' ? report.content.trim() : '';
+            typeof report.content === "string" ? report.content.trim() : "";
           return content.length > 0;
         });
 
         if (!hasCompletedReport) {
           this.logger.warn(
-            `Report metadata exists without accessible content for ${normalizedTicker} ${normalizedTradeDate}; rerun will be allowed.`,
+            `Report metadata exists without accessible content for ${normalizedTicker} ${normalizedTradeDate}; rerun will be allowed.`
           );
         }
       } catch (error) {
-        const message =
-          error instanceof Error ? error.message : String(error);
+        const message = error instanceof Error ? error.message : String(error);
         this.logger.warn(
-          `Failed to verify existing reports for ${normalizedTicker} ${normalizedTradeDate}: ${message}`,
+          `Failed to verify existing reports for ${normalizedTicker} ${normalizedTradeDate}: ${message}`
         );
         hasCompletedReport = true;
       }
@@ -122,11 +128,11 @@ export class RunService {
 
     if (hasCompletedReport) {
       this.logger.log(
-        `Skipping run for ${normalizedTicker} ${normalizedTradeDate} (reports already exist)`,
+        `Skipping run for ${normalizedTicker} ${normalizedTradeDate} (reports already exist)`
       );
       throw new ConflictException({
         statusCode: 409,
-        error: 'Conflict',
+        error: "Conflict",
         message: `Reports already exist for ${normalizedTicker} on ${normalizedTradeDate}`,
         ticker: normalizedTicker,
         tradeDate: normalizedTradeDate,
@@ -138,7 +144,7 @@ export class RunService {
     // 템플릿 config 병합
     const config = this.runConfigService.buildRunConfig(
       normalizedTicker,
-      normalizedTradeDate,
+      normalizedTradeDate
     );
     const enrichedDto = {
       ...dto,
@@ -173,7 +179,7 @@ export class RunService {
     }
 
     this.emit(context, {
-      event: 'created',
+      event: "created",
       runId: id,
       status: context.status,
       timestamp: now.toISOString(),
@@ -231,8 +237,9 @@ export class RunService {
     const timestamp = event.timestamp ?? new Date().toISOString();
     const payload = event.payload ?? {};
 
-    if (event.event === 'status') {
-      const stateValue = typeof payload.state === 'string' ? payload.state : undefined;
+    if (event.event === "status") {
+      const stateValue =
+        typeof payload.state === "string" ? payload.state : undefined;
       if (stateValue) {
         context.status = this.mapRemoteStatus(stateValue);
       }
@@ -247,12 +254,12 @@ export class RunService {
         context.error = {
           message: String(payload.error),
         };
-      } else if (context.status !== 'failed') {
+      } else if (context.status !== "failed") {
         context.error = undefined;
       }
 
       this.emit(context, {
-        event: 'status',
+        event: "status",
         runId: context.id,
         status: context.status,
         payload,
@@ -263,7 +270,10 @@ export class RunService {
         void this.hydrateFromRemote(context.id)
           .then((latest) => this.persistRunArtifacts(latest))
           .catch((error) => {
-            this.logger.error(`Failed to hydrate completed run ${context.id}`, error as Error);
+            this.logger.error(
+              `Failed to hydrate completed run ${context.id}`,
+              error as Error
+            );
           })
           .finally(() => {
             this.complete(context);
@@ -274,7 +284,7 @@ export class RunService {
     }
 
     this.emit(context, {
-      event: event.event ?? 'message',
+      event: event.event ?? "message",
       runId: context.id,
       payload,
       timestamp,
@@ -289,7 +299,7 @@ export class RunService {
     }
 
     this.emit(context, {
-      event: 'error',
+      event: "error",
       runId: context.id,
       message: error.message,
       timestamp: new Date().toISOString(),
@@ -301,7 +311,7 @@ export class RunService {
       this.ensureRemoteStream(context);
     }, 1000);
 
-    if (typeof (retry as NodeJS.Timeout).unref === 'function') {
+    if (typeof (retry as NodeJS.Timeout).unref === "function") {
       (retry as NodeJS.Timeout).unref();
     }
   }
@@ -312,14 +322,16 @@ export class RunService {
       return;
     }
 
-    this.logger.warn(`Python stream closed for run ${context.id}, retrying connection`);
+    this.logger.warn(
+      `Python stream closed for run ${context.id}, retrying connection`
+    );
     context.streamActive = false;
 
     const retry = setTimeout(() => {
       this.ensureRemoteStream(context);
     }, 1000);
 
-    if (typeof (retry as NodeJS.Timeout).unref === 'function') {
+    if (typeof (retry as NodeJS.Timeout).unref === "function") {
       (retry as NodeJS.Timeout).unref();
     }
   }
@@ -329,11 +341,16 @@ export class RunService {
     try {
       remote = await this.runRepository.getRun(id);
     } catch (error) {
-      if (error instanceof Error && error.message.includes('status 404')) {
-        throw new NotFoundException(`Run ${id} was not found on the Python service`);
+      if (error instanceof Error && error.message.includes("status 404")) {
+        throw new NotFoundException(
+          `Run ${id} was not found on the Python service`
+        );
       }
 
-      this.logger.error(`Failed to fetch run ${id} from Python service`, error as Error);
+      this.logger.error(
+        `Failed to fetch run ${id} from Python service`,
+        error as Error
+      );
 
       const existing = this.runs.get(id);
       if (existing) {
@@ -363,7 +380,7 @@ export class RunService {
         persisted: false,
       };
       this.runs.set(remote.id, context);
-    } else if (typeof context.persisted === 'undefined') {
+    } else if (typeof context.persisted === "undefined") {
       context.persisted = false;
     }
     return context;
@@ -391,7 +408,9 @@ export class RunService {
     context.persisted = true;
 
     if (!context.tradeDate) {
-      this.logger.warn(`Run ${context.id} is missing trade date; skipping artifact persistence.`);
+      this.logger.warn(
+        `Run ${context.id} is missing trade date; skipping artifact persistence.`
+      );
       return;
     }
 
@@ -413,7 +432,7 @@ export class RunService {
     } catch (error) {
       this.logger.error(
         `Failed to persist run summary for ${context.ticker} ${context.tradeDate} (${context.id})`,
-        error as Error,
+        error as Error
       );
     }
 
@@ -421,14 +440,17 @@ export class RunService {
       return;
     }
 
-    const artifacts = await this.buildArtifactsFromResult(context, resultRecord);
+    const artifacts = await this.buildArtifactsFromResult(
+      context,
+      resultRecord
+    );
     for (const artifact of artifacts) {
       try {
         await this.artifactsService.saveArtifact(artifact);
       } catch (error) {
         this.logger.error(
           `Failed to persist artifact ${artifact.artifactKey} for ${context.ticker} ${context.tradeDate}`,
-          error as Error,
+          error as Error
         );
       }
     }
@@ -436,14 +458,18 @@ export class RunService {
 
   private async buildArtifactsFromResult(
     context: RunContext,
-    result: Record<string, unknown>,
-  ): Promise<Parameters<ArtifactsService['saveArtifact']>[0][]> {
-    const artifacts: Parameters<ArtifactsService['saveArtifact']>[0][] = [];
+    result: Record<string, unknown>
+  ): Promise<Parameters<ArtifactsService["saveArtifact"]>[0][]> {
+    const artifacts: Parameters<ArtifactsService["saveArtifact"]>[0][] = [];
     const runDate = context.tradeDate;
     const ticker = context.ticker;
     const reportsContent: Record<string, string> = {};
 
-    const addArtifact = (namespace: string, key: string, value: unknown): void => {
+    const addArtifact = (
+      namespace: string,
+      key: string,
+      value: unknown
+    ): void => {
       const content = this.toContentString(value);
       if (!content) {
         return;
@@ -455,36 +481,46 @@ export class RunService {
         artifactNamespace: namespace,
         artifactKey,
         content,
-        contentSize: Buffer.byteLength(content, 'utf8'),
+        contentSize: Buffer.byteLength(content, "utf8"),
         metadata: {
           runId: context.id,
           status: context.status,
         },
       });
 
-      if (namespace === 'reports') {
+      if (namespace === "reports") {
         reportsContent[key] = content;
       }
     };
 
-    addArtifact('reports', 'decision', result['decision']);
-    addArtifact('reports', 'final_trade_decision', result['final_trade_decision']);
-    addArtifact('plans', 'investment_plan', result['investment_plan']);
-    addArtifact('plans', 'trader_investment_plan', result['trader_investment_plan']);
+    addArtifact("reports", "decision", result["decision"]);
+    addArtifact(
+      "reports",
+      "final_trade_decision",
+      result["final_trade_decision"]
+    );
+    addArtifact("plans", "investment_plan", result["investment_plan"]);
+    addArtifact(
+      "plans",
+      "trader_investment_plan",
+      result["trader_investment_plan"]
+    );
 
-    const reports = this.asRecord(result['reports']);
+    const reports = this.asRecord(result["reports"]);
     if (reports) {
       for (const [section, value] of Object.entries(reports)) {
-        addArtifact('reports', section, value);
+        addArtifact("reports", section, value);
       }
     }
 
     const summaryLanguage = this.reportSummaryService.getDefaultLanguage();
     const decisionContent =
-      reportsContent['decision'] ?? this.toContentString(result['decision']) ?? null;
+      reportsContent["decision"] ??
+      this.toContentString(result["decision"]) ??
+      null;
     const finalDecisionContent =
-      reportsContent['final_trade_decision'] ??
-      this.toContentString(result['final_trade_decision']) ??
+      reportsContent["final_trade_decision"] ??
+      this.toContentString(result["final_trade_decision"]) ??
       null;
 
     const summary = await this.reportSummaryService.generateCompositeReport({
@@ -494,10 +530,10 @@ export class RunService {
       decision: decisionContent,
       finalDecision: finalDecisionContent,
       sections: {
-        market: reportsContent['market'] ?? null,
-        sentiment: reportsContent['sentiment'] ?? null,
-        news: reportsContent['news'] ?? null,
-        fundamentals: reportsContent['fundamentals'] ?? null,
+        market: reportsContent["market"] ?? null,
+        sentiment: reportsContent["sentiment"] ?? null,
+        news: reportsContent["news"] ?? null,
+        fundamentals: reportsContent["fundamentals"] ?? null,
         decision: decisionContent,
         final_trade_decision: finalDecisionContent,
       },
@@ -509,10 +545,10 @@ export class RunService {
       artifacts.push({
         ticker,
         runDate,
-        artifactNamespace: 'reports',
+        artifactNamespace: "reports",
         artifactKey,
         content: summary.content,
-        contentSize: Buffer.byteLength(summary.content, 'utf8'),
+        contentSize: Buffer.byteLength(summary.content, "utf8"),
         metadata: {
           runId: context.id,
           status: context.status,
@@ -525,52 +561,54 @@ export class RunService {
   }
 
   private asRecord(value: unknown): Record<string, unknown> | undefined {
-    if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
       return undefined;
     }
     return value as Record<string, unknown>;
   }
 
   private toContentString(value: unknown): string | null {
-    if (value === null || typeof value === 'undefined') {
+    if (value === null || typeof value === "undefined") {
       return null;
     }
     const stringified =
-      typeof value === 'string'
-        ? value
-        : stringifyStructuredContent(value);
+      typeof value === "string" ? value : stringifyStructuredContent(value);
     const trimmed = stringified.trim();
     return trimmed.length > 0 ? trimmed : null;
   }
 
-  private extractDurationSeconds(result: Record<string, unknown> | undefined): number | undefined {
+  private extractDurationSeconds(
+    result: Record<string, unknown> | undefined
+  ): number | undefined {
     if (!result) {
       return undefined;
     }
-    const value = result['duration_seconds'] ?? result['durationSeconds'];
-    if (typeof value === 'number') {
+    const value = result["duration_seconds"] ?? result["durationSeconds"];
+    if (typeof value === "number") {
       return value;
     }
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       const parsed = Number(value);
       return Number.isFinite(parsed) ? parsed : undefined;
     }
     return undefined;
   }
 
-  private extractSummaryMetadata(result: Record<string, unknown> | undefined): Record<string, unknown> | undefined {
+  private extractSummaryMetadata(
+    result: Record<string, unknown> | undefined
+  ): Record<string, unknown> | undefined {
     if (!result) {
       return undefined;
     }
     const metadata: Record<string, unknown> = {};
     const fields: Array<[string, unknown]> = [
-      ['log_path', result['log_path']],
-      ['project_dir', result['project_dir']],
-      ['started_at', result['started_at']],
-      ['completed_at', result['completed_at']],
+      ["log_path", result["log_path"]],
+      ["project_dir", result["project_dir"]],
+      ["started_at", result["started_at"]],
+      ["completed_at", result["completed_at"]],
     ];
     for (const [key, value] of fields) {
-      if (typeof value === 'string' && value.trim()) {
+      if (typeof value === "string" && value.trim()) {
         metadata[key] = value;
       }
     }
@@ -578,15 +616,15 @@ export class RunService {
   }
 
   private mapRemoteStatus(status: string | undefined): RunStatus {
-    switch ((status ?? '').toLowerCase()) {
-      case 'running':
-        return 'running';
-      case 'success':
-        return 'success';
-      case 'failed':
-        return 'failed';
+    switch ((status ?? "").toLowerCase()) {
+      case "running":
+        return "running";
+      case "success":
+        return "success";
+      case "failed":
+        return "failed";
       default:
-        return 'pending';
+        return "pending";
     }
   }
 
@@ -601,6 +639,12 @@ export class RunService {
 
     if (!context.subject.closed) {
       context.subject.complete();
+    }
+
+    // 락 해제
+    if (context.ticker && context.tradeDate) {
+      const lockKey = `run:lock:${context.ticker}:${context.tradeDate}`;
+      void this.redisService.releaseLock(lockKey);
     }
   }
 

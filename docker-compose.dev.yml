@@ -1,6 +1,6 @@
 # ============================================================
 # Modified: See CHANGELOG.md for complete modification history
-# Last Updated: 2025-11-02
+# Last Updated: 2025-11-08
 # Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 # ============================================================
 
@@ -10,6 +10,7 @@ services:
       context: ./TradingAgents
       dockerfile: Dockerfile
     image: tradingagents:dev
+    pull_policy: build
     container_name: trading-agents-dev
     env_file:
       - ./TradingAgents/.env
@@ -20,5 +21,15 @@ services:
       - "8000:8000"
     volumes:
       - ./TradingAgents:/app
-    profiles:
-      - dev
+
+  redis-dev:
+    image: redis:7.2-alpine
+    container_name: tradingagents-redis-dev
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_dev_data:/data
+    restart: unless-stopped
+
+volumes:
+  redis_dev_data:

@@ -1,6 +1,6 @@
 // ============================================================
 // Modified: See CHANGELOG.md for complete modification history
-// Last Updated: 2025-11-02
+// Last Updated: 2025-11-06
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
@@ -22,14 +22,14 @@ import { RunsController } from './presentation/runs.controller';
   providers: [
     // Domain
     RunService,
-    
+
     // Infrastructure
     RunRepository,
     PythonRunsClient,
-    
+
     // Config
     RunConfigService,
-    
+
     // Auth
     InternalAuthService,
     InternalAuthGuard,
