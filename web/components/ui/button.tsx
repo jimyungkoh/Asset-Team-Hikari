@@ -73,16 +73,16 @@ export const Button = ({
   ...props
 }: ButtonProps) => {
   const Comp = asChild ? Slot : "button";
-  
+
   const renderIcon = () => {
     if (loading) {
       return <LoadingSpinner size={iconSize} variant="spinner" className="text-current" />;
     }
-    
+
     if (icon) {
       return <Icon name={icon} size={iconSize} className="text-current" />;
     }
-    
+
     return null;
   };
 
@@ -90,7 +90,7 @@ export const Button = ({
     <>
       {/* Background shimmer effect */}
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
-      
+
       {/* Icon and content */}
       <div className="flex items-center justify-center gap-2 relative z-10">
         {iconPosition === "left" && renderIcon()}
@@ -112,16 +112,16 @@ export const Button = ({
 };
 
 // Financial specific button variants
-export const FinancialButton = {
-  Profit: (props: Omit<ButtonProps, "variant">) => (
-    <Button variant="profit" {...props} />
-  ),
-  Loss: (props: Omit<ButtonProps, "variant">) => (
-    <Button variant="loss" {...props} />
-  ),
-  Neutral: (props: Omit<ButtonProps, "variant">) => (
-    <Button variant="neutral" {...props} />
-  ),
-};
+export const FinancialButtonProfit = (props: Omit<ButtonProps, "variant">) => (
+  <Button variant="profit" {...props} />
+);
+
+export const FinancialButtonLoss = (props: Omit<ButtonProps, "variant">) => (
+  <Button variant="loss" {...props} />
+);
+
+export const FinancialButtonNeutral = (props: Omit<ButtonProps, "variant">) => (
+  <Button variant="neutral" {...props} />
+);
 
 Button.displayName = "Button";
