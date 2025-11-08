@@ -22,7 +22,7 @@ jobs:
       - name: Prepare env placeholders
         run: |
           set -euo pipefail
-          for dir in server web TradingAgents; do
+          for dir in server web TradingAgents traefik; do
             example="$dir/.env.example"
             target="$dir/.env"
             if [ -f "$example" ]; then
