@@ -47,6 +47,9 @@ jobs:
           script: |
             set -euo pipefail
             cd ~/services/prod/asset-team-hikari
+            git fetch origin
+            git checkout main
+            git reset --hard origin/main
             export STACK_PREFIX=asset-team-hikari
             export DEPLOY_BRANCH=origin/main
             export COMPOSE_FILE_REL=docker-compose.yml
