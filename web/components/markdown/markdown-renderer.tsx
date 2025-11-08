@@ -232,7 +232,7 @@ const markdownComponents: Components = {
 export function MarkdownRenderer({
   content,
   className,
-}: MarkdownRendererProps): JSX.Element {
+}: MarkdownRendererProps) {
   return (
     <div
       className={clsx(

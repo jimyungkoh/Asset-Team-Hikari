@@ -22,7 +22,7 @@ export default async function RootLayout({
   children,
 }: {
   children: ReactNode;
-}): Promise<JSX.Element> {
+}) {
   const navigationLinks: Array<{ href: string; label: string }> = [
     { href: ROUTES.HOME, label: "새 분석" },
     { href: ROUTES.TICKERS.LIST, label: "티커 목록" },

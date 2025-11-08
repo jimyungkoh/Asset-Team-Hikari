@@ -8,7 +8,7 @@ import type { PropsWithChildren, ReactNode } from "react";
 
 import { surfaceClass, textStyles } from "../../lib/design-system";
 
-interface SectionProps extends PropsWithChildren {
+export interface SectionProps extends PropsWithChildren {
   title: string;
   description?: string;
   leading?: ReactNode;
@@ -23,7 +23,7 @@ export function Section({
   leading,
   variant = "default",
   icon,
-}: SectionProps): JSX.Element {
+}: SectionProps) {
   const surface =
     variant === "soft"
       ? surfaceClass("soft")

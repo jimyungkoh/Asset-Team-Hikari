@@ -29,7 +29,7 @@ export default async function ReportDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
-}): Promise<JSX.Element> {
+}) {
   const { id } = await params;
   const session = await auth();
 

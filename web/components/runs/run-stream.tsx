@@ -164,7 +164,7 @@ function normalizeStreamEvent(raw: RunEvent): RunEvent {
   };
 }
 
-export function RunStream({ run }: RunStreamProps): JSX.Element {
+export function RunStream({ run }: RunStreamProps) {
   const [status, setStatus] = useState<RunStatus>(run.status);
   const [progress, setProgress] = useState<number>(
     run.status === "success" ? 100 : 5

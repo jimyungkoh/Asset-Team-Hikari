@@ -41,7 +41,7 @@ export default async function RunDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
-}): Promise<JSX.Element> {
+}) {
   const { id } = await params;
   const session = await auth();
   if (!session) {
@@ -77,7 +77,9 @@ export default async function RunDetailPage({
       description="실시간 스트리밍 로그와 최종 리포트를 확인하세요."
       variant="soft"
     >
-      <RunStream run={run} />
+      <div className="w-full overflow-x-auto">
+        <RunStream run={run} />
+      </div>
     </Section>
   );
 }

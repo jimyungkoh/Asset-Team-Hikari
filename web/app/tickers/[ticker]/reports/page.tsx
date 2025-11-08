@@ -11,7 +11,7 @@ export default async function TickerReportsPage({
   params,
 }: {
   params: Promise<{ ticker: string }>;
-}): Promise<JSX.Element> {
+}) {
   const { ticker } = await params;
   redirect(ROUTES.TICKERS.DETAIL(ticker));
 }

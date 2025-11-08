@@ -25,7 +25,7 @@ export default async function TickerDateDetailPage({
   params,
 }: {
   params: Promise<{ ticker: string; date: string }>;
-}): Promise<JSX.Element> {
+}) {
   const { ticker, date } = await params;
   const normalizedTicker = ticker.trim().toUpperCase();
   const runDate = date.trim();

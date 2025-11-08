@@ -40,7 +40,7 @@ function statusLabel(resolved: "success" | "failed" | "pending"): string {
   }
 }
 
-export function StatusBadge({ status }: StatusBadgeProps): JSX.Element {
+export function StatusBadge({ status }: StatusBadgeProps) {
   const resolved = resolveStatus(status);
 
   return (
