@@ -1,0 +1,41 @@
+# ============================================================
+# Modified: See CHANGELOG.md for complete modification history
+# Last Updated: 2025-11-08
+# Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
+# ============================================================
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Validate compose descriptors
+        run: docker compose -f docker-compose.yml config -q
+
+      - name: Deploy to Oracle Compute
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.ORACLE_HOST }}
+          username: ${{ secrets.ORACLE_USER }}
+          key: ${{ secrets.ORACLE_SSH_KEY }}
+          port: ${{ secrets.ORACLE_SSH_PORT || '22' }}
+          script_stop: true
+          command_timeout: 30m
+          script: |
+            set -euo pipefail
+            cd ~/services/prod/asset-team-hikari
+            export STACK_PREFIX=asset-team-hikari
+            export DEPLOY_BRANCH=origin/main
+            export COMPOSE_FILE_REL=docker-compose.yml
+            export BUILD_IMAGES=true
+            bash scripts/deploy/remote_deploy.sh

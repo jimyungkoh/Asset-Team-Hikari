@@ -15,6 +15,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### CI/CD & Deployment Infrastructure
+
+**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
+**Last Updated**: 2025-11-08
+
+#### [4.0] - 2025-11-08 - Add GitHub Actions CI/CD and blue/green deployment infrastructure
+
+##### CI/CD Pipeline
+
+- **Added**: `.github/workflows/deploy.yml` - GitHub Actions workflow for automated deployment to Oracle Compute
+- **Added**: `.github/workflows/deploy.yml` - Automated docker-compose validation before deployment
+- **Added**: `.github/workflows/deploy.yml` - SSH-based deployment using appleboy/ssh-action
+
+##### Deployment Scripts
+
+- **Added**: `scripts/deploy/remote_deploy.sh` - Blue/green deployment script for zero-downtime updates
+- **Added**: `scripts/deploy/remote_deploy.sh` - Automatic stack switching (blue/green) based on active stack tracking
+- **Added**: `scripts/deploy/remote_deploy.sh` - Infrastructure services (traefik, redis) management with separate stack
+- **Added**: `scripts/deploy/wait_for_services.sh` - Service health check script with configurable timeout
+
+##### Docker Configuration
+
+- **Changed**: `docker-compose.yml` - Use COMPOSE_PROJECT_NAME environment variable for container naming
+- **Changed**: `docker-compose.yml` - Convert networks to external networks (asset-team-hikari_proxy, asset-team-hikari_infra)
+- **Changed**: `docker-compose.yml` - Separate infrastructure services (redis) to infra network
+- **Changed**: `docker-compose.yml` - Remove server dependency on redis service (handled separately)
+
+##### Configuration Updates
+
+- **Changed**: `.gitignore` - Add `.deploy/` directory to ignore deployment state files
+- **Changed**: `.gitignore` - Update file header with current date and maintainer info
+
+**Impact**: 🟡 Medium - Enables automated deployments and zero-downtime updates; requires external Docker networks setup
+
+**Benefits**:
+- Automated CI/CD pipeline reduces manual deployment errors
+- Blue/green deployment ensures zero-downtime updates
+- Infrastructure services managed separately for better isolation
+- Health checks prevent deployment of broken services
+
+**Migration Notes**:
+- External Docker networks must be created before deployment: `asset-team-hikari_proxy`, `asset-team-hikari_infra`
+- GitHub Secrets must be configured: `ORACLE_HOST`, `ORACLE_USER`, `ORACLE_SSH_KEY`, `ORACLE_SSH_PORT`
+- Deployment state is tracked in `.deploy/active_stack` file (gitignored)
+
+---
+
 ### Redis Integration & Distributed Locking
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>

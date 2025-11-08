@@ -1,7 +1,7 @@
 # ============================================================
 # Modified: See CHANGELOG.md for complete modification history
-# Last Updated: 2025-10-25
-# Modified By: Codex Agent<codex.agent@openai.com>
+# Last Updated: 2025-11-08
+# Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 # ============================================================
 
 # Root workspace ignores
@@ -15,6 +15,7 @@ node_modules/
 .env*
 !.env.example
 .rooignore
+.deploy/
 
 # Server build artifacts
 server/dist/

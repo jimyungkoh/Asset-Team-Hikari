@@ -7,7 +7,7 @@
 services:
   traefik:
     image: traefik:v3.1
-    container_name: traefik
+    container_name: ${COMPOSE_PROJECT_NAME:-asset-team-hikari}_traefik
     env_file:
       - ./traefik/.env
     command:
@@ -36,7 +36,7 @@ services:
       context: ./TradingAgents
       dockerfile: Dockerfile
     image: tradingagents:production
-    container_name: trading-agents
+    container_name: ${COMPOSE_PROJECT_NAME:-asset-team-hikari}_trading-agents
     env_file:
       - ./TradingAgents/.env
     environment:
@@ -56,10 +56,9 @@ services:
       context: .
       dockerfile: server/Dockerfile
     image: tradingagents-server:production
-    container_name: tradingagents-server
+    container_name: ${COMPOSE_PROJECT_NAME:-asset-team-hikari}_server
     depends_on:
       - trading-agents
-      - redis
     env_file:
       - ./server/.env
     environment:
@@ -72,13 +71,14 @@ services:
     restart: unless-stopped
     networks:
       - default
+      - infra
 
   web:
     build:
       context: .
       dockerfile: web/Dockerfile
     image: tradingagents-web:production
-    container_name: tradingagents-web
+    container_name: ${COMPOSE_PROJECT_NAME:-asset-team-hikari}_web
     depends_on:
       - server
     env_file:
@@ -105,18 +105,22 @@ services:
 
   redis:
     image: redis:7.2-alpine
-    container_name: tradingagents-redis
+    container_name: ${COMPOSE_PROJECT_NAME:-asset-team-hikari}_redis
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
     restart: unless-stopped
     networks:
-      - default
+      - infra
 
 networks:
   proxy:
-    driver: bridge
+    external: true
+    name: asset-team-hikari_proxy
+  infra:
+    external: true
+    name: asset-team-hikari_infra
 
 volumes:
   redis_data:
