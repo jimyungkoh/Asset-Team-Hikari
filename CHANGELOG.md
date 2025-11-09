@@ -20,6 +20,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
 **Last Updated**: 2025-11-08
 
+#### [5.1] - 2025-11-08 - Fix mobile Safari auto-zoom on input focus
+
+- **Fixed**: `web/app/_components/ticker-search.tsx` - Add `text-base` class to input to prevent iOS Safari auto-zoom (16px minimum required) 🟢 Low
+
 #### [5.0] - 2025-11-08 - Add ticker search functionality with autocomplete
 
 ##### Backend API Updates

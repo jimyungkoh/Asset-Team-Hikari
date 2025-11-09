@@ -1,12 +1,15 @@
 // ============================================================
 // Modified: See CHANGELOG.md for complete modification history
-// Last Updated: 2025-11-06
+// Last Updated: 2025-11-08
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
-'use client';
+"use client";
 
-import clsx from 'clsx';
+import clsx from "clsx";
+import { Loader2, Search, X } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import {
   useCallback,
   useEffect,
@@ -15,12 +18,9 @@ import {
   useRef,
   useState,
   type KeyboardEvent,
-} from 'react';
-import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
-import { Loader2, Search, X } from 'lucide-react';
+} from "react";
 
-import { ROUTES } from '@/lib/constants';
+import { ROUTES } from "@/lib/constants";
 
 const SEARCH_THROTTLE_MS = 450;
 
@@ -46,7 +46,7 @@ function useThrottledValue<T>(value: T, delay: number): T {
       timeoutRef.current = null;
     }
 
-    if (delay === 0 || remaining <= 0 || value === '') {
+    if (delay === 0 || remaining <= 0 || value === "") {
       lastExecutedRef.current = now;
       setThrottledValue(value);
       return;
@@ -75,14 +75,14 @@ export function TickerSearch({ className }: TickerSearchProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState("");
   const [results, setResults] = useState<string[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
-  const shortcutKeyRef = useRef<'meta' | 'ctrl'>('meta');
+  const shortcutKeyRef = useRef<"meta" | "ctrl">("meta");
 
   const throttledQuery = useThrottledValue(inputValue, SEARCH_THROTTLE_MS);
   const hasSession = Boolean(session?.user?.email);
@@ -90,14 +90,16 @@ export function TickerSearch({ className }: TickerSearchProps) {
   const listboxId = useId();
 
   useEffect(() => {
-    if (typeof navigator !== 'undefined') {
-      shortcutKeyRef.current = /mac/i.test(navigator.platform) ? 'meta' : 'ctrl';
+    if (typeof navigator !== "undefined") {
+      shortcutKeyRef.current = /mac/i.test(navigator.platform)
+        ? "meta"
+        : "ctrl";
     }
   }, []);
 
   useEffect(() => {
     if (!hasSession) {
-      setInputValue('');
+      setInputValue("");
       setResults([]);
       setIsOpen(false);
       setError(null);
@@ -115,9 +117,9 @@ export function TickerSearch({ className }: TickerSearchProps) {
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -131,7 +133,7 @@ export function TickerSearch({ className }: TickerSearchProps) {
 
   useEffect(() => {
     if (activeIndex >= 0 && optionRefs.current[activeIndex]) {
-      optionRefs.current[activeIndex]?.scrollIntoView({ block: 'nearest' });
+      optionRefs.current[activeIndex]?.scrollIntoView({ block: "nearest" });
     }
   }, [activeIndex]);
 
@@ -143,19 +145,19 @@ export function TickerSearch({ className }: TickerSearchProps) {
 
       const shortcutKey = shortcutKeyRef.current;
       const isShortcut =
-        (shortcutKey === 'meta' && event.metaKey) ||
-        (shortcutKey === 'ctrl' && event.ctrlKey);
+        (shortcutKey === "meta" && event.metaKey) ||
+        (shortcutKey === "ctrl" && event.ctrlKey);
 
-      if (isShortcut && event.key.toLowerCase() === 'k') {
+      if (isShortcut && event.key.toLowerCase() === "k") {
         event.preventDefault();
         inputRef.current?.focus();
         setIsOpen(true);
       }
     };
 
-    window.addEventListener('keydown', handleGlobalShortcut);
+    window.addEventListener("keydown", handleGlobalShortcut);
     return () => {
-      window.removeEventListener('keydown', handleGlobalShortcut);
+      window.removeEventListener("keydown", handleGlobalShortcut);
     };
   }, [hasSession]);
 
@@ -167,62 +169,57 @@ export function TickerSearch({ className }: TickerSearchProps) {
       }
 
       router.push(ROUTES.TICKERS.DETAIL(normalizedTicker));
-      setInputValue('');
+      setInputValue("");
       setResults([]);
       setIsOpen(false);
       setError(null);
       setActiveIndex(-1);
     },
-    [router],
+    [router]
   );
 
-  const fetchResults = useCallback(
-    async (query: string) => {
-      if (!query) {
-        setResults([]);
-        setIsOpen(false);
-        setActiveIndex(-1);
+  const fetchResults = useCallback(async (query: string) => {
+    if (!query) {
+      setResults([]);
+      setIsOpen(false);
+      setActiveIndex(-1);
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
+    try {
+      const endpoint = `/api/tickers/search?query=${encodeURIComponent(query)}`;
+      const response = await fetch(endpoint, { signal: controller.signal });
+
+      if (!response.ok) {
+        throw new Error("검색 요청에 실패했습니다.");
+      }
+
+      const data = (await response.json()) as SearchResponse;
+      setResults(data.tickers);
+      setIsOpen(true);
+      setActiveIndex(data.tickers.length > 0 ? 0 : -1);
+    } catch (fetchError) {
+      if ((fetchError as Error).name === "AbortError") {
         return;
       }
-
-      setIsLoading(true);
-      setError(null);
-
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-
-      const controller = new AbortController();
-      abortControllerRef.current = controller;
-
-      try {
-        const endpoint = `/api/tickers/search?query=${encodeURIComponent(
-          query,
-        )}`;
-        const response = await fetch(endpoint, { signal: controller.signal });
-
-        if (!response.ok) {
-          throw new Error('검색 요청에 실패했습니다.');
-        }
-
-        const data = (await response.json()) as SearchResponse;
-        setResults(data.tickers);
-        setIsOpen(true);
-        setActiveIndex(data.tickers.length > 0 ? 0 : -1);
-      } catch (fetchError) {
-        if ((fetchError as Error).name === 'AbortError') {
-          return;
-        }
-        setError('티커 데이터를 불러오지 못했습니다.');
-        setResults([]);
-        setIsOpen(true);
-        setActiveIndex(-1);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [],
-  );
+      setError("티커 데이터를 불러오지 못했습니다.");
+      setResults([]);
+      setIsOpen(true);
+      setActiveIndex(-1);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (!hasSession) {
@@ -240,12 +237,12 @@ export function TickerSearch({ className }: TickerSearchProps) {
       }
       navigateToTicker(target);
     },
-    [inputValue, navigateToTicker],
+    [inputValue, navigateToTicker]
   );
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLInputElement>) => {
-      if (event.key === 'Enter') {
+      if (event.key === "Enter") {
         event.preventDefault();
         if (activeIndex >= 0 && results[activeIndex]) {
           handleSubmit(results[activeIndex]);
@@ -255,12 +252,12 @@ export function TickerSearch({ className }: TickerSearchProps) {
         return;
       }
 
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         setIsOpen(false);
         return;
       }
 
-      if (event.key === 'ArrowDown') {
+      if (event.key === "ArrowDown") {
         event.preventDefault();
         if (results.length === 0) {
           return;
@@ -275,7 +272,7 @@ export function TickerSearch({ className }: TickerSearchProps) {
         return;
       }
 
-      if (event.key === 'ArrowUp') {
+      if (event.key === "ArrowUp") {
         event.preventDefault();
         if (results.length === 0) {
           return;
@@ -289,14 +286,14 @@ export function TickerSearch({ className }: TickerSearchProps) {
         });
       }
     },
-    [activeIndex, handleSubmit, results],
+    [activeIndex, handleSubmit, results]
   );
 
   const clearInput = useCallback(() => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
-    setInputValue('');
+    setInputValue("");
     setResults([]);
     setIsOpen(false);
     setError(null);
@@ -318,11 +315,7 @@ export function TickerSearch({ className }: TickerSearchProps) {
     }
 
     if (error) {
-      return (
-        <div className="px-4 py-3 text-sm text-red-500">
-          {error}
-        </div>
-      );
+      return <div className="px-4 py-3 text-sm text-red-500">{error}</div>;
     }
 
     if (!hasQuery) {
@@ -362,15 +355,17 @@ export function TickerSearch({ className }: TickerSearchProps) {
                 role="option"
                 aria-selected={isActive}
                 className={clsx(
-                  'flex w-full items-center justify-between gap-3 px-4 py-2 text-left text-sm transition-colors',
+                  "flex w-full items-center justify-between gap-3 px-4 py-2 text-left text-sm transition-colors",
                   isActive
-                    ? 'bg-blue-50/80 text-blue-700'
-                    : 'text-slate-700 hover:bg-slate-100'
+                    ? "bg-blue-50/80 text-blue-700"
+                    : "text-slate-700 hover:bg-slate-100"
                 )}
                 onMouseEnter={() => setActiveIndex(index)}
                 onClick={() => navigateToTicker(tickerSymbol)}
               >
-                <span className="font-semibold tracking-wide">{tickerSymbol}</span>
+                <span className="font-semibold tracking-wide">
+                  {tickerSymbol}
+                </span>
                 <span className="text-xs text-slate-400">
                   {ROUTES.TICKERS.DETAIL(tickerSymbol)}
                 </span>
@@ -396,11 +391,11 @@ export function TickerSearch({ className }: TickerSearchProps) {
   }
 
   return (
-    <div ref={containerRef} className={clsx('relative w-full', className)}>
+    <div ref={containerRef} className={clsx("relative w-full", className)}>
       <div
         className={clsx(
-          'flex w-full items-center rounded-xl border border-white/60 bg-white/70 px-3 py-1.5 text-sm text-slate-700 shadow-sm backdrop-blur transition-all focus-within:border-white focus-within:bg-white',
-          (isFocused || isOpen) && 'ring-1 ring-blue-100'
+          "flex w-full items-center rounded-xl border border-white/60 bg-white/70 px-3 py-1.5 text-sm text-slate-700 shadow-sm backdrop-blur transition-all focus-within:border-white focus-within:bg-white",
+          (isFocused || isOpen) && "ring-1 ring-blue-100"
         )}
       >
         <Search className="mr-2 h-4 w-4 text-slate-400" aria-hidden="true" />
@@ -413,7 +408,7 @@ export function TickerSearch({ className }: TickerSearchProps) {
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           placeholder="티커 검색"
-          className="w-full bg-transparent placeholder:text-slate-400 focus:outline-none"
+          className="w-full bg-transparent text-base placeholder:text-slate-400 focus:outline-none"
           aria-label="티커 검색"
           aria-autocomplete="list"
           aria-controls={listboxId}
