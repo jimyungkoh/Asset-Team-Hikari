@@ -36,6 +36,7 @@ services:
       context: ./TradingAgents
       dockerfile: Dockerfile
     image: tradingagents:production
+    pull_policy: build
     container_name: ${COMPOSE_PROJECT_NAME:-asset-team-hikari}_trading-agents
     env_file:
       - ./TradingAgents/.env
@@ -56,6 +57,7 @@ services:
       context: .
       dockerfile: server/Dockerfile
     image: tradingagents-server:production
+    pull_policy: build
     container_name: ${COMPOSE_PROJECT_NAME:-asset-team-hikari}_server
     depends_on:
       - trading-agents
@@ -78,6 +80,7 @@ services:
       context: .
       dockerfile: web/Dockerfile
     image: tradingagents-web:production
+    pull_policy: build
     container_name: ${COMPOSE_PROJECT_NAME:-asset-team-hikari}_web
     depends_on:
       - server

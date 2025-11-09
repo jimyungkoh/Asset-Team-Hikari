@@ -15,33 +15,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### CI/CD & Deployment Infrastructure
+### Deployment Infrastructure Improvements
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
 **Last Updated**: 2025-11-08
 
-#### [4.0] - 2025-11-08 - Move env file preparation to GitHub Actions workflow
-
-##### GitHub Actions Workflow
-
-- **Added**: `.github/workflows/deploy.yml` - Add "Prepare env stubs" step to create .env files from .env.example before deployment
-- **Changed**: `.github/workflows/deploy.yml` - Prepare env files in CI environment before docker-compose validation
+#### [4.0] - 2025-11-08 - Improve deployment script and docker-compose configuration
 
 ##### Deployment Scripts
 
-- **Removed**: `scripts/deploy/remote_deploy.sh` - Remove ensure_env_file() function and env file preparation logic
-- **Changed**: `scripts/deploy/remote_deploy.sh` - Simplify deployment script by removing env file handling
+- **Changed**: `scripts/deploy/remote_deploy.sh` - Add PUSH_IMAGES option for registry-based deployments
+- **Changed**: `scripts/deploy/remote_deploy.sh` - Improve image build/push/pull logic with conditional flow
+- **Changed**: `scripts/deploy/remote_deploy.sh` - Support both local build and registry push workflows
 
-**Impact**: 🟢 Low - Moves env file preparation to CI stage for better validation and consistency
+##### Docker Configuration
+
+- **Changed**: `docker-compose.yml` - Add pull_policy: build to trading-agents, server, and web services
+- **Changed**: `docker-compose.yml` - Prioritize local builds over pulling from registry
+
+**Impact**: 🟢 Low - Improves deployment flexibility and ensures local builds are used when available
 
 **Benefits**:
-- Env files are prepared and validated before deployment
-- Better separation of concerns between CI and deployment stages
-- Docker compose validation can catch missing env files earlier
+- Supports both local build and registry-based deployment workflows
+- Local builds are prioritized when available (pull_policy: build)
+- Better control over image distribution in multi-host environments
 
 **Migration Notes**:
-- No action required - env files are now automatically created in CI before deployment
-- Existing .env files on remote host are preserved (not overwritten)
+- No action required - existing deployments continue to work
+- Set PUSH_IMAGES=true to enable registry push workflow if needed
 
 ---
 

@@ -24,6 +24,7 @@ ACTIVE_STACK_FILE=${ACTIVE_STACK_FILE:-"$REPO_ROOT/.deploy/active_stack"}
 DEPLOY_BRANCH=${DEPLOY_BRANCH:-origin/main}
 SKIP_GIT_PULL=${SKIP_GIT_PULL:-false}
 BUILD_IMAGES=${BUILD_IMAGES:-true}
+PUSH_IMAGES=${PUSH_IMAGES:-false}
 
 mkdir -p "$(dirname "$ACTIVE_STACK_FILE")"
 
@@ -67,15 +68,19 @@ else
   NEXT_STACK="blue"
 fi
 
-PULL_CMD=(docker compose -f "$COMPOSE_FILE" pull $APP_SERVICES)
 if [ "$BUILD_IMAGES" = "true" ]; then
-  UP_CMD=(docker compose -f "$COMPOSE_FILE" up -d --build $APP_SERVICES)
+  if [ "$PUSH_IMAGES" = "true" ]; then
+    docker compose -f "$COMPOSE_FILE" build $APP_SERVICES
+    docker compose -f "$COMPOSE_FILE" push $APP_SERVICES
+    PULL_CMD=(docker compose -f "$COMPOSE_FILE" pull $APP_SERVICES)
+    COMPOSE_PROJECT_NAME="${STACK_PREFIX}-${NEXT_STACK}" "${PULL_CMD[@]}"
+    COMPOSE_PROJECT_NAME="${STACK_PREFIX}-${NEXT_STACK}" docker compose -f "$COMPOSE_FILE" up -d $APP_SERVICES
+  else
+    COMPOSE_PROJECT_NAME="${STACK_PREFIX}-${NEXT_STACK}" docker compose -f "$COMPOSE_FILE" up -d --build $APP_SERVICES
+  fi
 else
-  UP_CMD=(docker compose -f "$COMPOSE_FILE" up -d $APP_SERVICES)
+  COMPOSE_PROJECT_NAME="${STACK_PREFIX}-${NEXT_STACK}" docker compose -f "$COMPOSE_FILE" up -d $APP_SERVICES
 fi
-
-COMPOSE_PROJECT_NAME="${STACK_PREFIX}-${NEXT_STACK}" "${PULL_CMD[@]}"
-COMPOSE_PROJECT_NAME="${STACK_PREFIX}-${NEXT_STACK}" "${UP_CMD[@]}"
 
 "$SCRIPT_DIR/wait_for_services.sh" "$COMPOSE_FILE" "${STACK_PREFIX}-${NEXT_STACK}" server web
 
