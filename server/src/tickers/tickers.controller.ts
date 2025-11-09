@@ -4,7 +4,7 @@
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, UseGuards, Query } from '@nestjs/common';
 
 import { InternalAuthGuard } from '../common/guards/internal-auth.guard';
 import { DatabaseService } from '../infrastructure/database/database.service';
@@ -21,6 +21,18 @@ export class TickersController {
   @Get()
   async listTickers(): Promise<{ tickers: string[] }> {
     const tickers = await this.databaseService.listTickers();
+    return { tickers };
+  }
+
+  @Get('search')
+  async searchTickers(
+    @Query('query') query?: string,
+  ): Promise<{ tickers: string[] }> {
+    if (!query || !query.trim()) {
+      return { tickers: [] };
+    }
+
+    const tickers = await this.databaseService.searchTickers(query, 10);
     return { tickers };
   }
 

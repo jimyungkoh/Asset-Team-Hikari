@@ -15,34 +15,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Deployment Infrastructure Improvements
+### Ticker Search Feature
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
 **Last Updated**: 2025-11-08
 
-#### [4.0] - 2025-11-08 - Improve deployment script and docker-compose configuration
+#### [5.0] - 2025-11-08 - Add ticker search functionality with autocomplete
 
-##### Deployment Scripts
+##### Backend API Updates
 
-- **Changed**: `scripts/deploy/remote_deploy.sh` - Add PUSH_IMAGES option for registry-based deployments
-- **Changed**: `scripts/deploy/remote_deploy.sh` - Improve image build/push/pull logic with conditional flow
-- **Changed**: `scripts/deploy/remote_deploy.sh` - Support both local build and registry push workflows
+- **Added**: `server/src/infrastructure/database/database.service.ts` - Add `searchTickers` method with case-insensitive prefix search using `ilike`
+- **Added**: `server/src/tickers/tickers.controller.ts` - Add `GET /tickers/search` endpoint with query parameter support
 
-##### Docker Configuration
+##### Frontend Components
 
-- **Changed**: `docker-compose.yml` - Add pull_policy: build to trading-agents, server, and web services
-- **Changed**: `docker-compose.yml` - Prioritize local builds over pulling from registry
+- **Added**: `web/app/_components/ticker-search.tsx` - New TickerSearch component with autocomplete dropdown
+- **Added**: `web/app/_components/ticker-search.tsx` - Keyboard navigation support (Arrow keys, Enter, Escape)
+- **Added**: `web/app/_components/ticker-search.tsx` - Global keyboard shortcut (Cmd/Ctrl+K) for quick access
+- **Added**: `web/app/_components/ticker-search.tsx` - Throttled search with 450ms delay to reduce API calls
+- **Added**: `web/app/_components/ticker-search.tsx` - Loading states and error handling
 
-**Impact**: 🟢 Low - Improves deployment flexibility and ensures local builds are used when available
+##### API Routes
+
+- **Added**: `web/app/api/tickers/search/route.ts` - Next.js API route for ticker search with authentication middleware
+
+##### Service Layer
+
+- **Added**: `web/lib/services/backend-api.service.ts` - Add `searchTickers` method to BackendApiService
+
+##### UI Improvements
+
+- **Changed**: `web/app/_components/header.tsx` - Integrate TickerSearch component into header
+- **Changed**: `web/app/_components/header.tsx` - Improve responsive layout with separate mobile/desktop search placement
+- **Changed**: `web/app/_components/header.tsx` - Restructure header layout for better search integration
+
+**Impact**: 🟢 Low - New feature addition; improves user experience for ticker navigation
 
 **Benefits**:
-- Supports both local build and registry-based deployment workflows
-- Local builds are prioritized when available (pull_policy: build)
-- Better control over image distribution in multi-host environments
+- Quick access to ticker pages via search
+- Keyboard-first navigation with global shortcut
+- Responsive design for mobile and desktop
+- Reduced API calls through throttling
+- Accessible UI with ARIA attributes
 
 **Migration Notes**:
-- No action required - existing deployments continue to work
-- Set PUSH_IMAGES=true to enable registry push workflow if needed
+- No migration required - new feature only
+- Search requires authenticated session
+- Desktop users can use Cmd+K (Mac) or Ctrl+K (Windows/Linux) to open search
 
 ---
 

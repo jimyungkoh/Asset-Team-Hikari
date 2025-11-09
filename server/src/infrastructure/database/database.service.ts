@@ -7,7 +7,7 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { Pool, PoolConfig } from "pg";
 import { drizzle, NodePgDatabase } from "drizzle-orm/node-postgres";
-import { asc, desc, eq } from "drizzle-orm";
+import { asc, desc, eq, ilike } from "drizzle-orm";
 
 import { users, ticker, reports } from "./schema";
 
@@ -133,6 +133,27 @@ export class DatabaseService {
       .orderBy(desc(ticker.runDate));
 
     return rows.map((row) => row.runDate);
+  }
+
+  async searchTickers(query: string, limit = 10): Promise<string[]> {
+    if (!this._db) {
+      return [];
+    }
+
+    const normalizedQuery = query.trim().toUpperCase();
+    if (!normalizedQuery) {
+      return [];
+    }
+
+    const rows = await this._db
+      .select({ ticker: ticker.ticker })
+      .from(ticker)
+      .where(ilike(ticker.ticker, `${normalizedQuery}%`))
+      .groupBy(ticker.ticker)
+      .orderBy(asc(ticker.ticker))
+      .limit(limit);
+
+    return rows.map((row) => row.ticker);
   }
 
   async terminate(): Promise<void> {

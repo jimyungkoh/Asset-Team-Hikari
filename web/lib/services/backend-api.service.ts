@@ -157,6 +157,23 @@ class BackendApiService {
     );
     return reports;
   }
+
+  async searchTickers(query: string): Promise<string[]> {
+    this.validateConfig();
+
+    const url = new URL(`${this.config.baseUrl}/tickers/search`);
+    url.searchParams.set('query', query);
+
+    const response = await fetch(url.toString(), {
+      headers: this.getHeaders(),
+      cache: 'no-store',
+    });
+
+    const { tickers } = await this.handleResponse<{ tickers: string[] }>(
+      response,
+    );
+    return tickers;
+  }
 }
 
 // ============================================================
