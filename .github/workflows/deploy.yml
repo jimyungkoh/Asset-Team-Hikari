@@ -19,6 +19,22 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v4
 
+      - name: Prepare env stubs
+        run: |
+          set -euo pipefail
+          for dir in TradingAgents server web traefik; do
+            example="$dir/.env.example"
+            target="$dir/.env"
+            if [ -f "$target" ]; then
+              continue
+            fi
+            if [ -f "$example" ]; then
+              cp "$example" "$target"
+            else
+              : > "$target"
+            fi
+          done
+
       - name: Validate compose descriptors
         run: docker compose -f docker-compose.yml config -q
 

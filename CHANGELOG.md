@@ -1,6 +1,6 @@
 <!-- ============================================================
 Modified: See CHANGELOG.md for complete modification history
-Last Updated: 2025-11-09
+Last Updated: 2025-11-08
 Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 ============================================================ -->
 
@@ -15,116 +15,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Web Application - Build Fixes & Component Refactoring
-
-**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
-**Last Updated**: 2025-11-09
-
-#### [5.1] - 2025-11-09 - Fix build errors and improve component structure
-
-##### Build Fixes
-
-- **Fixed**: Function declaration syntax errors - Remove incorrect arrow function syntax from async function declarations
-- **Fixed**: Type safety improvements in design system - Replace unsafe type assertions with type guards
-- **Fixed**: Card component loading prop type error
-
-##### Component Refactoring
-
-- **Removed**: Unused chart components (MetricChart, Sparkline, CompactSparkline)
-- **Removed**: Unused design components (MetricGrid, MetricCard, PageShell)
-- **Removed**: Unused report components (DailyReportSections, ReportsList)
-
-##### Component Structure Improvements
-
-- **Added**: Component index files for better export organization
-- **Added**: New UI components (Icon, Loading, Skeleton)
-- **Changed**: Export SectionProps interface from section component
-
-**Impact**: 🟡 Medium - Resolves build errors and improves code maintainability
-
-**Modified Files**:
-
-- `web/app/layout.tsx` - Fix function declaration syntax
-- `web/app/reports/[id]/page.tsx` - Fix function declaration syntax
-- `web/app/runs/[id]/page.tsx` - Fix function declaration syntax
-- `web/app/tickers/[ticker]/dates/[date]/page.tsx` - Fix function declaration syntax
-- `web/app/tickers/[ticker]/page.tsx` - Fix function declaration syntax
-- `web/app/tickers/[ticker]/reports/page.tsx` - Fix function declaration syntax
-- `web/components/design/section.tsx` - Export SectionProps interface, fix syntax
-- `web/components/markdown/markdown-renderer.tsx` - Fix function declaration syntax
-- `web/components/providers/session-provider.tsx` - Fix function declaration syntax
-- `web/components/reports/status-badge.tsx` - Fix function declaration syntax
-- `web/components/runs/run-stream.tsx` - Fix function declaration syntax
-- `web/components/ui/card.tsx` - Fix loading prop type error
-- `web/lib/design-system.ts` - Improve type safety with type guards
-- `web/components/charts/index.ts` - Add empty export for module
-- `web/components/design/index.ts` - Update exports
-- `web/components/reports/index.ts` - Update exports
-- `web/components/index.ts` - Add main component exports
-- `web/components/markdown/index.ts` - Add markdown component exports
-- `web/components/providers/index.ts` - Add provider component exports
-- `web/components/runs/index.ts` - Add run component exports
-- `web/components/ui/index.ts` - Add UI component exports
-- `web/components/ui/icon.tsx` - New icon component
-- `web/components/ui/loading.tsx` - New loading components
-- `web/components/ui/skeleton.tsx` - New skeleton components
-
----
-
 ### CI/CD & Deployment Infrastructure
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
 **Last Updated**: 2025-11-08
 
-#### [4.2] - 2025-11-08 - Move env file preparation to remote deploy script
+#### [4.0] - 2025-11-08 - Move env file preparation to GitHub Actions workflow
 
 ##### GitHub Actions Workflow
 
-- **Removed**: `.github/workflows/deploy.yml` - Remove "Prepare env placeholders" step from GitHub Actions workflow
-- **Changed**: `.github/workflows/deploy.yml` - Update deployment path from `~/services/prod/asset-team-hikari` to `/home/ubuntu/services/prod/asset-team-hikari` for absolute path consistency
+- **Added**: `.github/workflows/deploy.yml` - Add "Prepare env stubs" step to create .env files from .env.example before deployment
+- **Changed**: `.github/workflows/deploy.yml` - Prepare env files in CI environment before docker-compose validation
 
 ##### Deployment Scripts
 
-- **Added**: `scripts/deploy/remote_deploy.sh` - Add `ensure_env_file()` function to handle .env file creation on remote host
-- **Changed**: `scripts/deploy/remote_deploy.sh` - Move env file preparation logic from GitHub Actions to remote deploy script
-- **Changed**: `scripts/deploy/remote_deploy.sh` - Ensure .env files are created before deployment starts (only if missing)
+- **Removed**: `scripts/deploy/remote_deploy.sh` - Remove ensure_env_file() function and env file preparation logic
+- **Changed**: `scripts/deploy/remote_deploy.sh` - Simplify deployment script by removing env file handling
 
-**Impact**: 🟢 Low - Improves deployment reliability by ensuring env files exist on remote host
-
-**Benefits**:
-
-- Env file preparation happens directly on the deployment target
-- More reliable than preparing files in CI and transferring them
-- Handles missing .env files gracefully during deployment
-- Better separation of concerns between CI and deployment scripts
-
-**Migration Notes**:
-
-- No action required - env files are now automatically created during deployment
-- Existing .env files are preserved (not overwritten)
-
----
-
-#### [4.1] - 2025-11-08 - Optimize infrastructure services management in deployment script
-
-##### Deployment Scripts
-
-- **Changed**: `scripts/deploy/remote_deploy.sh` - Change INFRA_SERVICES default from "traefik redis" to "redis" only
-- **Changed**: `scripts/deploy/remote_deploy.sh` - Add conditional check to only start infrastructure services when INFRA_SERVICES is not empty
-- **Changed**: `scripts/deploy/remote_deploy.sh` - Add comment explaining that traefik should be started separately as it only needs to run once
-
-**Impact**: 🟢 Low - Improves deployment flexibility by allowing traefik to be managed separately
+**Impact**: 🟢 Low - Moves env file preparation to CI stage for better validation and consistency
 
 **Benefits**:
-
-- Traefik can be started once and reused across deployments
-- More flexible infrastructure service management
-- Prevents unnecessary traefik restarts during application deployments
+- Env files are prepared and validated before deployment
+- Better separation of concerns between CI and deployment stages
+- Docker compose validation can catch missing env files earlier
 
 **Migration Notes**:
-
-- Traefik should be started separately before first deployment
-- INFRA_SERVICES environment variable can be set to include traefik if needed: `INFRA_SERVICES="traefik redis"`
+- No action required - env files are now automatically created in CI before deployment
+- Existing .env files on remote host are preserved (not overwritten)
 
 ---
 

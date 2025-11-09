@@ -25,34 +25,6 @@ DEPLOY_BRANCH=${DEPLOY_BRANCH:-origin/main}
 SKIP_GIT_PULL=${SKIP_GIT_PULL:-false}
 BUILD_IMAGES=${BUILD_IMAGES:-true}
 
-ensure_env_file() {
-  local rel_dir="$1"
-  local dir_path="$REPO_ROOT/$rel_dir"
-  local example="$dir_path/.env.example"
-  local target="$dir_path/.env"
-
-  if [ ! -d "$dir_path" ]; then
-    return 0
-  fi
-
-  if [ -f "$example" ]; then
-    # 예제가 있으면 기존 .env가 없을 때만 복사
-    if [ ! -f "$target" ]; then
-      cp "$example" "$target"
-    fi
-  else
-    # 예제가 없어도 compose가 요구하므로 빈 .env 보장
-    if [ ! -f "$target" ]; then
-      : > "$target"
-    fi
-  fi
-}
-
-# 배포 대상 디렉터리들의 .env 플레이스홀더를 원격 호스트에서 직접 보장
-for dir in server web TradingAgents traefik; do
-  ensure_env_file "$dir"
-done
-
 mkdir -p "$(dirname "$ACTIVE_STACK_FILE")"
 
 if [ "$SKIP_GIT_PULL" != "true" ]; then
