@@ -1,16 +1,16 @@
 // ============================================================
 // Modified: See CHANGELOG.md for complete modification history
-// Last Updated: 2025-11-06
+// Last Updated: 2025-11-08
 // Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 // ============================================================
 
 import type { Metadata } from "next";
 import { ReactNode } from "react";
 
-import { Header } from "./_components/header";
+import { SessionProviders } from "@/components";
+import { ROUTES } from "@/lib/constants";
 import { Footer } from "./_components/footer";
-import { SessionProviders } from "../components/providers/session-provider";
-import { ROUTES } from "../lib/constants";
+import { Header } from "./_components/header";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -41,7 +41,7 @@ export default async function RootLayout({
           <Header navigationLinks={navigationLinks} />
 
           {/* Main Content */}
-          <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8 py-12 md:py-16 lg:py-20">
+          <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8 py-8 md:py-14 lg:py-20">
             <main className="space-y-20">{children}</main>
           </div>
 

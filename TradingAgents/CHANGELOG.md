@@ -208,7 +208,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### web/ (Next.js UI)
 
 **Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
-**Last Updated**: 2025-11-06
+**Last Updated**: 2025-11-08
+
+#### [1.10] - 2025-11-08 - Mobile Header Scroll Behavior Enhancement
+
+- **Added**: `web/app/_hooks/use-scroll-direction.ts` - Custom hook to detect scroll direction with throttling and threshold options for performance optimization
+- **Changed**: `web/app/_components/header.tsx` - Added scroll-based hide/show behavior for mobile TickerSearch. When scrolling down, the search bar hides to maximize content area. When scrolling up, it reappears for easy access.
+- **Changed**: `web/app/_components/header.tsx` - Improved mobile navigation layout with better spacing and touch-friendly interactions
+- **Changed**: `web/app/layout.tsx` - Reduced main content vertical padding (py-12 md:py-16 → py-8 md:py-14) for better content density
+- **Changed**: `web/app/layout.tsx` - Updated import paths to use @/ aliases for cleaner code organization
+- **Fixed**: `web/next-env.d.ts` - Updated Next.js type path from `./.next/types/routes.d.ts` to `./.next/dev/types/routes.d.ts` for Next.js 15 compatibility
+- **Note**: Mobile users now have a cleaner reading experience with auto-hiding search bar that appears when needed, following modern mobile UX patterns.
+
+**Impact**: 🟡 Medium - Improved mobile UX with scroll-aware header behavior, better content density
 
 #### [1.9] - 2025-11-06 - Mobile Content Area Optimization
 
