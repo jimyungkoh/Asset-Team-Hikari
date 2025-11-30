@@ -30,6 +30,7 @@ type SearchResponse = {
 
 interface TickerSearchProps {
   className?: string;
+  onFocusChange?: (focused: boolean) => void;
 }
 
 function useThrottledValue<T>(value: T, delay: number): T {
@@ -67,7 +68,7 @@ function useThrottledValue<T>(value: T, delay: number): T {
   return throttledValue;
 }
 
-export function TickerSearch({ className }: TickerSearchProps) {
+export function TickerSearch({ className, onFocusChange }: TickerSearchProps) {
   const { data: session } = useSession();
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -405,8 +406,14 @@ export function TickerSearch({ className }: TickerSearchProps) {
           value={inputValue}
           onChange={(event) => setInputValue(event.target.value.toUpperCase())}
           onKeyDown={handleKeyDown}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
+          onFocus={() => {
+            setIsFocused(true);
+            onFocusChange?.(true);
+          }}
+          onBlur={() => {
+            setIsFocused(false);
+            onFocusChange?.(false);
+          }}
           placeholder="티커 검색"
           className="w-full bg-transparent text-base placeholder:text-slate-400 focus:outline-none"
           aria-label="티커 검색"

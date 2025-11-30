@@ -7,6 +7,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { ROUTES } from "../../lib/constants";
 import { useScrollDirection } from "../_hooks/use-scroll-direction";
 import { AuthDropdown } from "./auth-dropdown";
@@ -23,6 +24,7 @@ interface HeaderProps {
 
 export function Header({ navigationLinks }: HeaderProps) {
   const isScrollingDown = useScrollDirection();
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   return (
     <>
@@ -86,16 +88,16 @@ export function Header({ navigationLinks }: HeaderProps) {
         </div>
       </header>
 
-      {/* Sticky TickerSearch 영역 - 모바일에서만 스크롤 방향에 따라 숨김/표시 */}
+      {/* Sticky TickerSearch 영역 - 모바일에서만 스크롤 방향에 따라 숨김/표시 (검색창 포커스 시 유지) */}
       <div
         className={`md:hidden sticky top-[73px] z-40 border-b border-white/20 backdrop-blur-xl bg-white/20 transition-transform duration-300 ease-in-out ${
-          isScrollingDown
+          isScrollingDown && !isSearchFocused
             ? "-translate-y-full opacity-0 pointer-events-none"
             : "translate-y-0 opacity-100 pointer-events-auto"
         }`}
       >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-2">
-          <TickerSearch />
+          <TickerSearch onFocusChange={setIsSearchFocused} />
         </div>
       </div>
     </>

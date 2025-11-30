@@ -32,3 +32,6 @@ TradingAgents/__pycache__/
 **/*.csv
 
 **/acme
+/.bmad/
+/.claude/
+/docs/
