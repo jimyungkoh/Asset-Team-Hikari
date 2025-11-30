@@ -1,6 +1,6 @@
 <!-- ============================================================
 Modified: See CHANGELOG.md for complete modification history
-Last Updated: 2025-11-08
+Last Updated: 2025-11-30
 Modified By: jimyungkoh<aqaqeqeq0511@gmail.com>
 ============================================================ -->
 
@@ -14,6 +14,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 ## [Unreleased]
+
+### Mobile Search Bar UX Improvement
+
+**Modified By**: jimyungkoh<aqaqeqeq0511@gmail.com>
+**Last Updated**: 2025-11-30
+
+#### [5.2] - 2025-11-30 - Prevent mobile search bar from hiding while focused
+
+- **Changed**: `web/app/_components/header.tsx` - Track search focus state to prevent sticky search bar from hiding on scroll when input is focused 🟢 Low
+- **Changed**: `web/app/_components/ticker-search.tsx` - Add focus state propagation to improve mobile UX by keeping search input visible during interaction 🟢 Low
+- **Changed**: `.gitignore` - Exclude local tool configurations and documentation files for cleaner repository state 🟢 Low
+
+**Impact**: 🟢 Low - UX improvement for mobile users; no breaking changes
+
+**Benefits**:
+- Improved mobile search experience by preventing search bar collapse while user is typing
+- Search input remains accessible and visible during interaction
+- Better focus management for mobile accessibility
+
+**Migration Notes**:
+- No migration required - UX improvement only
+- Applies to mobile browsers (responsive design)
+
+---
 
 ### Ticker Search Feature
 
@@ -235,6 +259,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-**Last Updated**: 2025-11-02
+**Last Updated**: 2025-11-30
 **Maintained By**: jimyungkoh<aqaqeqeq0511@gmail.com>
 **License**: Apache License 2.0
